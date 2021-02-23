@@ -1,0 +1,77 @@
+---
+title: "Use"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Use}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, echo=FALSE}
+# library(DemoKin)
+devtools::load_all()
+library(tidyverse)
+library(DiagrammeR)
+```
+
+My ego has 35 years and is in 1995. She and her ancestors had lived in Sweden. I would like to know how many realtives ego has, and their ages.
+
+First take the data from Sweden:
+
+```{r}
+SWE_data <- get_HMDHFD(country = "SWE", min_year = 1900, max_year = 2015,
+                       user = "ivanwilliams1985@gmail.com", pass = "AD2") # delete that
+names(SWE_data)
+```
+
+First estimate kin count in a **stable** framework using data from 1995.
+
+```{r, fig.height=8, fig.width=14}
+# take back from matrix form to vector (soon change)
+U_1995 <- SWE_data[["U"]][["1995"]]
+f_1995 <- SWE_data[["f"]][["1995"]]
+W_1995 <- SWE_data[["W"]][["1995"]]
+p_1995 <- c(U_1995[row(U_1995)-1 == col(U_1995)],U_1995[nrow(U_1995),ncol(U_1995)])
+f_1995 <- f_1995[1,]
+ego_SWE35_stable <- kins_stable(p=p_1995,f=f_1995)
+ego_SWE35_stable %>% 
+  filter(age_ego ==35, alive=="yes") %>% 
+  ggplot() + 
+  geom_line(aes(x=age_kin, y=count, 
+                color=factor(age_ego)))  + 
+  geom_vline(xintercept = 35, color="grey", linetype = 2)+ 
+  theme_classic() +
+  facet_wrap(~kin,scales = "free_y")
+```
+
+Now using time variant data (taking too long by now).
+
+```{r, fig.height=8, fig.width=14}
+U <- SWE_data[["U"]]
+f <- SWE_data[["f"]]
+W <- SWE_data[["W"]]
+ego_SWE35_nonstable <- kins(ego_age = 35, 
+                            year = 1995,
+                            U = U, f = f, W = W)
+ego_SWE35_nonstable[["kins_by_age_ego"]] %>%
+  gather(kin, count, -x) %>% 
+  ggplot() + 
+  geom_line(aes(x, count))  + 
+  geom_vline(xintercept = 35, color=2)+ 
+  theme_bw() +
+  facet_wrap(~kin)
+```
+
+Finally we can visualize counts in ego´s network, in this case for non-stable framework.
+
+```{r, fig.height=8, fig.width=14}
+plot_diagramm(ego_SWE35_nonstable[["kins_total"]])
+```
+
