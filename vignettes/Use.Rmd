@@ -1,5 +1,5 @@
 ---
-title: "Use"
+title: "Kin estimation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Use}
@@ -9,66 +9,77 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+  collapse = TRUE, comment = "#>"
 )
+# library(DemoKin)
+devtools::load_all()
+library(tidyverse)
+library(DiagrammeR)
 ```
 
-```{r setup, echo=FALSE}
-library(DemoKin)
-```
+My ego has 35 years and she is in 1995. She and all her relatives had lived in Sweden. We would like to know how many relatives ego has in 1995, their mean age, how many had at each age until now.
 
-My ego has 35 years and is in 1995. She and her ancestors had lived in Sweden. I would like to know how many realtives ego has, and their ages.
-
-First take the data from Sweden:
+We can estimate this in a **stable** framework using data from 1995, assuming all relatives would experience mortality and fertility from that calendar year (Caswell, 2019). The package has available data from Sweden (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population), loaded using *get_HMDHFD* function.
 
 ```{r}
-SWE_data <- get_HMDHFD(country = "SWE", min_year = 1900, max_year = 2015,
-                       user = "ivanwilliams1985@gmail.com", pass = "AD2") # delete that
-names(SWE_data)
+swe30_1950_stable <- kins(ego_age = 35, year = 2015,
+                             P = swe_surv, asfr = swe_asfr,
+                             stable = TRUE)
 ```
 
-First estimate kin count in a **stable** framework using data from 1995.
+Let´s visualize their distribution during ego´s life.
 
-```{r, fig.height=8, fig.width=14}
-# take back from matrix form to vector (soon change)
-U_1995 <- SWE_data[["U"]][["1995"]]
-f_1995 <- SWE_data[["f"]][["1995"]]
-W_1995 <- SWE_data[["W"]][["1995"]]
-p_1995 <- c(U_1995[row(U_1995)-1 == col(U_1995)],U_1995[nrow(U_1995),ncol(U_1995)])
-f_1995 <- f_1995[1,]
-ego_SWE35_stable <- kins_stable(p=p_1995,f=f_1995)
-ego_SWE35_stable %>% 
-  filter(age_ego ==35, alive=="yes") %>% 
-  ggplot() + 
-  geom_line(aes(x=age_kin, y=count, 
-                color=factor(age_ego)))  + 
-  geom_vline(xintercept = 35, color="grey", linetype = 2)+ 
-  theme_classic() +
-  facet_wrap(~kin,scales = "free_y")
+```{r, fig.height=6, fig.width=8}
+swe30_1950_stable[["kins_by_age_ego"]] %>%
+              gather(kin, count, -x) %>%
+              ggplot() +
+              geom_line(aes(x, count))  +
+              geom_vline(xintercept = 35, color=2)+
+              theme_bw() +
+              facet_wrap(~kin)
 ```
 
-Now using time variant data (taking too long by now).
+Now let´s visualize their age distribution when ego is 35 (age valuation).
 
-```{r, fig.height=8, fig.width=14}
-U <- SWE_data[["U"]]
-f <- SWE_data[["f"]]
-W <- SWE_data[["W"]]
-ego_SWE35_nonstable <- kins(ego_age = 35, 
-                            year = 1995,
-                            U = U, f = f, W = W)
-ego_SWE35_nonstable[["kins_by_age_ego"]] %>%
-  gather(kin, count, -x) %>% 
-  ggplot() + 
-  geom_line(aes(x, count))  + 
-  geom_vline(xintercept = 35, color=2)+ 
-  theme_bw() +
-  facet_wrap(~kin)
+```{r, fig.height=6, fig.width=8}
+swe30_1950_stable[["kins_by_age_kin"]] %>%
+              select(-x) %>% 
+              gather(kin, count, -x_kin) %>%
+              ggplot() +
+              geom_line(aes(x_kin, count))  +
+              geom_vline(xintercept = 35, color=2)+
+              theme_bw() +
+              facet_wrap(~kin)
 ```
 
-Finally we can visualize counts in ego´s network, in this case for non-stable framework.
+Now let´s see same results considering time variant components. The formula for example for Great-grandmothers (*ggm*), being *x* mother´s age at ego´s birth, *y* grandmother´s age at ego´s mother birth and *z* Great-grandmother´s age until ego´s birth:
 
-```{r, fig.height=8, fig.width=14}
-plot_diagramm(ego_SWE35_nonstable[["kins_total"]])
+$$ ggm(0,t) = \sum_{x=0}^{\omega}{W(x,t-x)
+              \sum_{y=0}^{\omega}{W(y,t-x-y)
+              \prod_{z=0}^{x+y-1}{p(z,t-x-y+z)}}}$$
+
+Let´s take a look (taking too long by now):
+
+```{r}
+swe30_1950_nonstable <- kins(ego_age = 35, year = 2015,
+                             P = swe_surv, asfr = swe_asfr, N = swe_pop,
+                             stable = FALSE)
+```
+
+```{r, fig.height=6, fig.width=8}
+swe30_1950_nonstable[["kins_by_age_kin"]] %>%
+              select(-x) %>% 
+              gather(kin, count, -x_kin) %>%
+              ggplot() +
+              geom_line(aes(x_kin, count))  +
+              geom_vline(xintercept = 35, color=2)+
+              theme_bw() +
+              facet_wrap(~kin)
+```
+
+Finally we can visualize counts in ego´s network, for the first case, rounded on 3 digits by default.
+
+```{r, fig.height=6, fig.width=8}
+plot_diagramm(swe30_1950_stable[["kins_total"]],ego_age = 35)
 ```
 

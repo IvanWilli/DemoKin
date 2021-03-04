@@ -1,3 +1,17 @@
+#' Get time serie matrix data from HMD/HFD
+
+#' @description Wrapper function to get data.frames of survival, fertlity and population
+#' of selected countriy on selected period.
+
+#' @param country numeric. Country code from rom HMD/HFD.
+#' @param min_year numeric. Latest year to get data.
+#' @param min_year integer. Older year to get data.
+#' @param user character. From HMD/HFD.
+#' @param pass character. From HMD/HFD.
+#'
+#' @return A list wiith survival, fertility and poopulation age specific matrixes, with calendar year as colnames.
+#' @export
+
 get_HMDHFD <- function(country = "SWE",
                          min_year = 1900,
                          max_year = 2018,

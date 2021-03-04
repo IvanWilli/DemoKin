@@ -16,14 +16,21 @@ library(devtools)
 library(HMDHFDplus)
 load_all()
 SWE_data <- get_HMDHFD(country = "SWE", min_year = 1900, max_year = 2015,
-                       pass = rstudioapi::askForPassword(),
-                       user = rstudioapi::askForSecret(name="user"))
-                       # user = "ivanwilliams1985@gmail.com", pass = "AD2")
+                       user = "ivanwilliams1985@gmail.com", pass = "AD2")
 debugonce(kins)
 
+swe_surv = SWE_data[["P"]]
+swe_asfr = SWE_data[["asfr"]]
+swe_pop =  SWE_data[["N"]]
+
+usethis::use_data(swe_surv)
+usethis::use_data(swe_asfr)
+usethis::use_data(swe_pop)
+
 #stable
-ego_SWE35_stable <- kins(ego_age = 30, year = 1950, P = SWE_data[["P"]],
-                         asfr = SWE_data[["asfr"]], stable = TRUE)
+swe30_1950_stable <- kins(ego_age = 30, year = 1950,
+                         P = swe_surv, asfr = swe_asfr,
+                         stable = TRUE)
 
 ego_SWE35_stable[["kins_by_age_ego"]] %>%
   gather(kin, count, -x) %>%
@@ -35,9 +42,9 @@ ego_SWE35_stable[["kins_by_age_ego"]] %>%
 
 
 # non-stable
-ego_SWE35_nonstable <- kins(ego_age = 30, year = 1990,
-                         P = SWE_data[["P"]], asfr = SWE_data[["asfr"]],
-                         N = SWE_data[["N"]])
+swe30_1950_nonstable <- kins(ego_age = 30, year = 1950,
+                            P = swe_surv, asfr = swe_asfr, N = swe_pop,
+                            stable = FALSE)
 
 ego_SWE35_nonstable[["kins_by_age_ego"]] %>%
   gather(kin, count, -x) %>%
@@ -54,7 +61,44 @@ ego_SWE35_nonstable[["kins_total"]]
 ego_SWE35_stable[["kins_total"]]
 
 
+### ggm
+for(m_age in age){
+  m          = W[,as.character(ego_cohort)]
+  m_cohort   = ego_cohort - m_age - 1
+  gm         = W[,as.character(m_cohort)]
 
+  for(y in m_cohort:ego_cohort){
+    Ut = U[[as.character(y)]]
+    ft = f[[as.character(y)]]
+    gm = Ut %*% gm
+  }
+
+  # conditionated to mother´s age
+  gmM[, m_age+1] = gm
+
+  # grandmother´s age at mother´s birth
+  for(gm_age in age){
+    gm_cohort  = m_cohort - gm_age - 1
+    ggm        = W[,as.character(gm_cohort)]
+
+    # before mother born
+    for(y in gm_cohort:ego_cohort){
+      Ut = U[[as.character(y)]]
+      ft = f[[as.character(y)]]
+      ggm = Ut %*% ggm
+
+    }
+
+    # conditionated to granmother´s age
+    ggmMy[,gm_age+1] = ggm
+  }
+
+  # expected count for possible granmother´s age
+  ggmM[,m_age+1] = ggmMy %*% gm
+  }
+  # expected count for possible mother´s age
+  gm  = gmM  %*% m
+  ggm = ggmM %*% m
 
 
 

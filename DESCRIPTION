@@ -15,5 +15,7 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-Imports: tidyverse, DiagrammeR, HMDHFDplus
+Imports: tidyverse, DiagrammeR, HMDHFDplus, devtools
 BugReports: https://github.com/IvanWilli/DemoKin/issues
+Depends: 
+    R (>= 2.10)

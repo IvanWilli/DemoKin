@@ -1,8 +1,22 @@
+#' Estimate kin counts in a non stable framework
 
+#' @description Implementation of Goodman-Keyfitz-Pullum equations but as a
+#' weigthed average of possible ages at childbear of mothers and grandmothers of ego.
+
+#' @param ego_age integer. Age where ego is.
+#' @param year integer. Year where ego is with `ego_age` age.
+#' @param P numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
+#' @param asfr numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
+#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
+#' @param age integer. Ages, assuming last one as an open age group.
+#' @param birth_female numeric. Female portion at birth.
+#'
+#' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
+#' (for example `d` is daughter, `oa` is older aunts, etc.).
+#' @export
 
 kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will be at half year
                             P = NULL, asfr = NULL, N = NULL,
-                            stable = FALSE,
                             age = 0:100,
                             birth_female = 1/2.04){
 
@@ -28,7 +42,6 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
   W <- t(t(N * asfr)/colSums(N * asfr))
 
   # complete data on the right(left) with last (first) available year
-  # sonn forecats option here
   if((year-1) > max(years_data)){
     for(y in (max(years_data)+1):(year-1)){
       U[[as.character(y)]] = U[[as.character(max(years_data))]]

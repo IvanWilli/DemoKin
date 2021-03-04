@@ -1,13 +1,19 @@
-# base in Caswell (2019)
-### main function
-# it needs:
-  # p: a survival probability vector. Its lenght is the number of age stages
-  # f: a fertility vector. Same length than p.
-  # age: simple ages by default
-  # cum_deaths: tell if cumulate death experience
+#' Estimate kin counts in a stable framework
 
-kins_stable <- function(p, f, age = 0:(length(p)-1),
-                       cum_deaths = F, birth_female = 1/2.04){
+#' @description Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019).
+
+#' @param p numeric. A vector of survival ratios.
+#' @param f numeric. A vector of age-specific fertility rates.
+#' @param age integer. Ages, assuming last one as an open age group.
+#' @param cum_deaths logic. Include or not expected lost. Default `FALSE`. See Caswell (2019) for more details.
+#' @param birth_female numeric. Female portion at birth.
+#'
+#' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
+#' (for example `d` is daughter, `oa` is older aunts, etc.).
+#' @export
+
+kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
+                       cum_deaths = FALSE, birth_female = 1/2.04){
 
   # make matrix transition from vectors
   ages = length(age)
@@ -99,7 +105,8 @@ kins_stable <- function(p, f, age = 0:(length(p)-1),
   if(cum_deaths == FALSE){
     kins <- kins %>%
               filter(alive == "yes") %>%
-              select(-alive)
+              select(-alive) %>%
+              spread(kin,count)
   }
 
   return(kins)
