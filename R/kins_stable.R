@@ -7,7 +7,7 @@
   # cum_deaths: tell if cumulate death experience
 
 kins_stable <- function(p, f, age = 0:(length(p)-1),
-                       cum_deaths = F){
+                       cum_deaths = F, birth_female = 1/2.04){
 
   # make matrix transition from vectors
   ages = length(age)
@@ -21,7 +21,9 @@ kins_stable <- function(p, f, age = 0:(length(p)-1),
   Ut = rbind(cbind(Ut,zeros),
              cbind(Mt,Dcum))
   Ft = matrix(0, nrow=ages*2, ncol=ages*2)
-  Ft[1,1:ages] = f * p / 2
+
+  # Caswell's assumption
+  Ft[1,1:ages] = f * p * birth_female
 
   # stable age distr
   A = Ut[1:ages,1:ages] + Ft[1:ages,1:ages]
@@ -86,8 +88,19 @@ kins_stable <- function(p, f, age = 0:(length(p)-1),
                              age_kin = rep(age,2),
                              alive = c(rep("yes",ages), rep("no",ages))) %>%
                       gather(age_ego,count,-age_kin, -kin, -alive) %>%
-                      mutate(age_ego = as.integer(age_ego))}
+                      mutate(age_ego = as.integer(age_ego)) %>%
+                      rename(x = age_ego,
+                             x_kin = age_kin)
+                    }
                ) %>%
               reduce(rbind)
+
+  # return or not death experience
+  if(cum_deaths == FALSE){
+    kins <- kins %>%
+              filter(alive == "yes") %>%
+              select(-alive)
+  }
+
   return(kins)
 }

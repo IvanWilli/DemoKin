@@ -3,9 +3,8 @@ get_HMDHFD <- function(country = "SWE",
                          max_year = 2018,
                          user = NULL,
                          pass = NULL){
-  # source HMD HFD - use SWE now-----------------------------------------------------------------
-  library(HMDHFDplus)
 
+  # source HMD HFD - use SWE now-----------------------------------------------------------------
   pop <- readHMDweb(CNTRY = country, "Population", user, pass, fixup = TRUE) %>%
           select(Year, Age, N = Female1)%>%
           filter(Year >= min_year, Year <= max_year)
@@ -55,21 +54,5 @@ get_HMDHFD <- function(country = "SWE",
     spread(Year, N) %>%
     select(-Age)
 
-  # mean age at childborn
-  W <- t(t(N * asfr)/colSums(N * asfr))
-
-  # arrange lists of matrixs
-  U = f = list()
-  for(t in 1:length(years)){
-    # t = 1
-    Ut = ft = matrix(0, nrow=ages, ncol=ages)
-    Ut[row(Ut)-1 == col(Ut)] <- P[-101,t]
-    Ut[ages, ages]=P[101,t]
-    ft[1,] = asfr[,t]
-    U[[as.character(years[t])]] <- Ut
-    f[[as.character(years[t])]] <- ft
-
-  }
-
-  return(list(U=U, f=f, W=as.data.frame(W)))
+  return(list(P=P, asfr=asfr, N=N))
 }

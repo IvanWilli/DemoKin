@@ -15,10 +15,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, echo=FALSE}
-# library(DemoKin)
-devtools::load_all()
-library(tidyverse)
-library(DiagrammeR)
+library(DemoKin)
 ```
 
 My ego has 35 years and is in 1995. She and her ancestors had lived in Sweden. I would like to know how many realtives ego has, and their ages.
