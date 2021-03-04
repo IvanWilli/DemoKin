@@ -1,5 +1,5 @@
 ---
-title: "Kin estimation"
+title: "Expected kin count estimation by type"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Use}
@@ -7,22 +7,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE, comment = "#>"
-)
-# library(DemoKin)
+```{r, include=FALSE}
 devtools::load_all()
 library(tidyverse)
 library(DiagrammeR)
 ```
 
-My ego has 35 years and she is in 1995. She and all her relatives had lived in Sweden. We would like to know how many relatives ego has in 1995, their mean age, how many had at each age until now.
+Ego is 35 years old and she is in 1995. She and all her relatives had lived in Sweden. We would like to know how many reatives Ego has in 1995, their mean age and living kins at each age by type.
 
-We can estimate this in a **stable** framework using data from 1995, assuming all relatives would experience mortality and fertility from that calendar year (Caswell, 2019). The package has available data from Sweden (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population), loaded using *get_HMDHFD* function.
+We can estimate this in a **stable** framework using data from 1995, assuming all relatives would experience mortality and fertility from that calendar year (Caswell, 2019). The package has already available data from Sweden (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population), loaded using *get_HMDHFD* function.
 
 ```{r}
-swe30_1950_stable <- kins(ego_age = 35, year = 2015,
+swe35_2015_stable <- kins(ego_age = 35, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
                              stable = TRUE)
 ```
@@ -30,7 +26,7 @@ swe30_1950_stable <- kins(ego_age = 35, year = 2015,
 Let´s visualize their distribution during ego´s life.
 
 ```{r, fig.height=6, fig.width=8}
-swe30_1950_stable[["kins_by_age_ego"]] %>%
+swe35_2015_stable[["kins_by_age_ego"]] %>%
               gather(kin, count, -x) %>%
               ggplot() +
               geom_line(aes(x, count))  +
@@ -39,10 +35,10 @@ swe30_1950_stable[["kins_by_age_ego"]] %>%
               facet_wrap(~kin)
 ```
 
-Now let´s visualize their age distribution when ego is 35 (age valuation).
+Now let´s visualize their age distribution when ego is 35 (age valuation), and the mean age:
 
 ```{r, fig.height=6, fig.width=8}
-swe30_1950_stable[["kins_by_age_kin"]] %>%
+swe35_2015_stable[["kins_by_age_kin"]] %>%
               select(-x) %>% 
               gather(kin, count, -x_kin) %>%
               ggplot() +
@@ -50,24 +46,25 @@ swe30_1950_stable[["kins_by_age_kin"]] %>%
               geom_vline(xintercept = 35, color=2)+
               theme_bw() +
               facet_wrap(~kin)
+
+sort(round(swe35_2015_stable[["kins_mean_age"]],1))
 ```
 
-Now let´s see same results considering time variant components. The formula for example for Great-grandmothers (*ggm*), being *x* mother´s age at ego´s birth, *y* grandmother´s age at ego´s mother birth and *z* Great-grandmother´s age until ego´s birth:
+Now let´s see same results considering time variant components. The basic formulas are weighting averages that depends on the distribution of ages at childbearing for ego´s ancestors. We can call *T* the year of ego´s birth and *W* the matrix of age (rows) by year (cols) of age at child-bearing, so the sum of each column is 1. For example for Great-grandmothers (*ggm*), being *x* mother´s age at ego´s birth, *y* grandmother´s age at ego´s mother birth, *z* Great-grandmother´s age at ego´s grandmother birth, and *i* her age until ego´s birth, the formula for initial Great-grandaughter at ego´s birth would be:
 
-$$ ggm(0,t) = \sum_{x=0}^{\omega}{W(x,t-x)
-              \sum_{y=0}^{\omega}{W(y,t-x-y)
-              \prod_{z=0}^{x+y-1}{p(z,t-x-y+z)}}}$$
+$$ ggm(0,T) = \sum_{x=0}^{\omega-1}{W(x,T-x)
+              \sum_{y=0}^{\omega-1}{W(y,T-x-y)
+              \sum_{z=0}^{\omega-1}{W(z,T-x-y-z)
+              \prod_{i=z}^{x+y-1}{p(i,T-x-y-z+i)}}}}$$
+              
+This last (*ugly*) expression is implemented with loops and matrix algebra in the code (a matrix collapsed expression would be better here). Let´s take a look to results when ego is 35:
 
-Let´s take a look (taking too long by now):
-
-```{r}
-swe30_1950_nonstable <- kins(ego_age = 35, year = 2015,
+```{r, fig.height=6, fig.width=8}
+swe35_2015_nonstable <- kins(ego_age = 35, year = 2015,
                              P = swe_surv, asfr = swe_asfr, N = swe_pop,
                              stable = FALSE)
-```
 
-```{r, fig.height=6, fig.width=8}
-swe30_1950_nonstable[["kins_by_age_kin"]] %>%
+swe35_2015_nonstable[["kins_by_age_kin"]] %>%
               select(-x) %>% 
               gather(kin, count, -x_kin) %>%
               ggplot() +
@@ -77,9 +74,9 @@ swe30_1950_nonstable[["kins_by_age_kin"]] %>%
               facet_wrap(~kin)
 ```
 
-Finally we can visualize counts in ego´s network, for the first case, rounded on 3 digits by default.
+Finally we can visualize counts in ego´s network, for the stable case as an example, rounded on 3 digits by default.
 
 ```{r, fig.height=6, fig.width=8}
-plot_diagramm(swe30_1950_stable[["kins_total"]],ego_age = 35)
+plot_diagramm(swe35_2015_stable[["kins_total"]],ego_age = 35)
 ```
 
