@@ -1,5 +1,5 @@
 ---
-title: "Expected kin count estimation by type"
+title: "Expected kin count by type of relative: A matrix implementation"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Use}
@@ -11,11 +11,15 @@ vignette: >
 devtools::load_all()
 library(tidyverse)
 library(DiagrammeR)
+library(knitr)
 ```
 
-Ego is 35 years old and she is in 1995. She and all her relatives had lived in Sweden. We would like to know how many reatives Ego has in 1995, their mean age and living kins at each age by type.
+The year is 1995 and Ego is 35 years old. Ego and her relatives have all lived in Sweden. 
+We would like to know how many relatives Ego has in 1995, their mean age and the number of living kin at each age of Ego.
 
-We can estimate this in a **stable** framework using data from 1995, assuming all relatives would experience mortality and fertility from that calendar year (Caswell, 2019). The package has already available data from Sweden (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population), loaded using *get_HMDHFD* function.
+## Kin counts in stable populations
+
+We can estimate this in a **stable** framework using data from 1995, assuming that all of Egos' relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets are loaded using the`get_HMDHFD` function. 
 
 ```{r}
 swe35_2015_stable <- kins(ego_age = 35, year = 2015,
@@ -23,7 +27,7 @@ swe35_2015_stable <- kins(ego_age = 35, year = 2015,
                              stable = TRUE)
 ```
 
-Let´s visualize their distribution during ego´s life.
+Let's visualize the distribution of relatives over ego's lifecourse:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_stable[["kins_by_age_ego"]] %>%
@@ -35,7 +39,31 @@ swe35_2015_stable[["kins_by_age_ego"]] %>%
               facet_wrap(~kin)
 ```
 
-Now let´s visualize their age distribution when ego is 35 (age valuation), and the mean age:
+Where each relative type is identified by a unique code:
+
+```{r, fig.height=6, fig.width=8, echo=FALSE}
+
+relatives <- c(
+  "coa" = "Cousins (through aunt older than mother)"
+  , "cya" = "Cousins (through aunt younger than mother)"
+  , "d" = "Daughter"
+  , "gd" = "Grand-daughter"
+  , "ggm" = "Great-grandmother"
+  , "gm" = "Grandmother"
+  , "m" = "Mother"
+  , "nos" = "Nieces through older sister"
+  , "nys" = "Nieces through younger sister"
+  , "oa" = "Aunt older than mother"
+  , "ya" = "Aunt younger than mother"
+  , "os" = "Older sister"
+  , "ys" = "Younger sister"
+  )
+
+data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% kable()
+
+```
+
+We can also visualize the age distribution of relatives when Ego is 35 (age valuation):
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_stable[["kins_by_age_kin"]] %>%
@@ -46,18 +74,39 @@ swe35_2015_stable[["kins_by_age_kin"]] %>%
               geom_vline(xintercept = 35, color=2)+
               theme_bw() +
               facet_wrap(~kin)
-
-sort(round(swe35_2015_stable[["kins_mean_age"]],1))
 ```
 
-Now let´s see same results considering time variant components. The basic formulas are weighting averages that depends on the distribution of ages at childbearing for ego´s ancestors. We can call *T* the year of ego´s birth and *W* the matrix of age (rows) by year (cols) of age at child-bearing, so the sum of each column is 1. For example for Great-grandmothers (*ggm*), being *x* mother´s age at ego´s birth, *y* grandmother´s age at ego´s mother birth, *z* Great-grandmother´s age at ego´s grandmother birth, and *i* her age until ego´s birth, the formula for initial Great-grandaughter at ego´s birth would be:
+
+The function also includes data on the mean age of Ego's relatives:
+
+```{r, fig.height=6, fig.width=8}
+swe35_2015_stable[["kins_mean_age"]] %>% 
+  round(1) %>% 
+  sort() %>% 
+  t() %>% 
+  kable()
+```
+
+We can visualize the estimated kin counts for Ego at age 35 in a stable population using a Keyfitz-style diagram:
+
+```{r, fig.height=6, fig.width=8}
+plot_diagramm(swe35_2015_stable[["kins_total"]],ego_age = 35)
+```
+
+## Kin counts in non-stable populations
+
+The population of Sweden is, in reality, **non-stable**, and Ego' relatives will have been expossed to changing mortality and fertility rates.
+To account for this, we extend the original approach in Caswell (2019) to estimate kin counts in population with time-variant demographic rates.
+The basic formulas for this are weighted averages that depend on the distribution of ages at childbearing for Ego's ancestors. Let *T* be the year of Ego's birth and *W* the matrix of age (rows) by year (cols) of age at child-bearing, so that the sum of each column is 1.
+We exemplify this for the case of great-grandmothers (*ggm*), where *x* is the mother's age at Ego's birth, *y* is the grandmother's age at Ego's mother birth, *z* great-grandmother's age at Ego's grandmother birth, and *i* her age until Ego's birth. The formula for initial great-grandaughter at Ego's birth is:
 
 $$ ggm(0,T) = \sum_{x=0}^{\omega-1}{W(x,T-x)
               \sum_{y=0}^{\omega-1}{W(y,T-x-y)
               \sum_{z=0}^{\omega-1}{W(z,T-x-y-z)
               \prod_{i=z}^{x+y-1}{p(i,T-x-y-z+i)}}}}$$
               
-This last (*ugly*) expression is implemented with loops and matrix algebra in the code (a matrix collapsed expression would be better here). Let´s take a look to results when ego is 35:
+The last component of the expression (*admittedly a little bit ugly*) is currently implemented in the package using loops and matrix algebra (future development includes a matrix-collapsed expression). 
+Let's take a look at the resulting kin counts at Ego's age 35 using empirical single-year mortality and fertility rates as input:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_nonstable <- kins(ego_age = 35, year = 2015,
@@ -74,9 +123,12 @@ swe35_2015_nonstable[["kins_by_age_kin"]] %>%
               facet_wrap(~kin)
 ```
 
-Finally we can visualize counts in ego´s network, for the stable case as an example, rounded on 3 digits by default.
+Finally, we display the estimated kin counts for Ego at age 35 in a non-stable population using a Keyfitz-style diagram:
 
 ```{r, fig.height=6, fig.width=8}
-plot_diagramm(swe35_2015_stable[["kins_total"]],ego_age = 35)
+plot_diagramm(swe35_2015_nonstable[["kins_total"]],ego_age = 35)
 ```
 
+## References
+
+Caswell, H. (2019). The formal demography of kinship: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
