@@ -1,5 +1,5 @@
 # graph -------------------------------------------------------------------
-plot_diagramm <- function(kins_total, ego_age = NULL, rounding = 3){
+plot_diagram <- function(kins_total, ego_age = NULL, rounding = 3){
   # https://cran.r-project.org/web/packages/DiagrammeR/vignettes/graphviz-mermaid.html
 
   kins_total <- round(kins_total,3)

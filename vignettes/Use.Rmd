@@ -90,12 +90,12 @@ swe35_2015_stable[["kins_mean_age"]] %>%
 We can visualize the estimated kin counts for Ego at age 35 in a stable population using a Keyfitz-style diagram:
 
 ```{r, fig.height=6, fig.width=8}
-plot_diagramm(swe35_2015_stable[["kins_total"]],ego_age = 35)
+plot_diagram(swe35_2015_stable[["kins_total"]],ego_age = 35)
 ```
 
 ## Kin counts in non-stable populations
 
-The population of Sweden is, in reality, **non-stable**, and Ego' relatives will have been expossed to changing mortality and fertility rates.
+The population of Sweden is, in reality, **non-stable**, and Ego' relatives have been expossed to changing mortality and fertility rates.
 To account for this, we extend the original approach in Caswell (2019) to estimate kin counts in population with time-variant demographic rates.
 The basic formulas for this are weighted averages that depend on the distribution of ages at childbearing for Ego's ancestors. Let *T* be the year of Ego's birth and *W* the matrix of age (rows) by year (cols) of age at child-bearing, so that the sum of each column is 1.
 We exemplify this for the case of great-grandmothers (*ggm*), where *x* is the mother's age at Ego's birth, *y* is the grandmother's age at Ego's mother birth, *z* great-grandmother's age at Ego's grandmother birth, and *i* her age until Ego's birth. The formula for initial great-grandaughter at Ego's birth is:
@@ -126,7 +126,7 @@ swe35_2015_nonstable[["kins_by_age_kin"]] %>%
 Finally, we display the estimated kin counts for Ego at age 35 in a non-stable population using a Keyfitz-style diagram:
 
 ```{r, fig.height=6, fig.width=8}
-plot_diagramm(swe35_2015_nonstable[["kins_total"]],ego_age = 35)
+plot_diagram(swe35_2015_nonstable[["kins_total"]],ego_age = 35)
 ```
 
 ## References
