@@ -12,20 +12,20 @@ plot_diagram <- function(kins_total, ego_age = NULL, rounding = 3){
   style title fill:#FFF,stroke:#FFF,font-size:150%;
   linkStyle 0 stroke:#FFF,stroke-width:0;
 
-  GGM(Great-grandgmother: <br>",                      round(kins_total["ggm"],5)  ,")
-  GGM ==> GM(Grandmother: <br>",                round(kins_total["gm"],5)  ,")
-  GM  --> AOM(Aunts older than Mother: <br>",     round(kins_total["oa"],5)  ,")
-  GM  ==> M(Mother: <br>",                    round(kins_total["m"],5)  ,")
-  GM  --> AYM(Aunts younger than mother: <br>",   round(kins_total["ya"],5)  ,")
-  AOM  --> CAOM(Cousins: <br>",               round(kins_total["coa"],5)  ,")
-  M   --> OS(Older sister: <br>",             round(kins_total["os"],5)  ,")
+  GGM(ggm: <br>",                      round(kins_total["ggm"],5)  ,")
+  GGM ==> GM(gm: <br>",                round(kins_total["gm"],5)  ,")
+  GM  --> AOM(oa: <br>",     round(kins_total["oa"],5)  ,")
+  GM  ==> M(m: <br>",                    round(kins_total["m"],5)  ,")
+  GM  --> AYM(ya: <br>",   round(kins_total["ya"],5)  ,")
+  AOM  --> CAOM(coa: <br>",               round(kins_total["coa"],5)  ,")
+  M   --> OS(os: <br>",             round(kins_total["os"],5)  ,")
   M   ==> E((Ego: <br>",                        1  ,"))
-  M   --> YS(Younger sisters: <br>",            round(kins_total["ys"],5)  ,")
-  AYM  --> CAYM(Cousins: <br>",               round(kins_total["cya"],5)  ,")
-  OS   --> NOS(Nieces through older sister: <br>",   round(kins_total["nos"],5)  ,")
-  E   ==> D(Daughters: <br>",                 round(kins_total["d"],5)  ,")
-  YS   --> NYS(Nieces through younger sister: <br>", round(kins_total["nys"],5)  ,")
-  D   ==> GD(Granddaughters: <br>",             round(kins_total["gd"],5)  ,")
+  M   --> YS(ys: <br>",            round(kins_total["ys"],5)  ,")
+  AYM  --> CAYM(cya: <br>",               round(kins_total["cya"],5)  ,")
+  OS   --> NOS(nos: <br>",   round(kins_total["nos"],5)  ,")
+  E   ==> D(d: <br>",                 round(kins_total["d"],5)  ,")
+  YS   --> NYS(nys: <br>", round(kins_total["nys"],5)  ,")
+  D   ==> GD(gd: <br>",             round(kins_total["gd"],5)  ,")
   style GGM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center;
   style GM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center;
   style M fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
