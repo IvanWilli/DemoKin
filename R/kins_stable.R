@@ -7,7 +7,7 @@
 #' @param age integer. Ages, assuming last one as an open age group.
 #' @param cum_deaths logic. Include or not expected lost. Default `FALSE`. See Caswell (2019) for more details.
 #' @param birth_female numeric. Female portion at birth.
-#' @param pi numeric. Want mean age at childbearing as result.
+#' @param pi_stable logical. Want mean age at childbearing as result. Default `FALSE`
 #'
 #' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.).
@@ -15,7 +15,7 @@
 
 kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
                        cum_deaths = FALSE, birth_female = 1/2.04,
-                       pi = FALSE){
+                       pi_stable = FALSE){
 
   # make matrix transition from vectors
   ages = length(age)
@@ -111,8 +111,8 @@ kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
               spread(kin,count)
   }
 
-  if(pi){
-    out <- list(kins=kins, pi=pi)
+  if(pi_stable){
+    out <- list(kins=kins, pi_stable=pi)
   }else{
     out <- kins
   }

@@ -21,10 +21,10 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Example
 
-Consider an average Swedish woman aged 50 in 2015. How many relatives
-can this woman expect to have? The function `kins` can be used to obtain
-the expected number of Ego’s relatives for the following types of
-relative:
+Consider an average Swedish woman aged 50 in year 2015. How many
+relatives can this woman expect to have? The function `kins` can be used
+to obtain the expected number of Ego’s relatives for the following types
+of relative:
 
 | Code | Relative                                   |
 | :--- | :----------------------------------------- |
@@ -51,8 +51,6 @@ library(DemoKin)
 swe50_2015_stable <- kins(ego_age = 50, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
                              stable = TRUE)
-#> Warning in if (pi) {: la condición tiene longitud > 1 y sólo el primer elemento
-#> será usado
 
 plot_diagram(swe50_2015_stable[["kins_total"]],ego_age = 50)
 ```

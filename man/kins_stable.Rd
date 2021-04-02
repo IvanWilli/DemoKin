@@ -10,7 +10,7 @@ kins_stable(
   age = 0:(length(p) - 1),
   cum_deaths = FALSE,
   birth_female = 1/2.04,
-  pi = FALSE
+  pi_stable = FALSE
 )
 }
 \arguments{
@@ -24,7 +24,7 @@ kins_stable(
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{pi}{numeric. Want mean age at childbearing as result.}
+\item{pi_stable}{logical. Want mean age at childbearing as result. Default \code{FALSE}}
 }
 \value{
 A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin
