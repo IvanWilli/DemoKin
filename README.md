@@ -51,6 +51,8 @@ library(DemoKin)
 swe50_2015_stable <- kins(ego_age = 50, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
                              stable = TRUE)
+#> Warning in if (pi) {: la condición tiene longitud > 1 y sólo el primer elemento
+#> será usado
 
 plot_diagram(swe50_2015_stable[["kins_total"]],ego_age = 50)
 ```

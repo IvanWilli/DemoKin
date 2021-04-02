@@ -69,7 +69,7 @@ data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% 
 
 For this example, we assume demographic stability (i.e., we assume that the womans and her relatives experienced the mortality and fertility rates from 2015 at each age throughout their life):
 
-```{r, fig.height=8, fig.width=10}
+```{r, fig.height=8, fig.width=6}
 library(DemoKin)
 swe50_2015_stable <- kins(ego_age = 50, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
