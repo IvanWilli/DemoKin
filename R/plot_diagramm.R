@@ -1,4 +1,14 @@
-# graph -------------------------------------------------------------------
+#' plot a Kin diagram (network)
+
+#' @description Given estimation of kin counts from `kins` function, draw a diagramm.
+#' @param kins_total vector. Colum names must be as `kins` output.
+#' @param ego_age integer.
+#' @param rounding numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.
+#' @return A plot
+#' @importFrom DiagrammeR mermaid
+#' @export
+
+
 plot_diagram <- function(kins_total, ego_age = NULL, rounding = 3){
   # https://cran.r-project.org/web/packages/DiagrammeR/vignettes/graphviz-mermaid.html
 

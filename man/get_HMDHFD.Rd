@@ -17,6 +17,8 @@ get_HMDHFD(
 
 \item{min_year}{integer. Older year to get data.}
 
+\item{max_year}{numeric. Latest year to get data.}
+
 \item{user}{character. From HMD/HFD.}
 
 \item{pass}{character. From HMD/HFD.}

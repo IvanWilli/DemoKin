@@ -4,31 +4,37 @@
 #' @details See Caswell (2019) for details on stable option.
 #' @param ego_age integer. Age where ego is.
 #' @param year integer. Year where ego is with `ego_age` age.
-#' @param P numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param asfr numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
+#' @param P numeric. A matrix of survival ratios with rows as ages and columns as years.
+#' The name of each col must be the year.
+#' @param asfr numeric. A matrix of age-specific fertility rates with rows as ages and
+#' columns as years. The name of each col must be the year.
+#' @param N numeric. A matrix of population with rows as ages and columns as years.
+#' The name of each col must be the year.
 #' @param age integer. Ages, assuming last one as an open age group.
 #' @param birth_female numeric. Female portion at birth.
+#' @param stable logical. Stable assumption given `year` rates.
 #'
 #' @return A list with:
-#' - A data frame with ego´s age `x`, realted ages `x_kin` and kind of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.).
-#' - A data frame with available kins at each age of ego.
-#' - A data frame with available kins at actual age of ego.
-#' - Mean age of each type of kin at actual age of ego.
-#' - Total of each type of kin at actual age of ego.
+#'  *
+#'  * A data frame with ego´s age `x`, related ages `x_kin` and kind of kin (for example `d` is daughter, `oa` is older aunts, etc.).
+#'  * A data frame with available kins at each age of ego.
+#'  * A data frame with available kins at actual age of ego.
+#'  * Mean age of each type of kin at actual age of ego.
+#'  * Total of each type of kin at actual age of ego.
 #' @export
 #' @examples
-#' Ego is 30 and lives in 1950. How much live kins would have if her relatives would experience mortality and fertility in that calendar year?
+#' # If ego is 30 years old and lives in 1950. How much live kins would have if
+#' # her relatives would experience mortality and fertility in that calendar year?
 #' \dontrun{
 #' swe30_1950_stable <- kins(ego_age = 30, year = 1950,
 #'                           P = swe_surv, asfr = swe_asfr,
 #'                           stable = TRUE)
-#' How much live kins would have if her relatives would experience mortality and fertility at each observed year?
+#' # How much live kins would have if her relatives would experience
+#' # mortality and fertility at each observed year?
 #' swe30_1950_nonstable <- kins(ego_age = 30, year = 1950,
 #'                           P = swe_surv, asfr = swe_asfr,
 #'                           stable = FALSE)
-#' Difference in total by kin:
+#' # Difference in total by kin:
 #' swe30_1950_stable[["kins_total"]] - swe30_1950_nonstable[["kins_total"]]
 #' }
 #'

@@ -4,7 +4,7 @@
 #' of selected countriy on selected period.
 
 #' @param country numeric. Country code from rom HMD/HFD.
-#' @param min_year numeric. Latest year to get data.
+#' @param max_year numeric. Latest year to get data.
 #' @param min_year integer. Older year to get data.
 #' @param user character. From HMD/HFD.
 #' @param pass character. From HMD/HFD.

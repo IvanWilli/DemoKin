@@ -20,11 +20,16 @@ kins(
 
 \item{year}{integer. Year where ego is with \code{ego_age} age.}
 
-\item{P}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
+\item{P}{numeric. A matrix of survival ratios with rows as ages and columns as years.
+The name of each col must be the year.}
 
-\item{asfr}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
+\item{asfr}{numeric. A matrix of age-specific fertility rates with rows as ages and
+columns as years. The name of each col must be the year.}
 
-\item{N}{numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.}
+\item{N}{numeric. A matrix of population with rows as ages and columns as years.
+The name of each col must be the year.}
+
+\item{stable}{logical. Stable assumption given \code{year} rates.}
 
 \item{age}{integer. Ages, assuming last one as an open age group.}
 
@@ -32,9 +37,9 @@ kins(
 }
 \value{
 A list with:
+*
 \itemize{
-\item A data frame with ego´s age \code{x}, realted ages \code{x_kin} and kind of kin
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.).
+\item A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.).
 \item A data frame with available kins at each age of ego.
 \item A data frame with available kins at actual age of ego.
 \item Mean age of each type of kin at actual age of ego.
@@ -48,16 +53,18 @@ Implementation of Goodman-Keyfitz-Pullum equations in an stable or not framework
 See Caswell (2019) for details on stable option.
 }
 \examples{
-Ego is 30 and lives in 1950. How much live kins would have if her relatives would experience mortality and fertility in that calendar year?
+# If ego is 30 years old and lives in 1950. How much live kins would have if
+# her relatives would experience mortality and fertility in that calendar year?
 \dontrun{
 swe30_1950_stable <- kins(ego_age = 30, year = 1950,
                           P = swe_surv, asfr = swe_asfr,
                           stable = TRUE)
-How much live kins would have if her relatives would experience mortality and fertility at each observed year?
+# How much live kins would have if her relatives would experience
+# mortality and fertility at each observed year?
 swe30_1950_nonstable <- kins(ego_age = 30, year = 1950,
                           P = swe_surv, asfr = swe_asfr,
                           stable = FALSE)
-Difference in total by kin:
+# Difference in total by kin:
 swe30_1950_stable[["kins_total"]] - swe30_1950_nonstable[["kins_total"]]
 }
 

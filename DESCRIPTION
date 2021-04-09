@@ -5,8 +5,7 @@ Version: 0.0.0.9000
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),
     person("Diego", "Alburez-Gutierrez", email = "alburezgutierrez@demogr.mpg.de", role = "aut"))
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
