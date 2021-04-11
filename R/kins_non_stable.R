@@ -49,8 +49,8 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
       W[as.character(y)]   = W[,as.character(max(years_data))]
     }
   }
+  cat(paste0("Rates before ",min(years_data),"were constant for Ego's ancestors."))
   for(y in 1500:(min(years_data)-1)){
-    cat(paste0("Rates before ",min(years_data),"are constant for Ego's ancestors.")
     U[[as.character(y)]] = U[[as.character(min(years_data))]]
     f[[as.character(y)]] = f[[as.character(min(years_data))]]
     W   = cbind(W, W[,as.character(min(years_data))])
