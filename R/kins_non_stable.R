@@ -20,6 +20,9 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
                             age = 0:100,
                             birth_female = 1/2.04){
 
+  # diff yars
+  if(!any(as.integer(colnames(P))==as.integer(colnames(asfr))))stop("Data should be from same years.")
+
   # half year and half age
   years_data  <- as.integer(colnames(P))
   ages        <- length(age)
@@ -43,13 +46,15 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
 
   # complete data on the right(left) with last (first) available year
   if((year-1) > max(years_data)){
+    cat(paste0("Rates after ",max(years_data)," assumed as constant."))
     for(y in (max(years_data)+1):(year-1)){
       U[[as.character(y)]] = U[[as.character(max(years_data))]]
       f[[as.character(y)]] = f[[as.character(max(years_data))]]
-      W[as.character(y)]   = W[,as.character(max(years_data))]
+      W   = cbind(W, W[,as.character(max(years_data))])
+      colnames(W)[ncol(W)] = as.character(y)
     }
   }
-  cat(paste0("Rates before ",min(years_data),"were constant for Ego's ancestors."))
+
   for(y in 1500:(min(years_data)-1)){
     U[[as.character(y)]] = U[[as.character(min(years_data))]]
     f[[as.character(y)]] = f[[as.character(min(years_data))]]
@@ -154,7 +159,6 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
                     os=os, ys=ys,
                     nos=nos, nys=nys,
                     d=d, gd=gd)
-
   for(x in 1:ego_age){
     Ut = U[[as.character(ego_cohort + x - 1)]]
     ft = f[[as.character(ego_cohort + x - 1)]]

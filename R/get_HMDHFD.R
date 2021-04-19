@@ -68,5 +68,19 @@ get_HMDHFD <- function(country = "SWE",
     spread(Year, N) %>%
     select(-Age)
 
+  # only return data with values
+  if(any(is.na(colSums(P)))){
+    warning("Asked for data out of HMDHFD range")
+    P <- P[,!is.na(colSums(P))]
+  }
+  if(any(is.na(colSums(asfr)))){
+    warning("Asked for data out of HMDHFD range")
+    asfr <- asfr[,!is.na(colSums(asfr))]
+  }
+  if(any(is.na(colSums(N)))){
+    warning("Asked for data out of HMDHFD range")
+    N <- N[,!is.na(colSums(N))]
+  }
+
   return(list(P=P, asfr=asfr, N=N))
 }
