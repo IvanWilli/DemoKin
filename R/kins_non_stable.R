@@ -127,9 +127,9 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
       coaMy[,gm_age+1] = coa
     }
     # expected count for possible granmother´s age
-    ggmM[,m_age+1] = ggmMy %*% gm
-    oaM[,m_age+1]  = oaMy  %*% gm
-    coaM[,m_age+1] = coaMy %*% gm
+    ggmM[,m_age+1] = ggmMy %*% W[,as.character(m_cohort)]
+    oaM[,m_age+1]  = oaMy  %*% W[,as.character(m_cohort)]
+    coaM[,m_age+1] = coaMy %*% W[,as.character(m_cohort)]
   }
   # expected count for possible mother´s age
   gm  = gmM  %*% m

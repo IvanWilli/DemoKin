@@ -11,46 +11,42 @@
 
 plot_diagram <- function(kins_total, ego_age = NULL, rounding = 3){
   # https://cran.r-project.org/web/packages/DiagrammeR/vignettes/graphviz-mermaid.html
-
+  # https://color.hailpixel.com/#D9E9BE,BF62CB,94C2DB,79D297,CDA76A,C8695B
   kins_total <- round(kins_total,3)
 
   mermaid(
-  paste0("graph TB
+  paste0("graph TD
 
-  title[<u>Expected kins for an ego aged ", ego_age ," </u>]
-  title-->GGM
-  style title fill:#FFF,stroke:#FFF,font-size:150%;
-  linkStyle 0 stroke:#FFF,stroke-width:0;
-
-  GGM(ggm: <br>",                      round(kins_total["ggm"],5)  ,")
-  GGM ==> GM(gm: <br>",                round(kins_total["gm"],5)  ,")
-  GM  --> AOM(oa: <br>",     round(kins_total["oa"],5)  ,")
-  GM  ==> M(m: <br>",                    round(kins_total["m"],5)  ,")
-  GM  --> AYM(ya: <br>",   round(kins_total["ya"],5)  ,")
-  AOM  --> CAOM(coa: <br>",               round(kins_total["coa"],5)  ,")
-  M   --> OS(os: <br>",             round(kins_total["os"],5)  ,")
-  M   ==> E((Ego: <br>",                        1  ,"))
-  M   --> YS(ys: <br>",            round(kins_total["ys"],5)  ,")
-  AYM  --> CAYM(cya: <br>",               round(kins_total["cya"],5)  ,")
-  OS   --> NOS(nos: <br>",   round(kins_total["nos"],5)  ,")
-  E   ==> D(d: <br>",                 round(kins_total["d"],5)  ,")
-  YS   --> NYS(nys: <br>", round(kins_total["nys"],5)  ,")
-  D   ==> GD(gd: <br>",             round(kins_total["gd"],5)  ,")
-  style GGM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center;
-  style GM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center;
-  style M fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
+  GGM(ggm: <br>",                       kins_total["ggm"]  ,")
+  GGM ==> GM(gm: <br>",                 kins_total["gm"]  ,")
+  GM  --> AOM(oa: <br>",                kins_total["oa"]  ,")
+  GM  ==> M(m: <br>",                   kins_total["m"]  ,")
+  GM  --> AYM(ya: <br>",                kins_total["ya"]  ,")
+  AOM  --> CAOM(coa: <br>",             kins_total["coa"]  ,")
+  M   --> OS(os: <br>",                 kins_total["os"]  ,")
+  M   ==> E((Ego))
+  M   --> YS(ys: <br>",                 kins_total["ys"]  ,")
+  AYM  --> CAYM(cya: <br>",             kins_total["cya"]  ,")
+  OS   --> NOS(nos: <br>",              kins_total["nos"] ,")
+  E   ==> D(d: <br>",                   kins_total["d"]  ,")
+  YS   --> NYS(nys: <br>",              kins_total["nys"]  ,")
+  D   ==> GD(gd: <br>",                 kins_total["gd"]  ,")
+  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;
+  style GM fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;
+  style M fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
   style D fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style YS fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style OS fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style CAOM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style AYM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style AOM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style CAYM fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style NOS fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style NYS fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
+  style YS fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style OS fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
+  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
+  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
+  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
   style E fill:#FFF, stroke:#333, stroke-width:4px, text-align: center
-  style D fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style GD fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center"))
+  style D fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
+  style GD fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"))
+
 }
 
 
