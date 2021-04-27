@@ -92,7 +92,7 @@ swe35_2015_stable[["kins_mean_age"]] %>%
 We can visualize the estimated kin counts for Ego at age 35 in a stable population using a Keyfitz-style diagram:
 
 ```{r, fig.height=10, fig.width=12}
-plot_diagram(swe35_2015_stable[["kins_total"]],ego_age = 35)
+plot_diagram(swe35_2015_stable[["kins_total"]])
 ```
 
 ## Kin counts in non-stable populations
@@ -128,7 +128,7 @@ swe35_2015_nonstable[["kins_by_age_kin"]] %>%
 Finally, we display the estimated kin counts for Ego at age 35 in a non-stable population using a Keyfitz-style diagram:
 
 ```{r, fig.height=10, fig.width=12}
-plot_diagram(swe35_2015_nonstable[["kins_total"]],ego_age = 35)
+plot_diagram(swe35_2015_nonstable[["kins_total"]])
 ```
 
 ## References

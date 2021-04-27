@@ -9,10 +9,10 @@
 #' @export
 
 
-plot_diagram <- function(kins_total, ego_age = NULL, rounding = 3){
+plot_diagram <- function(kins_total, rounding = 3){
   # https://cran.r-project.org/web/packages/DiagrammeR/vignettes/graphviz-mermaid.html
   # https://color.hailpixel.com/#D9E9BE,BF62CB,94C2DB,79D297,CDA76A,C8695B
-  kins_total <- round(kins_total,3)
+  kins_total <- round(kins_total,digits = rounding)
 
   mermaid(
   paste0("graph TD

@@ -52,7 +52,7 @@ swe50_2015_stable <- kins(ego_age = 50, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
                              stable = TRUE)
 
-plot_diagram(swe50_2015_stable[["kins_total"]],ego_age = 50)
+plot_diagram(swe50_2015_stable[["kins_total"]])
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />

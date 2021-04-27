@@ -4,14 +4,14 @@
 \alias{plot_diagram}
 \title{plot a Kin diagram (network)}
 \usage{
-plot_diagram(kins_total, ego_age = NULL, rounding = 3)
+plot_diagram(kins_total, rounding = 3)
 }
 \arguments{
 \item{kins_total}{vector. Colum names must be as \code{kins} output.}
 
-\item{ego_age}{integer.}
-
 \item{rounding}{numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.}
+
+\item{ego_age}{integer.}
 }
 \value{
 A plot
