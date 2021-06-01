@@ -2,7 +2,6 @@
 
 #' @description Given estimation of kin counts from `kins` function, draw a diagramm.
 #' @param kins_total vector. Colum names must be as `kins` output.
-#' @param ego_age integer.
 #' @param rounding numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.
 #' @return A plot
 #' @importFrom DiagrammeR mermaid

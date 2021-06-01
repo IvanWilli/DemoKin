@@ -46,6 +46,7 @@ get_HMDHFD <- function(country = "SWE",
   P <- rbind(L[c(-1,-101),]/L[-c(100:101),],
              L[101,]/(L[100,]+L[101,]),
              L[101,]/(L[100,]+L[101,]))
+  rownames(P) = 0:100
 
   # fertility
   asfr <- asfr %>%
@@ -58,6 +59,7 @@ get_HMDHFD <- function(country = "SWE",
     arrange(Year, Age) %>%
     spread(Year, ASFR) %>%
     select(-Age)
+  rownames(asfr) = 0:100
 
   # population
   N <- pop %>%
@@ -67,6 +69,7 @@ get_HMDHFD <- function(country = "SWE",
     arrange(Year, Age) %>%
     spread(Year, N) %>%
     select(-Age)
+  rownames(N) = 0:100
 
   # only return data with values
   if(any(is.na(colSums(P)))){

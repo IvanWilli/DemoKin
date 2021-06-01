@@ -12,7 +12,8 @@ kins(
   N = NULL,
   stable = FALSE,
   age = 0:100,
-  birth_female = 1/2.04
+  birth_female = 1/2.04,
+  alive = "yes"
 )
 }
 \arguments{

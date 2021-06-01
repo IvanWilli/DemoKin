@@ -5,26 +5,23 @@
 \title{Estimate kin counts in a stable framework}
 \usage{
 kins_stable(
-  p = NULL,
-  f = NULL,
-  age = 0:(length(p) - 1),
-  cum_deaths = FALSE,
+  P = NULL,
+  asfr = NULL,
+  age = 0:(length(P) - 1),
   birth_female = 1/2.04,
   pi_stable = FALSE
 )
 }
 \arguments{
-\item{p}{numeric. A vector of survival ratios.}
+\item{P}{numeric. A vector of survival ratios.}
 
-\item{f}{numeric. A vector of age-specific fertility rates.}
+\item{asfr}{numeric. A vector of age-specific fertility rates.}
 
 \item{age}{integer. Ages, assuming last one as an open age group.}
 
-\item{cum_deaths}{logic. Include or not expected lost. Default \code{FALSE}. See Caswell (2019) for more details.}
-
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{pi_stable}{logical. Want mean age at childbearing as result. Default \code{FALSE}}
+\item{pi_stable}{logical. Want mean age at childbearing as a result too. Default \code{FALSE}}
 }
 \value{
 A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin

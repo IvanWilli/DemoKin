@@ -11,7 +11,8 @@ kins_non_stable(
   asfr = NULL,
   N = NULL,
   age = 0:100,
-  birth_female = 1/2.04
+  birth_female = 1/2.04,
+  Pb = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ kins_non_stable(
 \item{age}{integer. Ages, assuming last one as an open age group.}
 
 \item{birth_female}{numeric. Female portion at birth.}
+
+\item{Pb}{logic. Is given Pb as the first row in P?. Default \code{FALSE}.}
 }
 \value{
 A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin

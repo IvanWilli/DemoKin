@@ -13,9 +13,8 @@
 #' @param age integer. Ages, assuming last one as an open age group.
 #' @param birth_female numeric. Female portion at birth.
 #' @param stable logical. Stable assumption given `year` rates.
-#'
+#' @param alive character. Only living kin counts `yes`, death kins `no`, or both other char.
 #' @return A list with:
-#'  *
 #'  * A data frame with ego´s age `x`, related ages `x_kin` and kind of kin (for example `d` is daughter, `oa` is older aunts, etc.).
 #'  * A data frame with available kins at each age of ego.
 #'  * A data frame with available kins at actual age of ego.
@@ -43,29 +42,61 @@ kins <- function(ego_age = NULL, year = NULL, # where ego is, it will be at half
                      P = NULL, asfr = NULL, N = NULL,
                      stable = FALSE,
                      age = 0:100,
-                     birth_female = 1/2.04)
+                     birth_female = 1/2.04,
+                     alive = "yes")
   {
 
   # if stable or not
   if(stable){
-      kins <- kins_stable(p = P[,as.character(year)],
-                          f = asfr[,as.character(year)],
-                          cum_deaths = FALSE) %>%
+      kins <- kins_stable(P = P[,as.character(year)],
+                          asfr = asfr[,as.character(year)],
+                          birth_female = birth_female) %>%
               filter(x <= ego_age)
   }else{
       kins <- kins_non_stable(ego_age = ego_age, year = year,
-                              P = P, asfr = asfr, N = N)
+                              P = P, asfr = asfr, N = N,
+                              birth_female = birth_female)
   }
 
-  # summarise results
-  kins_by_age_ego <- kins %>% group_by(x) %>% select(-x_kin) %>% summarise_all(sum)
-  kins_by_age_kin <- kins[kins$x == ego_age,]
-  kins_mean_age   <- colSums(kins_by_age_kin[,3:ncol(kins)]*0:100)/colSums(kins_by_age_kin[,3:ncol(kins)])
-  kins_sd_age     <- colSums(kins_by_age_kin[,3:ncol(kins)]*(0:100)^2)/colSums(kins_by_age_kin[,3:ncol(kins)]) - kins_mean_age^2
-  kins_total      <- colSums(kins_by_age_kin[,c(3:ncol(kins))])
-  return(list(kins = kins,
-              kins_by_age_ego = kins_by_age_ego,
-              kins_by_age_kin = kins_by_age_kin,
-              kins_mean_age = kins_mean_age,
-              kins_total = kins_total))
+  # living results
+  alive_yes <- kins %>% filter(alive=="yes")
+    alive_yes$alive <- NULL
+    kins_by_age_ego <- alive_yes %>% group_by(x) %>% select(-x_kin) %>% summarise_all(sum)
+    kins_by_age_kin <- alive_yes[alive_yes$x == ego_age,]
+    kins_mean_age   <- colSums(kins_by_age_kin[,3:ncol(alive_yes)]*0:100)/colSums(kins_by_age_kin[,3:ncol(alive_yes)])
+    kins_var_age    <- colSums(kins_by_age_kin[,3:ncol(alive_yes)]*(0:100)^2)/colSums(kins_by_age_kin[,3:ncol(alive_yes)]) - kins_mean_age^2
+    kins_total      <- colSums(kins_by_age_kin[,c(3:ncol(alive_yes))])
+    out_yes <- list(kins = alive_yes,
+                    kins_by_age_ego = kins_by_age_ego,
+                    kins_by_age_kin = kins_by_age_kin,
+                    kins_mean_age = kins_mean_age,
+                    kins_total = kins_total)
+
+  # death results
+  alive_no <- kins %>% filter(alive=="no")
+    alive_no$alive <- NULL
+    freq_d_by_age_ego <- alive_no %>% group_by(x) %>% select(-x_kin) %>% summarise_all(sum)
+    cum_d_by_age_ego  <- freq_d_by_age_ego %>% ungroup() %>%
+                                summarise_at(.vars = 2:ncol(freq_d_by_age_ego),cumsum) %>%
+                                mutate(x=freq_d_by_age_ego$x)
+    cum_d_total       <- cum_d_by_age_ego %>% filter(x == ego_age) %>% select(-x)
+    lost_mean_age     <- colSums(freq_d_by_age_ego[,2:ncol(freq_d_by_age_ego)]*freq_d_by_age_ego$x)/
+                         colSums(freq_d_by_age_ego[,2:ncol(freq_d_by_age_ego)])
+    lost_var_age      <- colSums(freq_d_by_age_ego[,2:ncol(freq_d_by_age_ego)]*freq_d_by_age_ego$x^2)/lost_mean_age^2
+    out_no <- list(kins = alive_no,
+                   kins_death_by_age_ego = freq_d_by_age_ego,
+                   kins_cum_death_by_age_ego = cum_d_by_age_ego,
+                   kins_cum_death_total = cum_d_total,
+                   lost_mean_age = lost_mean_age,
+                   lost_var_age  = lost_var_age)
+
+  # not return all
+  if(alive=="yes"){
+    kins=out_yes
+  }else if(alive=="no"){
+    kins=out_no
+  } else{
+    kins=list(kins_living=out_yes,kins_death=out_no)
+  }
+  return(kins)
 }

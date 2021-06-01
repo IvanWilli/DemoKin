@@ -2,36 +2,33 @@
 
 #' @description Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019).
 
-#' @param p numeric. A vector of survival ratios.
-#' @param f numeric. A vector of age-specific fertility rates.
+#' @param P numeric. A vector of survival ratios.
+#' @param asfr numeric. A vector of age-specific fertility rates.
 #' @param age integer. Ages, assuming last one as an open age group.
-#' @param cum_deaths logic. Include or not expected lost. Default `FALSE`. See Caswell (2019) for more details.
 #' @param birth_female numeric. Female portion at birth.
-#' @param pi_stable logical. Want mean age at childbearing as result. Default `FALSE`
+#' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
 #'
 #' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.).
 #' @export
 
-kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
-                       cum_deaths = FALSE, birth_female = 1/2.04,
-                       pi_stable = FALSE){
+kins_stable <- function(P = NULL, asfr = NULL,
+                        age = 0:(length(P)-1),
+                        birth_female = 1/2.04,
+                        pi_stable = FALSE){
 
   # make matrix transition from vectors
   ages = length(age)
   Ut = Mt = zeros = Dcum = matrix(0, nrow=ages, ncol=ages)
-  Ut[row(Ut)-1 == col(Ut)] <- p[-ages]
-  Ut[ages, ages] = p[ages]
-  diag(Mt) = 1 - p
-  if(cum_deaths){
-    diag(Dcum) = 1
-  }
+  Ut[row(Ut)-1 == col(Ut)] <- P[-ages]
+  Ut[ages, ages] = P[ages]
+  diag(Mt) = 1 - P
   Ut = rbind(cbind(Ut,zeros),
              cbind(Mt,Dcum))
   Ft = matrix(0, nrow=ages*2, ncol=ages*2)
 
   # Caswell's assumption
-  Ft[1,1:ages] = f * p * birth_female
+  Ft[1,1:ages] = asfr * P * birth_female
 
   # stable age distr
   A = Ut[1:ages,1:ages] + Ft[1:ages,1:ages]
@@ -61,22 +58,22 @@ kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
     gm[,i+1]  = Ut %*% gm[,i]
   }
 
-  ggm[,1] = gm[1:ages,] %*% pi
+  ggm[1:ages,1] = gm[1:ages,] %*% pi
   for(i in 1:(ages-1)){
     ggm[,i+1]  = Ut %*% ggm[,i]
   }
 
-  os[,1]  = d[1:ages,] %*% pi
-  nos[,1] = gd[1:ages,] %*% pi
+  os[1:ages,1]  = d[1:ages,] %*% pi
+  nos[1:ages,1] = gd[1:ages,] %*% pi
   for(i in 1:(ages-1)){
     os[,i+1]  = Ut %*% os[,i]
     nos[,i+1] = Ut %*% nos[,i] + Ft %*% os[,i]
   }
 
-  oa[,1]  = os[1:ages,] %*% pi
-  ya[,1]  = ys[1:ages,] %*% pi
-  coa[,1] = nos[1:ages,] %*% pi
-  cya[,1] = nys[1:ages,] %*% pi
+  oa[1:ages,1]  = os[1:ages,] %*% pi
+  ya[1:ages,1]  = ys[1:ages,] %*% pi
+  coa[1:ages,1] = nos[1:ages,] %*% pi
+  cya[1:ages,1] = nys[1:ages,] %*% pi
   for(i in 1:(ages-1)){
     oa[,i+1]  = Ut %*% oa[,i]
     ya[,i+1]  = Ut %*% ya[,i]  + Ft %*% gm[,i]
@@ -101,15 +98,8 @@ kins_stable <- function(p = NULL, f = NULL, age = 0:(length(p)-1),
                              x_kin = age_kin)
                     }
                ) %>%
-              reduce(rbind)
-
-  # return or not death experience
-  if(cum_deaths == FALSE){
-    kins <- kins %>%
-              filter(alive == "yes") %>%
-              select(-alive) %>%
-              spread(kin,count)
-  }
+              reduce(rbind) %>%
+        spread(kin,count)
 
   if(pi_stable){
     out <- list(kins=kins, pi_stable=pi)

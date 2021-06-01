@@ -131,6 +131,31 @@ Finally, we display the estimated kin counts for Ego at age 35 in a non-stable p
 plot_diagram(swe35_2015_nonstable[["kins_total"]])
 ```
 
+## Death Experience
+
+Kin loss has consequences related to mental health, care support and household incomes over life course. Setting `alive="no"` we can see how many relatives Ego loss during her life (output `kins_death_by_age_ego`), which of course is very realted to mortality shape by age, or the cumulated one.
+
+```{r, fig.height=6, fig.width=8}
+swe35_2015_nonstable_death <- kins(ego_age = 35, year = 2015,
+                             P = swe_surv, asfr = swe_asfr, N = swe_pop,
+                             stable = TRUE, alive = "no")
+
+swe35_2015_nonstable_death[["kins_cum_death_by_age_ego"]] %>%
+  gather(kin, count, -x,) %>%
+  ggplot() +
+  geom_line(aes(x, count))  +
+  geom_vline(xintercept = 35, color=2)+
+  theme_bw() +
+  facet_wrap(~kin,scales="free")
+```
+
+Maybe ask what was the mean age at lost for each kin:
+
+```{r}
+swe35_2015_nonstable_death[["lost_mean_age"]] %>% round(2)
+```
+
+
 ## References
 
 Caswell, H. (2019). The formal demography of kinship: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
