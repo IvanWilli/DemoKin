@@ -10,8 +10,6 @@ plot_diagram(kins_total, rounding = 3)
 \item{kins_total}{vector. Colum names must be as \code{kins} output.}
 
 \item{rounding}{numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.}
-
-\item{ego_age}{integer.}
 }
 \value{
 A plot

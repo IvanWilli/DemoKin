@@ -35,10 +35,11 @@ The name of each col must be the year.}
 \item{age}{integer. Ages, assuming last one as an open age group.}
 
 \item{birth_female}{numeric. Female portion at birth.}
+
+\item{alive}{character. Only living kin counts \code{yes}, death kins \code{no}, or both other char.}
 }
 \value{
 A list with:
-*
 \itemize{
 \item A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.).
 \item A data frame with available kins at each age of ego.

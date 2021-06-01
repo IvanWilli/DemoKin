@@ -82,13 +82,11 @@ For more details, including an extension to non-stable populations, see `vignett
 
 ## Citation
 
-Williams, Iván and Diego Alburez-Gutierrez. (2021) DemoKin: An R package to implement matrix kinship models in stable and non-stable populations. URL: https://github.com/IvanWilli/DemoKin.
+Williams, Iván and Diego Alburez-Gutierrez. (2021) DemoKin: An R package to estimate kinship networks in stable and non-stable populations. URL: https://github.com/IvanWilli/DemoKin.
 
 ## References
 
 Caswell, H. (2019). The formal demography of kinship: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
-
-Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research 42:1097–1146. doi:10.4054/DemRes.2020.42.38.
 
 Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation and the frequency of various kinship relationships. Theoretical Population Biology 5(1):1–27. doi:10.1016/0040-5809(74)90049-5.
 
