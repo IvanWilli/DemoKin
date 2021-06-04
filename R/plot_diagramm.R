@@ -31,20 +31,20 @@ plot_diagram <- function(kins_total, rounding = 3){
   YS   --> NYS(nys: <br>",              kins_total["nys"]  ,")
   D   ==> GD(gd: <br>",                 kins_total["gd"]  ,")
   style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;
-  style GM fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;
-  style M fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
-  style D fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style YS fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
-  style OS fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;
+  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
+  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
+  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
+  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
   style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
   style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
   style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
   style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
   style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
   style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
-  style E fill:#FFF, stroke:#333, stroke-width:4px, text-align: center
-  style D fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
-  style GD fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"))
+  style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center
+  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
+  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"))
 
 }
 

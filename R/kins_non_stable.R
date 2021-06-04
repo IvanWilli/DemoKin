@@ -10,10 +10,10 @@
 #' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
 #' @param age integer. Ages, assuming last one as an open age group.
 #' @param birth_female numeric. Female portion at birth.
-#' @param Pb logic. Is given Pb as the first row in P?. Default `FALSE`.
+#' @param Pb logic. Is given Pb as the first row in P?. If not take `P(0,1)` as `P(b,1)`. Default `FALSE`.
 #'
-#' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.).
+#' @return A data frame with ego´s age `x`, related ages `x_kin` and type of kin
+#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
 kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will be at half year
@@ -160,15 +160,15 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
   d = gd = ys = nys = matrix(0,ages*2,1)
 
   # no matters deaths before ego borns
-  ggm[(ages+1):(2*ages)] =0
-  gm[(ages+1) :(2*ages)] =0
-  m[(ages+1)  :(2*ages)] =0
-  oa[(ages+1) :(2*ages)] =0
-  ya[(ages+1) :(2*ages)] =0
-  coa[(ages+1):(2*ages)] =0
-  cya[(ages+1):(2*ages)] =0
-  os[(ages+1) :(2*ages)] =0
-  nos[(ages+1):(2*ages)] =0
+  ggm[(ages+1):(2*ages)] = 0
+  gm[(ages+1) :(2*ages)] = 0
+  m[(ages+1)  :(2*ages)] = 0
+  oa[(ages+1) :(2*ages)] = 0
+  ya[(ages+1) :(2*ages)] = 0
+  coa[(ages+1):(2*ages)] = 0
+  cya[(ages+1):(2*ages)] = 0
+  os[(ages+1) :(2*ages)] = 0
+  nos[(ages+1):(2*ages)] = 0
 
   # collect kins
   kins = data.frame(x=0, x_kin = age, alive = "yes",

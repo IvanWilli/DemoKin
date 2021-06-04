@@ -17,7 +17,7 @@ kins(
 )
 }
 \arguments{
-\item{ego_age}{integer. Age where ego is.}
+\item{ego_age}{integer. Age where ego is. Ages are assumed as x+.5, positioned ad year y+.5.}
 
 \item{year}{integer. Year where ego is with \code{ego_age} age.}
 
@@ -36,20 +36,20 @@ The name of each col must be the year.}
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{alive}{character. Only living kin counts \code{yes}, death kins \code{no}, or both other char.}
+\item{alive}{character. Only living kin counts \code{yes}, death kins \code{no}, or both any other char.}
 }
 \value{
 A list with:
 \itemize{
-\item A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.).
-\item A data frame with available kins at each age of ego.
-\item A data frame with available kins at actual age of ego.
-\item Mean age of each type of kin at actual age of ego.
-\item Total of each type of kin at actual age of ego.
+\item \code{kins}: a data frame with ego´s age \code{x}, related ages \code{x_kin} and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.). The content (living or deaths) dependes on \code{alive} param.
+\item A data frame with kins at each age of ego´s life. The content (living or deaths) dependes on \code{alive} param.
+\item A data frame with kins at actual age of ego. The content (living or deaths) dependes on \code{alive} param.
+\item Mean age of each type of kin at actual age of ego.  The content (living or deaths) dependes on \code{alive} param.
+\item Total of each type of kin at actual age of ego.  The content (living or deaths) dependes on \code{alive} param.
 }
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations in an stable or not framework.
+Implementation of Goodman-Keyfitz-Pullum equations based on Caswell (2019), in an stable or not framework.
 }
 \details{
 See Caswell (2019) for details on stable option.

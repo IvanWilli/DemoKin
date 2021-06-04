@@ -1,8 +1,8 @@
 #' Estimate kin counts
 
-#' @description Implementation of Goodman-Keyfitz-Pullum equations in an stable or not framework.
+#' @description Implementation of Goodman-Keyfitz-Pullum equations based on Caswell (2019), in an stable or not framework.
 #' @details See Caswell (2019) for details on stable option.
-#' @param ego_age integer. Age where ego is.
+#' @param ego_age integer. Age where ego is. Ages are assumed as x+.5, positioned ad year y+.5.
 #' @param year integer. Year where ego is with `ego_age` age.
 #' @param P numeric. A matrix of survival ratios with rows as ages and columns as years.
 #' The name of each col must be the year.
@@ -13,13 +13,13 @@
 #' @param age integer. Ages, assuming last one as an open age group.
 #' @param birth_female numeric. Female portion at birth.
 #' @param stable logical. Stable assumption given `year` rates.
-#' @param alive character. Only living kin counts `yes`, death kins `no`, or both other char.
+#' @param alive character. Only living kin counts `yes`, death kins `no`, or both any other char.
 #' @return A list with:
-#'  * A data frame with ego´s age `x`, related ages `x_kin` and kind of kin (for example `d` is daughter, `oa` is older aunts, etc.).
-#'  * A data frame with available kins at each age of ego.
-#'  * A data frame with available kins at actual age of ego.
-#'  * Mean age of each type of kin at actual age of ego.
-#'  * Total of each type of kin at actual age of ego.
+#'  * `kins`: a data frame with ego´s age `x`, related ages `x_kin` and type of kin (for example `d` is daughter, `oa` is older aunts, etc.). The content (living or deaths) dependes on `alive` param.
+#'  * A data frame with kins at each age of ego´s life. The content (living or deaths) dependes on `alive` param.
+#'  * A data frame with kins at actual age of ego. The content (living or deaths) dependes on `alive` param.
+#'  * Mean age of each type of kin at actual age of ego.  The content (living or deaths) dependes on `alive` param.
+#'  * Total of each type of kin at actual age of ego.  The content (living or deaths) dependes on `alive` param.
 #' @export
 #' @examples
 #' # If ego is 30 years old and lives in 1950. How much live kins would have if

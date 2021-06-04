@@ -24,8 +24,8 @@ kins_stable(
 \item{pi_stable}{logical. Want mean age at childbearing as a result too. Default \code{FALSE}}
 }
 \value{
-A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.).
+A data frame with ego´s age \code{x}, related ages \code{x_kin} and type of kin
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
 }
 \description{
 Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019).

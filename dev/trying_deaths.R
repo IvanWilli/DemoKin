@@ -3,18 +3,29 @@ library(tidyverse)
 load_all()
 # debugonce(kins)
 
-ego_age = 35
-year = 2015
-P = swe_surv
-asfr = swe_asfr
-N = swe_pop
-age = 0:100
-birth_female = 1/2.04
+# ego_age = 35
+# year = 2015
+# P = swe_surv
+# asfr = swe_asfr
+# N = swe_pop
+# age = 0:100
+# birth_female = 1/2.04
 
 start_time = Sys.time()
 swe35_2015_stable <- kins(ego_age = 35, year = 2015,
                           P = swe_surv, asfr = swe_asfr, N=swe_pop,
-                          stable = FALSE, alive = c("asdfsd"))
+                          stable = TRUE, alive = c("no"))
+
+freq_d_by_age_ego <- alive_no %>% group_by(x) %>% select(-x_kin) %>% summarise_all(sum)
+lost_mean_age     <- colSums(freq_d_by_age_ego[,2:ncol(freq_d_by_age_ego)]*freq_d_by_age_ego$x)/
+                     colSums(freq_d_by_age_ego[,2:ncol(freq_d_by_age_ego)])
+
+
+
+
+
+
+
 end_time = Sys.time()
 end_time-start_time
 (end_time-start_time)/60

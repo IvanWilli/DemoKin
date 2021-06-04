@@ -3,12 +3,13 @@
 
 # DemoKin
 
-This package uses matrix demographic methods to estimate kin counts and
-the age distribution of relatives in stable and non-stable populations.
-The package is an implementation of Caswell (2019) and draws on previous
-theoretical development by Goodman, Keyfitz and Pullum (1974). `DemoKin`
-is giving its first steps, so please contact us or submit a pull request
-if you have any suggestion.
+This package uses matrix demographic methods to estimate living and
+death kin counts, and their age distribution by type of relative in
+stable and non-stable populations. The package is a free-based
+implementation of Caswell (2019) and draws on previous theoretical
+development by Goodman, Keyfitz and Pullum (1974). `DemoKin` is giving
+its first steps, so please contact us, create an issue or submit a pull
+request if you have any suggestion.
 
 ## Installation
 
@@ -21,10 +22,9 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Example
 
-Consider an average Swedish woman aged 50 in year 2015. How many
-relatives can this woman expect to have? The function `kins` can be used
-to obtain the expected number of Ego’s relatives for the following types
-of relative:
+Consider an average Swedish woman aged 50 in year 2015, called more
+generally Ego. The types of Ego’s relatives included in this package
+follows this abbreviation list:
 
 | Code | Relative                                   |
 | :--- | :----------------------------------------- |
@@ -42,23 +42,31 @@ of relative:
 | os   | Older sister                               |
 | ys   | Younger sister                             |
 
-For this example, we assume demographic stability (i.e., we assume that
-the womans and her relatives experienced the mortality and fertility
-rates from 2015 at each age throughout their life):
+How many female relatives can this woman expect to have? Following the
+Swedish woman example, we can assume demographic stability (i.e., assume
+that the woman and her relatives experienced the mortality and fertility
+rates from 2015 at each age throughout their life, in a female closed
+population):
 
 ``` r
 library(DemoKin)
 swe50_2015_stable <- kins(ego_age = 50, year = 2015,
                              P = swe_surv, asfr = swe_asfr,
                              stable = TRUE)
+```
 
+Where *P* is the survival ratio by age from a life table and *asfr* are
+the age specific fertility ratios by age (simple ages allowed at the
+moment). A network-diagram shows expected living kins for Ego:
+
+``` r
 plot_diagram(swe50_2015_stable[["kins_total"]])
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
 
-For more details, including an extension to non-stable populations, see
-`vignette("Use")`.
+For more details, including an extension to non-stable populations and
+relative´s death distribution, see `vignette("Use")`.
 
 ## Citation
 
@@ -78,10 +86,7 @@ Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 
 ## Next steps:
 
-  - Improve performance of `kins_non_stable` function.
-  - Give an option to forecast mortality and fertility to locate Ego and
-    relatives in the future.
+  - Improve performance of `kins_non_stable` function (takes \~ 5 min).
   - Add more functionalities to the diagram, like colors by kin degree
     and box size weighted by kin amount.
-  - Add cumulative deaths by kin in the non-stable case, and also stage
-    properties as in Caswell (2020).
+  - Add stage properties as in Caswell (2020).

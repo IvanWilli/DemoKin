@@ -30,11 +30,11 @@ kins_non_stable(
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{Pb}{logic. Is given Pb as the first row in P?. Default \code{FALSE}.}
+\item{Pb}{logic. Is given Pb as the first row in P?. If not take \code{P(0,1)} as \code{P(b,1)}. Default \code{FALSE}.}
 }
 \value{
-A data frame with ego´s age \code{x}, related ages \code{x_kin} and kind of kin
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.).
+A data frame with ego´s age \code{x}, related ages \code{x_kin} and type of kin
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
 }
 \description{
 Implementation of Goodman-Keyfitz-Pullum equations but as a

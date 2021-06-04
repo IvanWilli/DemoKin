@@ -8,8 +8,8 @@
 #' @param birth_female numeric. Female portion at birth.
 #' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
 #'
-#' @return A data frame with ego´s age `x`, related ages `x_kin` and kind of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.).
+#' @return A data frame with ego´s age `x`, related ages `x_kin` and type of kin
+#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
 kins_stable <- function(P = NULL, asfr = NULL,
