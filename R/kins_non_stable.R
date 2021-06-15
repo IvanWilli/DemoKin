@@ -171,7 +171,8 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
   nos[(ages+1):(2*ages)] = 0
 
   # collect kins
-  kins = data.frame(x=0, x_kin = age, alive = "yes",
+  kins = data.frame(x=0, x_kin = rep(age,2),
+                    alive = c(rep("yes",ages),rep("no",ages)),
                     ggm=ggm,
                     gm=gm,
                     oa=oa,
@@ -199,7 +200,7 @@ kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will
     gd  = Ut %*% gd  + ft %*% d
 
     # bind results
-    kins <- rbind(kins, data.frame(x=rep(x,2), x_kin = rep(0:100,2),
+    kins <- rbind(kins, data.frame(x=x, x_kin = rep(age,2),
                                    alive = c(rep("yes",ages),rep("no",ages)),
                                    ggm=ggm,
                                    gm=gm,
