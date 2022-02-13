@@ -1,217 +1,186 @@
 #' Estimate kin counts in a non stable framework
 
-#' @description Implementation of Goodman-Keyfitz-Pullum equations but as a
-#' weigthed average of possible ages at childbear of mothers and grandmothers of ego.
-
-#' @param ego_age integer. Age where ego is.
-#' @param year integer. Year where ego is with `ego_age` age.
-#' @param P numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param asfr numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
-#' @param age integer. Ages, assuming last one as an open age group.
-#' @param birth_female numeric. Female portion at birth.
-#' @param Pb logic. Is given Pb as the first row in P?. If not take `P(0,1)` as `P(b,1)`. Default `FALSE`.
+#' @description Implementation of non-stable Goodman-Keyfitz-Pullum equations based on Caswell (2021).
 #'
-#' @return A data frame with ego´s age `x`, related ages `x_kin` and type of kin
+#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
+#' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
+#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
+#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
+#' @param ego_cohort integer. Year of birth of ego. Could be a vector. Should be within input data years range.
+#' @param ego_year integer. Year of ego. Could be a vector. Should be within input data years range.
+#' @param selected_kins character. Kins to return: "m" for mother, "d" for daughter,...
+#' @param birth_female numeric. Female portion at birth.
+#' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
+#'
+#' @return A data frame with ego´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
-kins_non_stable <- function(ego_age = NULL, year = NULL, # where ego is, it will be at half year
-                            P = NULL, asfr = NULL, N = NULL,
-                            age = 0:100,
+kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
+                            ego_cohort = NULL, ego_year = NULL, selected_kins = NULL,
                             birth_female = 1/2.04,
                             Pb = FALSE){
 
-
   # check input
-  stopifnot(!is.null(P)&!is.null(asfr)&!is.null(N))
+  stopifnot(!is.null(U)&!is.null(f)&any(!is.null(N)|!is.null(pi)))
 
   # diff years
-  if(!any(as.integer(colnames(P))==as.integer(colnames(asfr))))stop("Data should be from same years.")
+  if(!any(as.integer(colnames(U))==as.integer(colnames(f))))stop("Data should be from same years.")
+
+  # data should be from consequtive years
+  years_data = as.integer(colnames(U))
+  if(any(diff(years_data)!=1))stop("Data should be for consecutive years.")
 
   # half year and half age
-  years_data  <- as.integer(colnames(P))
-  ages        <- length(age)
-  w           <- last(age)
-  ego_cohort  <- year - ego_age
-  zeros = matrix(0, nrow=ages, ncol=ages)
+  age          <- 0:(nrow(U)-1)
+  n_years_data <- length(years_data)
+  ages         <- length(age)
+  om           <- max(age)
+  zeros        <- matrix(0, nrow=ages, ncol=ages)
   if(Pb){
     stopifnot(length(years_data)==ncol(Pb))
   }else{
-    Pb = P[1,]
-  }
-
-  # get lists
-  # arrange lists of matrixs
-  U = f = list()
-  for(t in 1:length(years_data)){
-    Ut = Mt = Dcum = matrix(0, nrow=ages, ncol=ages)
-    Ut[row(Ut)-1 == col(Ut)] <- P[-101,t]
-    Ut[ages, ages]=P[101,t]
-    diag(Mt) = 1 - P[,t]
-    # diag(Dcum) = 1
-    U[[as.character(years_data[t])]] <- rbind(cbind(Ut,zeros),cbind(Mt,Dcum))
-    ft = matrix(0, nrow=ages*2, ncol=ages*2)
-    ft[1,1:ages] = asfr[,t] * birth_female * (1+P[,t])/2 * Pb[1,t]
-    f[[as.character(years_data[t])]] <- ft
+    Pb = U[1,]
   }
 
   # age distribution at childborn
-  W <- rbind(t(t(N * asfr)/colSums(N * asfr)),
-             matrix(0,ages,length(years_data)))
-
-  # complete data on the right(left) with last (first) available year
-  cat(paste0("Rates before ",min(years_data)," assumed as constant."))
-  for(y in 1500:(min(years_data)-1)){
-    U[[as.character(y)]] = U[[as.character(min(years_data))]]
-    f[[as.character(y)]] = f[[as.character(min(years_data))]]
-    W = cbind(W, W[,as.character(min(years_data))])
-    colnames(W)[ncol(W)] = as.character(y)
-  }
-  if((year-1) > max(years_data)){
-    cat(paste0("Rates after ",max(years_data)," assumed as constant."))
-    for(y in (max(years_data)+1):(year-1)){
-      U[[as.character(y)]] = U[[as.character(max(years_data))]]
-      f[[as.character(y)]] = f[[as.character(max(years_data))]]
-      W   = cbind(W, W[,as.character(max(years_data))])
-      colnames(W)[ncol(W)] = as.character(y)
+  if(is.null(pi)){
+    if(is.null(N)){
+      stop("You need data on pi or N.")
+    }else{
+      pi <- rbind(t(t(N * f)/colSums(N * f)),
+                  matrix(0,ages,length(years_data)))
     }
   }
 
-  # conditional matrix on mother´s age (cols) at ego´s birth
-  osM = nosM = oaM = coaM = yaM = cyaM = osM = gmMy = gmM = ggmMy = ggmM = matrix(0, ages * 2, ages)
-
-  # conditional matrix on grandmother´s age (cols) at mothers´s birth
-  oaMy  = coaMy  = yaMy  = cyaMy  = osMy = nosMy = matrix(0, ages * 2, ages)
-
-  # index martix
-  e = matrix(0, ages * 2, ages * 2)
-  diag(e[1:ages,1:ages]) = 1
-
-  # mother´s age at ego´s birth
-  for(m_age in age){
-    m          = W[,as.character(ego_cohort)]
-    m_cohort   = ego_cohort - m_age - 1
-    gm         = W[,as.character(m_cohort)]
-    ya = cya = os = nos = rep(0,ages*2)
-
-    for(y in m_cohort:ego_cohort){
-      Ut = U[[as.character(y)]]
-      ft = f[[as.character(y)]]
-      gm = Ut %*% gm
-      ya = Ut %*% ya + ft %*% gm
-      cya = Ut %*% cya + ft %*% ya
-      os = Ut %*% os + ft %*% e[, y - m_cohort + 1]
-      nos = Ut %*% nos + ft %*% os
-    }
-    # conditionated to mother´s age
-    gmM[, m_age+1] = gm
-    yaM[, m_age+1] = ya
-    cyaM[,m_age+1] = cya
-    osM[, m_age+1] = os
-    nosM[,m_age+1] = nos
-
-    # grandmother´s age at mother´s birth
-    for(gm_age in age){
-      gm_cohort  = m_cohort - gm_age - 1
-      ggm        = W[,as.character(gm_cohort)]
-      oa = coa = rep(0, ages * 2)
-
-      # before mother born
-      for(y in gm_cohort:m_cohort){
-        Ut = U[[as.character(y)]]
-        ft = f[[as.character(y)]]
-        ggm = Ut %*% ggm
-        oa = Ut %*% oa + ft %*% e[,y - gm_cohort + 1]
-        coa = Ut %*% coa + ft %*% oa
-      }
-
-      # after mother born
-      for(y in m_cohort:ego_cohort){
-        Ut = U[[as.character(y)]]
-        ft = f[[as.character(y)]]
-        ggm = Ut %*% ggm
-        oa = Ut %*% oa
-        coa = Ut %*% coa + ft %*% oa
-      }
-      # conditionated to granmother´s age
-      ggmMy[,gm_age+1] = ggm
-      oaMy[,gm_age+1] = oa
-      coaMy[,gm_age+1] = coa
-    }
-    # expected count for possible granmother´s age
-    ggmM[,m_age+1] = ggmMy %*% W[1:ages,as.character(m_cohort)]
-    oaM[,m_age+1]  = oaMy  %*% W[1:ages,as.character(m_cohort)]
-    coaM[,m_age+1] = coaMy %*% W[1:ages,as.character(m_cohort)]
+  # get lists of matrix
+  Ul = fl = list()
+  for(t in 1:n_years_data){
+    Ut = Mt = Dcum = matrix(0, nrow=ages, ncol=ages)
+    Ut[row(Ut)-1 == col(Ut)] <- U[-ages,t]
+    Ut[ages, ages]=U[ages,t]
+    diag(Mt) = 1 - U[,t]
+    Ul[[as.character(years_data[t])]] <- rbind(cbind(Ut,zeros),cbind(Mt,Dcum))
+    ft = matrix(0, nrow=ages*2, ncol=ages*2)
+    ft[1,1:ages] = f[,t] * birth_female * (1+U[,t])/2 * as.numeric(Pb[t])
+    fl[[as.character(years_data[t])]] <- ft
   }
-  # expected count for possible mother´s age
-  gm  = gmM  %*% m[1:ages]
-  ggm = ggmM %*% m[1:ages]
-  oa  = oaM  %*% m[1:ages]
-  coa = coaM %*% m[1:ages]
-  ya  = yaM  %*% m[1:ages]
-  cya = cyaM %*% m[1:ages]
-  os  = osM  %*% m[1:ages]
-  nos = nosM %*% m[1:ages]
+  U <- Ul
+  f <- fl
 
-  # ego´s trip
-
-  # initial descendants
-  d = gd = ys = nys = matrix(0,ages*2,1)
-
-  # no matters deaths before ego borns
-  ggm[(ages+1):(2*ages)] = 0
-  gm[(ages+1) :(2*ages)] = 0
-  m[(ages+1)  :(2*ages)] = 0
-  oa[(ages+1) :(2*ages)] = 0
-  ya[(ages+1) :(2*ages)] = 0
-  coa[(ages+1):(2*ages)] = 0
-  cya[(ages+1):(2*ages)] = 0
-  os[(ages+1) :(2*ages)] = 0
-  nos[(ages+1):(2*ages)] = 0
-
-  # collect kins
-  kins = data.frame(x=0, x_kin = rep(age,2),
-                    alive = c(rep("yes",ages),rep("no",ages)),
-                    ggm=ggm,
-                    gm=gm,
-                    oa=oa,
-                    m=m,
-                    ya=ya,
-                    coa=coa, cya=cya,
-                    os=os, ys=ys,
-                    nos=nos, nys=nys,
-                    d=d, gd=gd)
-  for(x in 1:ego_age){
-    Ut = U[[as.character(ego_cohort + x - 1)]]
-    ft = f[[as.character(ego_cohort + x - 1)]]
-    ggm = Ut %*% ggm
-    gm  = Ut %*% gm
-    oa  = Ut %*% oa
-    m   = Ut %*% m
-    ya  = Ut %*% ya  + ft %*% gm
-    coa = Ut %*% coa + ft %*% oa
-    cya = Ut %*% cya + ft %*% ya
-    os  = Ut %*% os
-    ys  = Ut %*% ys  + ft %*% m
-    nos = Ut %*% nos + ft %*% os
-    nys = Ut %*% nys + ft %*% ys
-    d   = Ut %*% d   + ft %*% e[,x]
-    gd  = Ut %*% gd  + ft %*% d
-
-    # bind results
-    kins <- rbind(kins, data.frame(x=x, x_kin = rep(age,2),
-                                   alive = c(rep("yes",ages),rep("no",ages)),
-                                   ggm=ggm,
-                                   gm=gm,
-                                   oa=oa,
-                                   m=m,
-                                   ya=ya,
-                                   coa=coa, cya=cya,
-                                   os=os, ys=ys,
-                                   nos=nos, nys=nys,
-                                   d=d, gd=gd))
-
+  # loop over years (more performance here)
+  kins_all <- list()
+  for (iyear in 1:n_years_data){
+    # print(iyear)
+    Ut <- as.matrix(U[[iyear]]);
+    ft <- as.matrix(f[[iyear]]);
+    pit <- pi[,iyear];
+    if (iyear==1){
+      U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
+      f1 <- ft[1,][1:ages]
+      pi1 <- pit[1:ages]
+      kins_all[[1]] <- kins_stable(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
+    }
+    kins_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kins_all[[iyear]])
   }
+
+  # filter years and kins that were selected
+  names(kins_all) <- as.character(years_data)
+  if(!is.null(ego_cohort)){
+    selected_cohorts_year_age <- data.frame(age = rep(age,length(ego_cohort)),
+                                            year = map(ego_cohort,.f = ~.x+age) %>%
+                                              unlist(use.names = F))
+  }else{selected_cohorts_year_age <- c()}
+  if(!is.null(ego_year)){selected_years_age <- expand.grid(age, ego_year) %>% rename(age=1,year=2)
+  }else{selected_years_age <- c()}
+  if(is.null(ego_year) & is.null(ego_cohort)){
+    ego_year = years_data
+  }
+  out_selected <- bind_rows(selected_years_age,selected_cohorts_year_age) %>% distinct()
+  possible_kins <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
+  if(is.null(selected_kins)){
+    selected_kins_position <- 1:length(possible_kins)
+  }else{
+    selected_kins_position <- which(possible_kins %in% selected_kins)
+  }
+
+  # first filter
+  kins_all <- kins_all %>%
+    keep(names(.) %in% as.character(unique(out_selected$year))) %>%
+    map(~ .[selected_kins_position])
+
+  # long format
+  kins <- lapply(names(kins_all), function(Y){
+    X <- kins_all[[Y]]
+    X <- map2(X, names(X), function(x,y) as.data.frame(x) %>%
+                mutate(year = Y,
+                        kin=y,
+                        age_kin = rep(age,2),
+                        alive = c(rep("yes",ages), rep("no",ages)),
+                        .before=everything())) %>%
+      bind_rows() %>%
+      setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
+      gather(age_ego, count,-age_kin, -kin, -year, -alive) %>%
+      mutate(age_ego = as.integer(age_ego),
+             year = as.integer(year),
+             cohort = year - age_ego) %>%
+      filter(age_ego %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
+    bind_rows()
   return(kins)
+}
+
+# main fun for each year: based on caswell matlab code
+
+#' @description one time projection kin. internal function.
+#'
+#' @param Ut numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
+#' @param ft numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
+#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
+#' @param ages numeric.
+#' @param pkin numeric. A list with kin count distribution in previous year.
+#
+timevarying_kin<- function(Ut,ft,pit,ages, pkin){
+
+  # frequently used zero vector for initial condition
+  zvec=rep(0,ages*2);
+  I = matrix(0, ages * 2, ages * 2)
+  diag(I[1:ages,1:ages]) = 1
+  om=ages-1;
+  d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0,ages*2,ages)
+  kins_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
+                    nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
+
+  # initial distribution
+  d[,1]=gd[,1]=ggd[,1]=ys[,1]=nys[,1]=zvec
+  m[1:ages,1]  = pit[1:ages]
+  gm[1:ages,1] = pkin[["m"]][1:ages,] %*% pit[1:ages]
+  ggm[1:ages,1]= pkin[["gm"]][1:ages,] %*% pit[1:ages]
+  os[1:ages,1] = pkin[["d"]][1:ages,] %*% pit[1:ages]
+  ys[1:ages,1] = pkin[["gd"]][1:ages,] %*% pit[1:ages]
+  oa[1:ages,1] = pkin[["os"]][1:ages,] %*% pit[1:ages]
+  ya[1:ages,1] = pkin[["ys"]][1:ages,] %*% pit[1:ages]
+  coa[1:ages,1]= pkin[["nos"]][1:ages,] %*% pit[1:ages]
+  cya[1:ages,1]= pkin[["nys"]][1:ages,] %*% pit[1:ages]
+
+  for (ix in 1:om){
+    d[,ix+1]   = Ut %*% pkin[["d"]][,ix]   + ft %*% I[,ix]
+    gd[,ix+1]  = Ut %*% pkin[["gd"]][,ix]  + ft %*% pkin[["d"]][,ix]
+    ggd[,ix+1] = Ut %*% pkin[["ggd"]][,ix] + ft %*% pkin[["gd"]][,ix]
+    m[,ix+1]   = Ut %*% pkin[["m"]][,ix]
+    gm[,ix+1]  = Ut %*% pkin[["gm"]][,ix]
+    ggm[,ix+1] = Ut %*% pkin[["ggm"]][,ix]
+    os[,ix+1]  = Ut %*% pkin[["os"]][,ix]
+    ys[,ix+1]  = Ut %*% pkin[["ys"]][,ix]  + ft %*% pkin[["m"]][,ix]
+    nos[,ix+1] = Ut %*% pkin[["nos"]][,ix] + ft %*% pkin[["os"]][,ix]
+    nys[,ix+1] = Ut %*% pkin[["nys"]][,ix] + ft %*% pkin[["ys"]][,ix]
+    oa[,ix+1]  = Ut %*% pkin[["oa"]][,ix]
+    ya[,ix+1]  = Ut %*% pkin[["ya"]][,ix]  + ft %*% pkin[["gm"]][,ix]
+    coa[,ix+1] = Ut %*% pkin[["coa"]][,ix] + ft %*% pkin[["oa"]][,ix]
+    cya[,ix+1] = Ut %*% pkin[["cya"]][,ix] + ft %*% pkin[["ya"]][,ix]
+  }
+
+  kins_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
+                    nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
+
+  return(kins_list)
 }

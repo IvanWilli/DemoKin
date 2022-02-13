@@ -11,40 +11,41 @@
 plot_diagram <- function(kins_total, rounding = 3){
   # https://cran.r-project.org/web/packages/DiagrammeR/vignettes/graphviz-mermaid.html
   # https://color.hailpixel.com/#D9E9BE,BF62CB,94C2DB,79D297,CDA76A,C8695B
-  kins_total <- round(kins_total,digits = rounding)
+
+  kins_total <- kins_total %>% mutate(total = round(total,digits = rounding))
 
   mermaid(
   paste0("graph TD
 
-  GGM(ggm: <br>",                       kins_total["ggm"]  ,")
-  GGM ==> GM(gm: <br>",                 kins_total["gm"]  ,")
-  GM  --> AOM(oa: <br>",                kins_total["oa"]  ,")
-  GM  ==> M(m: <br>",                   kins_total["m"]  ,")
-  GM  --> AYM(ya: <br>",                kins_total["ya"]  ,")
-  AOM  --> CAOM(coa: <br>",             kins_total["coa"]  ,")
-  M   --> OS(os: <br>",                 kins_total["os"]  ,")
+  GGM(ggm: <br>",                       kins_total$total[kins_total$kin=="ggm"]  ,")
+  GGM ==> GM(gm: <br>",                 kins_total$total[kins_total$kin=="gm"]  ,")
+  GM  --> AOM(oa: <br>",                kins_total$total[kins_total$kin=="oa"]  ,")
+  GM  ==> M(m: <br>",                   kins_total$total[kins_total$kin=="m"]  ,")
+  GM  --> AYM(ya: <br>",                kins_total$total[kins_total$kin=="ya"]  ,")
+  AOM  --> CAOM(coa: <br>",             kins_total$total[kins_total$kin=="coa"]  ,")
+  M   --> OS(os: <br>",                 kins_total$total[kins_total$kin=="os"]  ,")
   M   ==> E((Ego))
-  M   --> YS(ys: <br>",                 kins_total["ys"]  ,")
-  AYM  --> CAYM(cya: <br>",             kins_total["cya"]  ,")
-  OS   --> NOS(nos: <br>",              kins_total["nos"] ,")
-  E   ==> D(d: <br>",                   kins_total["d"]  ,")
-  YS   --> NYS(nys: <br>",              kins_total["nys"]  ,")
-  D   ==> GD(gd: <br>",                 kins_total["gd"]  ,")
-  style GGM fill:#D9E9BE, stroke:#333, stroke-width:2px;
-  style GM  fill:#BF62CB, stroke:#333, stroke-width:2px, text-align: center;
-  style M   fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
-  style D   fill:#dddbdb, stroke:#333, stroke-width:2px, text-align: center
-  style YS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
-  style OS  fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
-  style CAOM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
-  style AYM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
-  style AOM fill:#94C2DB, stroke:#333, stroke-width:2px, text-align: center
-  style CAYM fill:#79D297, stroke:#333, stroke-width:2px, text-align: center
-  style NOS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
-  style NYS fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
+  M   --> YS(ys: <br>",                 kins_total$total[kins_total$kin=="ys"]  ,")
+  AYM  --> CAYM(cya: <br>",             kins_total$total[kins_total$kin=="cya"]  ,")
+  OS   --> NOS(nos: <br>",              kins_total$total[kins_total$kin=="nos"] ,")
+  E   ==> D(d: <br>",                   kins_total$total[kins_total$kin=="d"]  ,")
+  YS   --> NYS(nys: <br>",              kins_total$total[kins_total$kin=="nys"]  ,")
+  D   ==> GD(gd: <br>",                 kins_total$total[kins_total$kin=="gd"]  ,")
+  style GGM fill:#a1f590, stroke:#333, stroke-width:2px;
+  style GM  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center;
+  style M   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center
+  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center
+  style YS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center
+  style OS  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center
+  style CAOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
+  style AYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
+  style AOM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
+  style CAYM fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
+  style NOS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
+  style NYS fill:#f1f0f5, stroke:#333, stroke-width:2px, text-align: center
   style E   fill:#FFF, stroke:#333, stroke-width:4px, text-align: center
-  style D   fill:#CDA76A, stroke:#333, stroke-width:2px, text-align: center
-  style GD  fill:#C8695B, stroke:#333, stroke-width:2px, text-align: center"))
+  style D   fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center
+  style GD  fill:#a1f590, stroke:#333, stroke-width:2px, text-align: center"))
 
 }
 

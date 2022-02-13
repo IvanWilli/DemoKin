@@ -5,38 +5,40 @@
 \title{Estimate kin counts in a non stable framework}
 \usage{
 kins_non_stable(
-  ego_age = NULL,
-  year = NULL,
-  P = NULL,
-  asfr = NULL,
+  U = NULL,
+  f = NULL,
   N = NULL,
-  age = 0:100,
+  pi = NULL,
+  ego_cohort = NULL,
+  ego_year = NULL,
+  selected_kins = NULL,
   birth_female = 1/2.04,
   Pb = FALSE
 )
 }
 \arguments{
-\item{ego_age}{integer. Age where ego is.}
+\item{U}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{year}{integer. Year where ego is with \code{ego_age} age.}
-
-\item{P}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
-
-\item{asfr}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
+\item{f}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
 
 \item{N}{numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{age}{integer. Ages, assuming last one as an open age group.}
+\item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
+
+\item{ego_cohort}{integer. Year of birth of ego. Could be a vector. Should be within input data years range.}
+
+\item{ego_year}{integer. Year of ego. Could be a vector. Should be within input data years range.}
+
+\item{selected_kins}{character. Kins to return: "m" for mother, "d" for daughter,...}
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{Pb}{logic. Is given Pb as the first row in P?. If not take \code{P(0,1)} as \code{P(b,1)}. Default \code{FALSE}.}
+\item{Pb}{logic. Is given Pb as the first row in P?. If not, takes \code{P(0,1)} as \code{P(b,1)}. Useful for fertility matrix first row. Default \code{FALSE}.}
 }
 \value{
-A data frame with ego´s age \code{x}, related ages \code{x_kin} and type of kin
+A data frame with ego´s age, related ages and type of kin
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations but as a
-weigthed average of possible ages at childbear of mothers and grandmothers of ego.
+Implementation of non-stable Goodman-Keyfitz-Pullum equations based on Caswell (2021).
 }

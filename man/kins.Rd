@@ -5,38 +5,41 @@
 \title{Estimate kin counts}
 \usage{
 kins(
-  ego_age = NULL,
-  year = NULL,
-  P = NULL,
-  asfr = NULL,
+  U = NULL,
+  f = NULL,
   N = NULL,
-  stable = FALSE,
-  age = 0:100,
+  pi = NULL,
+  stable = TRUE,
+  ego_cohort = NULL,
+  ego_year = NULL,
+  selected_kins = NULL,
   birth_female = 1/2.04,
-  alive = "yes"
+  Pb = FALSE,
+  living = TRUE
 )
 }
 \arguments{
-\item{ego_age}{integer. Age where ego is. Ages are assumed as x+.5, positioned ad year y+.5.}
+\item{U}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{year}{integer. Year where ego is with \code{ego_age} age.}
+\item{f}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{P}{numeric. A matrix of survival ratios with rows as ages and columns as years.
-The name of each col must be the year.}
+\item{N}{numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{asfr}{numeric. A matrix of age-specific fertility rates with rows as ages and
-columns as years. The name of each col must be the year.}
+\item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{N}{numeric. A matrix of population with rows as ages and columns as years.
-The name of each col must be the year.}
+\item{stable}{logical. Stable assumption given \code{year} rates, taking ego_year in case is U and f are matrix.}
 
-\item{stable}{logical. Stable assumption given \code{year} rates.}
+\item{ego_cohort}{integer. Year of birth of ego. Could be a vector. Should be within input data years range.}
 
-\item{age}{integer. Ages, assuming last one as an open age group.}
+\item{ego_year}{integer. Year of ego. Could be a vector. Should be within input data years range.}
+
+\item{selected_kins}{character. Kins to return: "m" for mother, "d" for daughter,...}
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{alive}{character. Only living kin counts \code{yes}, death kins \code{no}, or both any other char.}
+\item{Pb}{logic. Is given Pb as the first row in P?. If not, takes \code{P(0,1)} as \code{P(b,1)}. Useful for fertility matrix first row. Default \code{FALSE}.}
+
+\item{living}{logial. Only living kin counts \code{TRUE}, or including death kins \code{FALSE}.}
 }
 \value{
 A list with:
@@ -49,25 +52,23 @@ A list with:
 }
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations based on Caswell (2019), in an stable or not framework.
+Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
 }
 \details{
-See Caswell (2019) for details on stable option.
+See Caswell (2019) and Caswell (2021) for details on formulas.
 }
 \examples{
 # If ego is 30 years old and lives in 1950. How much live kins would have if
 # her relatives would experience mortality and fertility in that calendar year?
 \dontrun{
-swe30_1950_stable <- kins(ego_age = 30, year = 1950,
-                          P = swe_surv, asfr = swe_asfr,
-                          stable = TRUE)
-# How much live kins would have if her relatives would experience
+swe30_1950_stable <- kins(U = swe_surv, f = swe_asfr, ego_year = 1950, stable = TRUE,selected_kins = c("m","gm"))
+# How much live mothers and grandmothers would have if her relatives would experience
 # mortality and fertility at each observed year?
-swe30_1950_nonstable <- kins(ego_age = 30, year = 1950,
-                          P = swe_surv, asfr = swe_asfr,
-                          stable = FALSE)
+swe30_1950_nonstable <- kins(U = swe_surv, f = swe_asfr,N = swe_pop,
+                             stable = FALSE, ego_year = 1950, selected_kins = c("m","gm"))
 # Difference in total by kin:
-swe30_1950_stable[["kins_total"]] - swe30_1950_nonstable[["kins_total"]]
+swe30_1950_stable$kins_by_age_ego \%>\% filter(age_ego==30) \%>\% select(kin, total)
+swe30_1950_nonstable$kins_by_age_ego \%>\% filter(age_ego==30) \%>\% select(kin, total)
 }
 
 }
