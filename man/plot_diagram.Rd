@@ -4,12 +4,12 @@
 \alias{plot_diagram}
 \title{plot a Kin diagram (network)}
 \usage{
-plot_diagram(kins_total, rounding = 3)
+plot_diagram(kin_total, rounding = 3)
 }
 \arguments{
-\item{kins_total}{vector. Colum names must be as \code{kins} output.}
-
 \item{rounding}{numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.}
+
+\item{kins_total}{vector. Colum names must be as \code{kins} output.}
 }
 \value{
 A plot

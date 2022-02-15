@@ -8,7 +8,7 @@
 #' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
 #' @param ego_cohort integer. Year of birth of ego. Could be a vector. Should be within input data years range.
 #' @param ego_year integer. Year of ego. Could be a vector. Should be within input data years range.
-#' @param selected_kins character. Kins to return: "m" for mother, "d" for daughter,...
+#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
 #' @param birth_female numeric. Female portion at birth.
 #' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
 #'
@@ -16,8 +16,8 @@
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
-kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
-                            ego_cohort = NULL, ego_year = NULL, selected_kins = NULL,
+kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
+                            ego_cohort = NULL, ego_year = NULL, selected_kin = NULL,
                             birth_female = 1/2.04,
                             Pb = FALSE){
 
@@ -69,7 +69,7 @@ kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
   f <- fl
 
   # loop over years (more performance here)
-  kins_all <- list()
+  kin_all <- list()
   for (iyear in 1:n_years_data){
     # print(iyear)
     Ut <- as.matrix(U[[iyear]]);
@@ -79,13 +79,13 @@ kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
       U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
-      kins_all[[1]] <- kins_stable(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
+      kin_all[[1]] <- kin_stable(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
     }
-    kins_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kins_all[[iyear]])
+    kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
   }
 
-  # filter years and kins that were selected
-  names(kins_all) <- as.character(years_data)
+  # filter years and kin that were selected
+  names(kin_all) <- as.character(years_data)
   if(!is.null(ego_cohort)){
     selected_cohorts_year_age <- data.frame(age = rep(age,length(ego_cohort)),
                                             year = map(ego_cohort,.f = ~.x+age) %>%
@@ -97,21 +97,21 @@ kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
     ego_year = years_data
   }
   out_selected <- bind_rows(selected_years_age,selected_cohorts_year_age) %>% distinct()
-  possible_kins <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
-  if(is.null(selected_kins)){
-    selected_kins_position <- 1:length(possible_kins)
+  possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
+  if(is.null(selected_kin)){
+    selected_kin_position <- 1:length(possible_kin)
   }else{
-    selected_kins_position <- which(possible_kins %in% selected_kins)
+    selected_kin_position <- which(possible_kin %in% selected_kin)
   }
 
   # first filter
-  kins_all <- kins_all %>%
+  kin_all <- kin_all %>%
     keep(names(.) %in% as.character(unique(out_selected$year))) %>%
-    map(~ .[selected_kins_position])
+    map(~ .[selected_kin_position])
 
   # long format
-  kins <- lapply(names(kins_all), function(Y){
-    X <- kins_all[[Y]]
+  kin <- lapply(names(kin_all), function(Y){
+    X <- kin_all[[Y]]
     X <- map2(X, names(X), function(x,y) as.data.frame(x) %>%
                 mutate(year = Y,
                         kin=y,
@@ -126,10 +126,11 @@ kins_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
              cohort = year - age_ego) %>%
       filter(age_ego %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
     bind_rows()
-  return(kins)
+  return(kin)
 }
 
-# main fun for each year: based on caswell matlab code
+
+#' one time projection kin
 
 #' @description one time projection kin. internal function.
 #'
@@ -147,7 +148,7 @@ timevarying_kin<- function(Ut,ft,pit,ages, pkin){
   diag(I[1:ages,1:ages]) = 1
   om=ages-1;
   d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0,ages*2,ages)
-  kins_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
+  kin_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
   # initial distribution
@@ -179,8 +180,8 @@ timevarying_kin<- function(Ut,ft,pit,ages, pkin){
     cya[,ix+1] = Ut %*% pkin[["cya"]][,ix] + ft %*% pkin[["ya"]][,ix]
   }
 
-  kins_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
+  kin_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
-  return(kins_list)
+  return(kin_list)
 }

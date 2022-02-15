@@ -41,7 +41,7 @@ library(knitr)
 ```
 
 
-Consider an average Swedish woman aged 50 in year 2015, called more generally Ego. The types of Ego's relatives included in this package follows this abbreviation list:
+Consider an average Swedish woman in year 2015, called more generally Ego. The types of Ego's relatives included in this package follows this abbreviation list:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 
@@ -65,20 +65,20 @@ data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% 
 
 ```
 
-How many female relatives can this woman expect to have? 
+How many female relatives can this woman expect to have?
 Following the Swedish woman example, we can assume demographic stability (i.e., assume that the woman and her relatives experienced the mortality and fertility rates from 2015 at each age throughout their life, in a female closed population):
 
 ```{r, fig.height=6, fig.width=8}
 library(DemoKin)
-swe50_2015_stable <- kins(ego_age = 50, year = 2015,
-                             P = swe_surv, asfr = swe_asfr,
-                             stable = TRUE)
+swe50_2015_stable <- kin(U = swe_surv, f = swe_asfr, ego_year = 2015, stable = TRUE)
 ```
 
-Where *P* is the survival ratio by age from a life table and *asfr* are the age specific fertility ratios by age (simple ages allowed at the moment). A network-diagram shows expected living kins for Ego:
+Where *U* is the survival ratio by age from a life table and *f* are the age specific fertility ratios by age (simple ages allowed at the moment). A network-diagram shows expected living kins for Ego, for example at age 35:
 
 ```{r}
-plot_diagram(swe50_2015_stable[["kins_total"]])
+plot_diagram(swe50_2015_stable[["kin_summary"]] %>% 
+               filter(age_ego == 35) %>% 
+                select(kin, count))
 ```
 
 For more details, including an extension to non-stable populations and relative´s death distribution, see `vignette("Use")`.
@@ -95,6 +95,4 @@ Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation and the fr
 
 ## Next steps:
 
-- Improve performance of `kins_non_stable` function (takes ~ 5 min).
-- Add more functionalities to the diagram, like colors by kin degree and box size weighted by kin amount.
-- Add stage properties as in Caswell (2020). 
+...

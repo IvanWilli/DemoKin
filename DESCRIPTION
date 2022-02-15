@@ -1,6 +1,6 @@
 Package: DemoKin
-Title: Estimates of kins by age and type.
-Description: What the package does (one paragraph).
+Title: Demokin
+Description: Estimate kin counts for stable and non stable populations
 Version: 0.0.0.9000
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),

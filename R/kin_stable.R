@@ -6,7 +6,7 @@
 #' @param f numeric. A vector of age-specific fertility rates.
 #' @param birth_female numeric. Female portion at birth.
 #' @param pi numeric. For using the non-stable distribution of childbearing. Default `NULL`.
-#' @param selected_kins character. Kins to return: "m" for mother, "d" for daughter,...
+#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
 #' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
 #' @param list_output logical. Want kin results as a list. Default `FALSE`
 #'
@@ -14,10 +14,10 @@
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
-kins_stable <- function(U = NULL, f = NULL,
+kin_stable <- function(U = NULL, f = NULL,
                         birth_female = 1/2.04,
                         pi = NULL,
-                        selected_kins = NULL,
+                        selected_kin = NULL,
                         pi_stable = FALSE,
                         list_output = FALSE){
 
@@ -90,15 +90,15 @@ kins_stable <- function(U = NULL, f = NULL,
   }
 
   # get results
-  kins_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
+  kin_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
-  # only selected kins
-  if(!is.null(selected_kins)){
-    kins_list <- kins_list %>% keep(names(.) %in% selected_kins)
+  # only selected kin
+  if(!is.null(selected_kin)){
+    kin_list <- kin_list %>% keep(names(.) %in% selected_kin)
   }
 
-  kins <- map2(kins_list, names(kins_list),
+  kin <- map2(kin_list, names(kin_list),
                function(x,y){
                     out = as.data.frame(x)
                     colnames(out) = age
@@ -113,12 +113,12 @@ kins_stable <- function(U = NULL, f = NULL,
               reduce(rbind)
 
   if(pi_stable){
-    out <- list(kins=kins, pi_stable=pi)
+    out <- list(kin=kin, pi_stable=pi)
   }else{
-    out <- kins
+    out <- kin
   }
 
-  if(list_output) out <- kins_list
+  if(list_output) out <- kin_list
 
   return(out)
 }
