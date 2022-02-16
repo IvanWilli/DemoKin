@@ -126,7 +126,7 @@ swe35_2015_nonstable <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, stable=FALS
 swe35_2015_nonstable$kin_summary %>%
   filter(alive =="no") %>%
   ggplot() +
-  geom_line(aes(age_ego, total_cum, color=cohort))  +
+  geom_line(aes(age_ego, count_cum, color=cohort))  +
   theme_bw() +
   facet_wrap(~kin,scales="free")
 ```
@@ -136,7 +136,7 @@ Given some portion of each realtive was dead (remember we are talking about popu
 ```{r}
 swe35_2015_nonstable$kin_summary %>% 
   filter(alive=="no", age_ego == 50) %>% 
-  select(kin,total_cum,mean_age_lost) %>% 
+  select(kin,count_cum,mean_age_lost) %>% 
   kable()
 ```
 

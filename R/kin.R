@@ -83,10 +83,10 @@ kin <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
       summarise(count = sum(total)) %>%
       ungroup() %>%
       group_by(cohort, kin, alive) %>%
-      mutate(total_cum = cumsum(count),
+      mutate(count_cum = cumsum(count),
              mean_age_lost = cumsum(count*age_ego)/cumsum(count)) %>%
       ungroup()
-    kin_out <- list(kin=kin_full, kin_summary=kin_summary)
+    kin_out <- list(kin_full=kin_full, kin_summary=kin_summary)
   }
   return(kin_out)
 }
