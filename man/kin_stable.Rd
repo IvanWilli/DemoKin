@@ -30,7 +30,7 @@ kin_stable(
 \item{list_output}{logical. Want kin results as a list. Default \code{FALSE}}
 }
 \value{
-A data frame with ego´s age, related ages and type of kin
+A data frame with focal´s age, related ages and type of kin
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
 }
 \description{

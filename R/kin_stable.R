@@ -10,7 +10,7 @@
 #' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
 #' @param list_output logical. Want kin results as a list. Default `FALSE`
 #'
-#' @return A data frame with ego´s age, related ages and type of kin
+#' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
@@ -106,8 +106,8 @@ kin_stable <- function(U = NULL, f = NULL,
                       mutate(kin = y,
                              age_kin = rep(age,2),
                              alive = c(rep("yes",ages), rep("no",ages))) %>%
-                      gather(age_ego,count,-age_kin, -kin, -alive) %>%
-                      mutate(age_ego = as.integer(age_ego))
+                      gather(age_focal,count,-age_kin, -kin, -alive) %>%
+                      mutate(age_focal = as.integer(age_focal))
                     }
                ) %>%
               reduce(rbind)

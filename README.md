@@ -23,8 +23,8 @@ devtools::install_github("IvanWilli/DemoKin")
 ## Example
 
 Consider an average Swedish woman in year 2015, called more generally
-Ego. The types of Ego’s relatives included in this package follows this
-abbreviation list:
+focal. The types of focal’s relatives included in this package follows
+this abbreviation list:
 
 | Code | Relative                                   |
 | :--- | :----------------------------------------- |
@@ -50,17 +50,17 @@ population):
 
 ``` r
 library(DemoKin)
-swe50_2015_stable <- kin(U = swe_surv, f = swe_asfr, ego_year = 2015, stable = TRUE)
+swe50_2015_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 2015, stable = TRUE)
 ```
 
 Where *U* is the survival ratio by age from a life table and *f* are the
 age specific fertility ratios by age (simple ages allowed at the
-moment). A network-diagram shows expected living kins for Ego, for
+moment). A network-diagram shows expected living kins for focal, for
 example at age 35:
 
 ``` r
 plot_diagram(swe50_2015_stable[["kin_summary"]] %>% 
-               filter(age_ego == 35) %>% 
+               filter(age_focal == 35) %>% 
                 select(kin, count))
 ```
 

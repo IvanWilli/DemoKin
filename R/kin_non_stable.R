@@ -6,18 +6,18 @@
 #' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
 #' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
 #' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
-#' @param ego_cohort integer. Year of birth of ego. Could be a vector. Should be within input data years range.
-#' @param ego_year integer. Year of ego. Could be a vector. Should be within input data years range.
+#' @param focal_cohort integer. Year of birth of focal. Could be a vector. Should be within input data years range.
+#' @param focal_year integer. Year of focal. Could be a vector. Should be within input data years range.
 #' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
 #' @param birth_female numeric. Female portion at birth.
 #' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
 #'
-#' @return A data frame with ego´s age, related ages and type of kin
+#' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
 kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
-                            ego_cohort = NULL, ego_year = NULL, selected_kin = NULL,
+                            focal_cohort = NULL, focal_year = NULL, selected_kin = NULL,
                             birth_female = 1/2.04,
                             Pb = FALSE){
 
@@ -86,15 +86,15 @@ kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
 
   # filter years and kin that were selected
   names(kin_all) <- as.character(years_data)
-  if(!is.null(ego_cohort)){
-    selected_cohorts_year_age <- data.frame(age = rep(age,length(ego_cohort)),
-                                            year = map(ego_cohort,.f = ~.x+age) %>%
+  if(!is.null(focal_cohort)){
+    selected_cohorts_year_age <- data.frame(age = rep(age,length(focal_cohort)),
+                                            year = map(focal_cohort,.f = ~.x+age) %>%
                                               unlist(use.names = F))
   }else{selected_cohorts_year_age <- c()}
-  if(!is.null(ego_year)){selected_years_age <- expand.grid(age, ego_year) %>% rename(age=1,year=2)
+  if(!is.null(focal_year)){selected_years_age <- expand.grid(age, focal_year) %>% rename(age=1,year=2)
   }else{selected_years_age <- c()}
-  if(is.null(ego_year) & is.null(ego_cohort)){
-    ego_year = years_data
+  if(is.null(focal_year) & is.null(focal_cohort)){
+    focal_year = years_data
   }
   out_selected <- bind_rows(selected_years_age,selected_cohorts_year_age) %>% distinct()
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
@@ -120,11 +120,11 @@ kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
                         .before=everything())) %>%
       bind_rows() %>%
       setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
-      gather(age_ego, count,-age_kin, -kin, -year, -alive) %>%
-      mutate(age_ego = as.integer(age_ego),
+      gather(age_focal, count,-age_kin, -kin, -year, -alive) %>%
+      mutate(age_focal = as.integer(age_focal),
              year = as.integer(year),
-             cohort = year - age_ego) %>%
-      filter(age_ego %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
+             cohort = year - age_focal) %>%
+      filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
     bind_rows()
   return(kin)
 }

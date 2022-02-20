@@ -6,7 +6,7 @@ library(DemoKin)
 
 # cohort
 swe_kin_cohorts <- kin(U = U_caswell_2021, f = f_caswell_2021, pi = pi_caswell_2021, stable = F,birth_female = 1,
-                ego_cohort = c(1891,1911,1931,1951,1971,2011,2041),
+                focal_cohort = c(1891,1911,1931,1951,1971,2011,2041),
                 selected_kin = c("d","gd","ggd","m","gm","ggm"))
 swe_kin_cohorts$kin_summary %>%
   ggplot(aes(year,count,color=factor(cohort))) +
@@ -18,11 +18,11 @@ swe_kin_cohorts$kin_summary %>%
 
 # period
 swe_kin_period <- kin(U = U_caswell_2021, f = f_caswell_2021, pi = pi_caswell_2021, stable = F, birth_female = 1,
-                 ego_year = c(1891,1921,1951,2010,2050,2080,2120),
+                 focal_year = c(1891,1921,1951,2010,2050,2080,2120),
                  selected_kin = c("d","gd","ggd","m","gm","ggm","os","ys","oa","ya"))
 
 swe_kin_period$kin_summary %>%
-  ggplot(aes(age_ego,count,color=factor(year))) +
+  ggplot(aes(age_focal,count,color=factor(year))) +
   geom_line(size=1)+
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   facet_wrap(~kin, scales = "free")+
@@ -40,7 +40,7 @@ ggplot(swe_kin_cohorts$kin_summary %>% filter(cohort == 1911),
   labs(title = "Kin cohort 1911")
 
 swe_kin_period$kin_summary %>%
-  filter(age_ego==50) %>%
+  filter(age_focal==50) %>%
   ggplot(aes(year, mean_age, color=kin)) +
   geom_point(aes(size=count)) +
   geom_line() +

@@ -14,25 +14,26 @@ devtools::load_all()
 library(tidyverse)
 library(DiagrammeR)
 library(knitr)
+library(igraph)
 ```
 
-The year is 1995 and Ego is 35 years old. Ego and her relatives have all lived in Sweden. 
-We would like to know how many female relatives Ego has in 1995, their mean age and the number of living kin at each age of Ego. Finally, we would like to know at which age she had to suffer a death in average.
+The year is 1995 and focal is 35 years old. Focal and her relatives have all lived in Sweden. 
+We would like to know how many female relatives focal has in 1995, their mean age and the number of living kin at each age of focal. Finally, we would like to know at which age she had to suffer a death in average.
 
 ## Kin counts in stable populations
 
-We can estimate this in a **stable** framework using data from 1995, assuming that all of Egos' relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
+We can estimate this in a **stable** framework using data from 1995, assuming that all of focal's relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
 
 ```{r}
-swe35_2015_stable <- kin(U = swe_surv, f = swe_asfr, ego_year = 1995, stable = TRUE)
+swe35_2015_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1995, stable = TRUE)
 ```
 
-Let's visualize the distribution of relatives over ego's lifecourse:
+Let's visualize the distribution of relatives over focal's lifecourse:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_stable[["kin_summary"]] %>%
               ggplot() +
-              geom_line(aes(age_ego, count))  +
+              geom_line(aes(age_focal, count))  +
               geom_vline(xintercept = 35, color=2)+
               theme_bw() +
               facet_wrap(~kin)
@@ -62,31 +63,31 @@ data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% 
 
 ```
 
-We can also visualize the age distribution of relatives when Ego is 35:
+We can also visualize the age distribution of relatives when focal is 35:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_stable[["kin_full"]] %>%
-              filter(age_ego == 35) %>% 
+              filter(age_focal == 35) %>% 
               ggplot() +
               geom_line(aes(age_kin, count))  +
               theme_bw() +
               facet_wrap(~kin)
 ```
 
-The function also includes data on the mean age of Ego's relatives at her actual age:
+The function also includes data on the mean age of focal's relatives at her actual age:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_stable[["kin_summary"]] %>% 
-  filter(age_ego == 35) %>% 
+  filter(age_focal == 35) %>% 
   select(kin, count, mean_age, sd_age) %>% 
   kable()
 ```
 
-We can visualize the estimated kin counts for Ego at age 35 in a stable population using a network diagram:
+We can visualize the estimated kin counts for focal at age 35 in a stable population using a network diagram:
 
-```{r, fig.height=10, fig.width=12}
+```{r}
 kin_total <- swe35_2015_stable[["kin_summary"]] %>% 
-                filter(age_ego == 35) %>% 
+                filter(age_focal == 35) %>% 
                 select(kin, count)
 plot_diagram(kin_total)
 ```
@@ -94,17 +95,17 @@ plot_diagram(kin_total)
 
 ## Kin counts in non-stable populations
 
-The population of Sweden is, in reality, **non-stable**, and Ego' relatives have been expossed to changing mortality and fertility rates.
-To account for this, is needed estimattions of kin counts in population with time-variant demographic rates. For this we adapted Matlab´s code from Caswell (2021). Let's take a look at the resulting kin counts at Ego's age 35 using empirical single-year mortality and fertility rates as input:
+The population of Sweden is, in reality, **non-stable**, and focal' relatives have been expossed to changing mortality and fertility rates.
+To account for this, is needed estimattions of kin counts in population with time-variant demographic rates. For this we adapted Matlab´s code from Caswell (2021). Let's take a look at the resulting kin counts at focal's age 35 using empirical single-year mortality and fertility rates as input:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_nonstable <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, stable=FALSE,
-                                    ego_cohort = 1960,
+                                    focal_cohort = 1960,
                                     selected_kin = c("d","gd","ggd","m","gm","ggm"))
 
 swe35_2015_nonstable$kin_full %>%
-  group_by(kin, cohort, age_ego) %>% summarise(count = sum(count)) %>%
-  ggplot(aes(age_ego,count,color=factor(cohort))) +
+  group_by(kin, cohort, age_focal) %>% summarise(count = sum(count)) %>%
+  ggplot(aes(age_focal,count,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   geom_line(size=1,color=1)+
   geom_vline(xintercept = 35, color=2)+
@@ -115,18 +116,18 @@ swe35_2015_nonstable$kin_full %>%
 
 ## Death Experience
 
-Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see how many relatives Ego loss during her life (output `kin_death_by_age_ego`), in a stable framework:
+Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see how many relatives focal loss during her life (output `kin_death_by_age_focal`), in a stable framework:
 
 ```{r, fig.height=6, fig.width=8}
 swe35_2015_nonstable <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, stable=FALSE,
-                                    ego_cohort = 1900,
+                                    focal_cohort = 1900,
                                     selected_kin = c("d","gd","ggd","m","gm","ggm"),
                              living = FALSE)
 
 swe35_2015_nonstable$kin_summary %>%
   filter(alive =="no") %>%
   ggplot() +
-  geom_line(aes(age_ego, count_cum, color=cohort))  +
+  geom_line(aes(age_focal, count_cum, color=cohort))  +
   theme_bw() +
   facet_wrap(~kin,scales="free")
 ```
@@ -135,7 +136,7 @@ Given some portion of each realtive was dead (remember we are talking about popu
 
 ```{r}
 swe35_2015_nonstable$kin_summary %>% 
-  filter(alive=="no", age_ego == 50) %>% 
+  filter(alive=="no", age_focal == 50) %>% 
   select(kin,count_cum,mean_age_lost) %>% 
   kable()
 ```

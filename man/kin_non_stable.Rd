@@ -9,8 +9,8 @@ kin_non_stable(
   f = NULL,
   N = NULL,
   pi = NULL,
-  ego_cohort = NULL,
-  ego_year = NULL,
+  focal_cohort = NULL,
+  focal_year = NULL,
   selected_kin = NULL,
   birth_female = 1/2.04,
   Pb = FALSE
@@ -25,9 +25,9 @@ kin_non_stable(
 
 \item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{ego_cohort}{integer. Year of birth of ego. Could be a vector. Should be within input data years range.}
+\item{focal_cohort}{integer. Year of birth of focal. Could be a vector. Should be within input data years range.}
 
-\item{ego_year}{integer. Year of ego. Could be a vector. Should be within input data years range.}
+\item{focal_year}{integer. Year of focal. Could be a vector. Should be within input data years range.}
 
 \item{selected_kin}{character. kin to return: "m" for mother, "d" for daughter,...}
 
@@ -36,7 +36,7 @@ kin_non_stable(
 \item{Pb}{logic. Is given Pb as the first row in P?. If not, takes \code{P(0,1)} as \code{P(b,1)}. Useful for fertility matrix first row. Default \code{FALSE}.}
 }
 \value{
-A data frame with ego´s age, related ages and type of kin
+A data frame with focal´s age, related ages and type of kin
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
 }
 \description{

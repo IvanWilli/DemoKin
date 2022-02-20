@@ -10,8 +10,8 @@ kin(
   N = NULL,
   pi = NULL,
   stable = TRUE,
-  ego_cohort = NULL,
-  ego_year = NULL,
+  focal_cohort = NULL,
+  focal_year = NULL,
   selected_kin = NULL,
   birth_female = 1/2.04,
   Pb = FALSE,
@@ -27,11 +27,11 @@ kin(
 
 \item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
 
-\item{stable}{logical. Stable assumption given \code{year} rates, taking ego_year in case is U and f are matrix.}
+\item{stable}{logical. Stable assumption given \code{year} rates, taking focal_year in case is U and f are matrix.}
 
-\item{ego_cohort}{integer. Year of birth of ego. Could be a vector. Should be within input data years range.}
+\item{focal_cohort}{integer. Year of birth of focal. Could be a vector. Should be within input data years range.}
 
-\item{ego_year}{integer. Year of ego. Could be a vector. Should be within input data years range.}
+\item{focal_year}{integer. Year of focal. Could be a vector. Should be within input data years range.}
 
 \item{selected_kin}{character. kin to return: "m" for mother, "d" for daughter,...}
 
@@ -44,11 +44,11 @@ kin(
 \value{
 A list with:
 \itemize{
-\item \code{kin}: a data frame with ego´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.). The content (living or deaths) dependes on \code{alive} param.
-\item A data frame with kin at each age of ego´s life. The content (living or deaths) dependes on \code{alive} param.
-\item A data frame with kin at actual age of ego. The content (living or deaths) dependes on \code{alive} param.
-\item Mean age of each type of kin at actual age of ego.  The content (living or deaths) dependes on \code{alive} param.
-\item Total of each type of kin at actual age of ego.  The content (living or deaths) dependes on \code{alive} param.
+\item \code{kin}: a data frame with focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.). The content (living or deaths) dependes on \code{alive} param.
+\item A data frame with kin at each age of focal´s life. The content (living or deaths) dependes on \code{alive} param.
+\item A data frame with kin at actual age of focal. The content (living or deaths) dependes on \code{alive} param.
+\item Mean age of each type of kin at actual age of focal.  The content (living or deaths) dependes on \code{alive} param.
+\item Total of each type of kin at actual age of focal.  The content (living or deaths) dependes on \code{alive} param.
 }
 }
 \description{
@@ -58,17 +58,17 @@ Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
 See Caswell (2019) and Caswell (2021) for details on formulas.
 }
 \examples{
-# If ego is 30 years old and lives in 1950. How much live kin would have if
+# If focal is 30 years old and lives in 1950. How much live kin would have if
 # her relatives would experience mortality and fertility in that calendar year?
 \dontrun{
-swe30_1950_stable <- kin(U = swe_surv, f = swe_asfr, ego_year = 1950, stable = TRUE,selected_kin = c("m","gm"))
+swe30_1950_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1950, stable = TRUE,selected_kin = c("m","gm"))
 # How much live mothers and grandmothers would have if her relatives would experience
 # mortality and fertility at each observed year?
 swe30_1950_nonstable <- kin(U = swe_surv, f = swe_asfr,N = swe_pop,
-                             stable = FALSE, ego_year = 1950, selected_kin = c("m","gm"))
+                             stable = FALSE, focal_year = 1950, selected_kin = c("m","gm"))
 # Difference in total by kin:
-swe30_1950_stable$kin_by_age_ego \%>\% filter(age_ego==30) \%>\% select(kin, total)
-swe30_1950_nonstable$kin_by_age_ego \%>\% filter(age_ego==30) \%>\% select(kin, total)
+swe30_1950_stable$kin_by_age_focal \%>\% filter(age_focal==30) \%>\% select(kin, total)
+swe30_1950_nonstable$kin_by_age_focal \%>\% filter(age_focal==30) \%>\% select(kin, total)
 }
 
 }
