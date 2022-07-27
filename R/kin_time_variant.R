@@ -1,57 +1,40 @@
-#' Estimate kin counts in a non stable framework
+#' Estimate kin counts in a time variant framework
 
-#' @description Implementation of non-stable Goodman-Keyfitz-Pullum equations based on Caswell (2021).
+#' @description Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).
 #'
-#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
-#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
-#' @param focal_cohort integer. Year of birth of focal. Could be a vector. Should be within input data years range.
-#' @param focal_year integer. Year of focal. Could be a vector. Should be within input data years range.
-#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
+#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.
+#' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. Coincident with `U`.
+#' @param N numeric. A matrix of population with rows as ages and columns as years. Coincident with `U`.
+#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with `U`.
+#' @param output_cohort integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.
+#' @param output_period integer. Year of focal to return as output. Could be a vector. Should be within input data years range.
+#' @param output_kin character. kin to return as output: "m" for mother, "d" for daughter,... See `vignette` for exahustive kin.
 #' @param birth_female numeric. Female portion at birth.
-#' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
 #'
 #' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
 #' @export
 
-kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
-                            focal_cohort = NULL, focal_year = NULL, selected_kin = NULL,
-                            birth_female = 1/2.04,
-                            Pb = FALSE){
+kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
+                            output_cohort = NULL, output_period = NULL, output_kin = NULL,
+                            birth_female = 1/2.04){
 
   # check input
-  stopifnot(!is.null(U)&!is.null(f)&any(!is.null(N)|!is.null(pi)))
+  if(is.null(U) | is.null(f)) stop("You need values on U and/or f.")
 
   # diff years
-  if(!any(as.integer(colnames(U))==as.integer(colnames(f))))stop("Data should be from same years.")
+  if(!any(as.integer(colnames(U)) == as.integer(colnames(f)))) stop("Data should be from same years.")
 
-  # data should be from consequtive years
-  years_data = as.integer(colnames(U))
-  if(any(diff(years_data)!=1))stop("Data should be for consecutive years.")
+  # data should be from same interval years
+  years_data <- as.integer(colnames(U))
+  if(var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
 
-  # half year and half age
+  # utils
   age          <- 0:(nrow(U)-1)
   n_years_data <- length(years_data)
   ages         <- length(age)
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
-  if(Pb){
-    stopifnot(length(years_data)==ncol(Pb))
-  }else{
-    Pb = U[1,]
-  }
-
-  # age distribution at childborn
-  if(is.null(pi)){
-    if(is.null(N)){
-      stop("You need data on pi or N.")
-    }else{
-      pi <- rbind(t(t(N * f)/colSums(N * f)),
-                  matrix(0,ages,length(years_data)))
-    }
-  }
 
   # get lists of matrix
   Ul = fl = list()
@@ -62,46 +45,69 @@ kin_non_stable <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
     diag(Mt) = 1 - U[,t]
     Ul[[as.character(years_data[t])]] <- rbind(cbind(Ut,zeros),cbind(Mt,Dcum))
     ft = matrix(0, nrow=ages*2, ncol=ages*2)
-    ft[1,1:ages] = f[,t] * birth_female * (1+U[,t])/2 * as.numeric(Pb[t])
+    ft[1,1:ages] = f[,t] * birth_female
     fl[[as.character(years_data[t])]] <- ft
   }
   U <- Ul
   f <- fl
 
+  # age distribution at childborn
+  if(is.null(pi)){
+    if(is.null(N)){
+      # create pi and fill it during the loop
+      message("Stable assumption was made for calculating pi on each year because no input data.")
+      pi <- matrix(0, nrow=ages, ncol=n_years_data)
+    }else{
+      pi <- rbind(t(t(N * f)/colSums(N * f)), matrix(0,ages,length(years_data)))
+    }
+  }
+
   # loop over years (more performance here)
   kin_all <- list()
+  pb <- progress_bar$new(
+    format = "Running over input years [:bar] :percent",
+    total = n_years_data, clear = FALSE, width = 60)
   for (iyear in 1:n_years_data){
     # print(iyear)
-    Ut <- as.matrix(U[[iyear]]);
-    ft <- as.matrix(f[[iyear]]);
-    pit <- pi[,iyear];
+    Ut <- as.matrix(U[[iyear]])
+    ft <- as.matrix(f[[iyear]])
+    if(is.null(pi)){
+      A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
+      A_decomp = eigen(A)
+      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+      pit <- pi[,iyear] <- w*A[1,]/sum(w*A[1,])
+    }else{
+      pit <- pi[,iyear]
+    }
     if (iyear==1){
       U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_stable(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
+      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
     }
     kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
+    pb$tick()
   }
 
   # filter years and kin that were selected
   names(kin_all) <- as.character(years_data)
-  if(!is.null(focal_cohort)){
-    selected_cohorts_year_age <- data.frame(age = rep(age,length(focal_cohort)),
-                                            year = map(focal_cohort,.f = ~.x+age) %>%
+  if(!is.null(output_cohort)){
+    selected_cohorts_year_age <- data.frame(age = rep(age,length(output_cohort)),
+                                            year = map(output_cohort,.f = ~.x+age) %>%
                                               unlist(use.names = F))
   }else{selected_cohorts_year_age <- c()}
-  if(!is.null(focal_year)){selected_years_age <- expand.grid(age, focal_year) %>% rename(age=1,year=2)
+  if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% rename(age=1,year=2)
   }else{selected_years_age <- c()}
-  if(is.null(focal_year) & is.null(focal_cohort)){
-    focal_year = years_data
+  if(is.null(output_period) & is.null(output_cohort)){
+    message("No specific output was set. Return all period data.")
+    output_period <- years_data
   }
   out_selected <- bind_rows(selected_years_age,selected_cohorts_year_age) %>% distinct()
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
-  if(is.null(selected_kin)){
+  if(is.null(output_kin)){
     selected_kin_position <- 1:length(possible_kin)
   }else{
-    selected_kin_position <- which(possible_kin %in% selected_kin)
+    selected_kin_position <- which(possible_kin %in% output_kin)
   }
 
   # first filter

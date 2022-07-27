@@ -2,17 +2,16 @@
 
 #' @description Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
 #' @details See Caswell (2019) and Caswell (2021) for details on formulas.
-#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
-#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
-#' @param focal_cohort integer. Year of birth of focal. Could be a vector. Should be within input data years range.
-#' @param focal_year integer. Year of focal. Could be a vector. Should be within input data years range.
-#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
+#' @param U numeric. A vector or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
+#' @param f numeric. Same as U but for fertility rates.
+#' @param time_invariant logical. Constant assumption for a given `year` rates.
+#' @param N numeric. Same as U but for population distribution (counts or `%`). Optional.
+#' @param pi numeric. Same as U but for childbearing distribution (sum to 1). Optional.
+#' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
+#' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
+#' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
 #' @param birth_female numeric. Female portion at birth.
-#' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
-#' @param stable logical. Stable assumption given `year` rates, taking focal_year in case is U and f are matrix.
-#' @param living logial. Only living kin counts `TRUE`, or including death kin `FALSE`.
+#' @param living logical. Only living kin counts `TRUE`, or including death kin `FALSE`.
 #' @return A list with:
 #'  * `kin`: a data frame with focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.). The content (living or deaths) dependes on `alive` param.
 #'  * A data frame with kin at each age of focal´s life. The content (living or deaths) dependes on `alive` param.
@@ -35,33 +34,43 @@
 #' }
 #'
 # get kin ----------------------------------------------------------------
-kin <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
-                 stable = TRUE,
-                 focal_cohort = NULL, focal_year = NULL, selected_kin=NULL,
+kin <- function(U = NULL, f = NULL,
+                 time_invariant = TRUE,
+                 N = NULL, pi = NULL,
+                 output_cohort = NULL, output_period = NULL, output_kin=NULL,
                  birth_female = 1/2.04,
-                 Pb = FALSE,
                  living = TRUE)
   {
 
-  age = as.integer(rownames(U))
-  years_data = as.integer(colnames(U))
+  age <- as.integer(rownames(U))
+  years_data <- as.integer(colnames(U))
 
-  # if stable or not
-  if(stable){
-      if(!is.vector(U)) {
-        U = U[,as.character(focal_year)]
-        f = f[,as.character(focal_year)]
-      }
-      kin_full <- kin_stable(U = U, f = f, selected_kin=selected_kin, birth_female = birth_female) %>%
-        mutate(cohort = 0, year = 0)
+  # kin to return
+  all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+  if(is.null(output_kin)){
+    output_kin <- all_possible_kin
   }else{
-      kin_full <- kin_non_stable(U = U, f = f, N = N, pi = pi,
-                              focal_cohort = focal_cohort, focal_year = focal_year,
-                              selected_kin=selected_kin,
-                              birth_female = birth_female,
-                              Pb = Pb)
+    output_kin <- match.arg(tolower(output_kin), all_possible_kin, several.ok = TRUE)
+  }
+
+  # if time dependent or not
+  if(time_invariant){
+      if(!is.vector(U)) {
+        focal_year <- min(years_data)
+        U <- U[,as.character(focal_year)]
+        f <- f[,as.character(focal_year)]
+      }
+      kin_full <- kin_time_invariant(U = U, f = f,
+                                     output_kin = output_kin, birth_female = birth_female) %>%
+                              mutate(cohort = NA, year = NA)
+  }else{
+      kin_full <- kin_time_variant(U = U, f = f, N = N, pi = pi,
+                              output_cohort = output_cohort, output_period = output_period,
+                              output_kin = output_kin,
+                              birth_female = birth_female)
       message(paste0("Assuming stable population before ", min(years_data), "."))
   }
+
   # reorder
   kin_full <- kin_full %>% select(year, cohort, age_focal, kin, age_kin, alive, count)
 

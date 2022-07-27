@@ -1,13 +1,37 @@
 # replicating Caswell´s figures: choose some kin
 
+library(devtools)
+load_all()
 library(DemoKin)
+library(tidyverse)
+
+#time invariant
+
+# Caswell's assumption on time invariant !!!!!!!!!!!!!!!!!!!!!!
+ft[1,1:ages] = f * U * birth_female
+
+swe_surv_2010 <- swe_surv %>% pull(`2011`)
+swe_asfr_2010 <- swe_asfr %>% pull(`2011`)
+debugonce(kin)
+swe50_2015_stable <- kin(U = swe_surv_2010, f = swe_asfr_2010, output_cohort = c(1911,1930),
+                         output_kin = c("d","m"))
+
+swe_kin_cohorts <- kin(U = U_caswell_2021, f = f_caswell_2021, time_invariant = F,
+                       birth_female = 1,
+                       output_cohort = c(1911),
+                       output_kin = c("d"))
+
+U = U_caswell_2021; f = f_caswell_2021; pi = pi_caswell_2021; birth_female = 1;
+output_cohort = c(1911);output_period = NULL; output_kin = c("d")
 
 # FIGURE 5
 
 # cohort
-swe_kin_cohorts <- kin(U = U_caswell_2021, f = f_caswell_2021, pi = pi_caswell_2021, stable = F,birth_female = 1,
-                focal_cohort = c(1891,1911,1931,1951,1971,2011,2041),
-                selected_kin = c("d","gd","ggd","m","gm","ggm"))
+swe_kin_cohorts <- kin(U = U_caswell_2021, f = f_caswell_2021, pi = pi_caswell_2021, time_invariant = F,
+                       birth_female = 1,
+                output_cohort = c(1891,1911,1931,1951,1971,2011,2041),
+                output_kin = c("d","gd","ggd","m","gm","ggm"))
+
 swe_kin_cohorts$kin_summary %>%
   ggplot(aes(year,count,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
