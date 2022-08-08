@@ -14,27 +14,29 @@ devtools::load_all()
 library(tidyverse)
 library(DiagrammeR)
 library(knitr)
+library(progress)
 library(igraph)
 ```
 
-The year is 1995 and focal is 35 years old. Focal and her relatives have all lived in Sweden. 
-We would like to know how many female relatives focal has in 1995, their mean age and the number of living kin at each age of focal. Finally, we would like to know at which age she had to suffer a death in average.
+The year is 2015 and focal is 35 years old. Focal and her relatives have all lived in Sweden. 
+We would like to know how many female relatives focal has in 2015, their mean age and the number of living kin at each age of focal. Finally, we would like to know at which age she had to suffer a death in average.
 
-## Kin counts in stable populations
+## Kin counts with time invariant rates
 
-We can estimate this in a **stable** framework using data from 1995, assuming that all of focal's relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, for survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
+We can estimate this in a **stable** framework using data from 2015, assuming that all of focal's relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, matrix of age by year, with survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
 
 ```{r}
-swe35_2015_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1995, stable = TRUE)
+swe_surv_2015 <- swe_surv[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
+swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 Let's visualize the distribution of relatives over focal's lifecourse:
 
 ```{r, fig.height=6, fig.width=8}
-swe35_2015_stable[["kin_summary"]] %>%
+swe_2015[["kin_summary"]] %>%
               ggplot() +
               geom_line(aes(age_focal, count))  +
-              geom_vline(xintercept = 35, color=2)+
               theme_bw() +
               facet_wrap(~kin)
 ```
@@ -63,10 +65,10 @@ data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% 
 
 ```
 
-We can also visualize the age distribution of relatives when focal is 35:
+We can also visualize the age distribution of relatives when focal is 35 for example:
 
 ```{r, fig.height=6, fig.width=8}
-swe35_2015_stable[["kin_full"]] %>%
+swe_2015[["kin_full"]] %>%
               filter(age_focal == 35) %>% 
               ggplot() +
               geom_line(aes(age_kin, count))  +
@@ -74,36 +76,42 @@ swe35_2015_stable[["kin_full"]] %>%
               facet_wrap(~kin)
 ```
 
-The function also includes data on the mean age of focal's relatives at her actual age:
+The function assumes that fertility input:
+- is for both sex. In case is only for one you need to set `birth_female = 1`.
+- considers *effective* births. This is important in the case you are using survival rates ($S_x$) instead of probabilities ($p_x$). In the case your are using survival and you do not want all new born survives to truncated age 0 (it means $P_b=1$ in life table notation), fertility rates must consider this risk already. This should be done for example in the previous case, using as input `swe_asfr * $P_b$` for fertility. In the case of probabilities newborn would have 0 exact age, and no additional risk must be considered,
+
+The function also includes a summary output with the count of living kin, mean and standard devaition of kin age, by type of kin, for each focal's age:
 
 ```{r, fig.height=6, fig.width=8}
-swe35_2015_stable[["kin_summary"]] %>% 
+swe_2015[["kin_summary"]] %>% 
   filter(age_focal == 35) %>% 
   select(kin, count, mean_age, sd_age) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
   kable()
 ```
 
-We can visualize the estimated kin counts for focal at age 35 in a stable population using a network diagram:
+We can visualize the estimated kin counts by kin using a network diagram. Folloing with the age 35:
 
 ```{r}
-kin_total <- swe35_2015_stable[["kin_summary"]] %>% 
+swe_2015_age35 <- swe_2015[["kin_summary"]] %>% 
                 filter(age_focal == 35) %>% 
                 select(kin, count)
-plot_diagram(kin_total)
+plot_diagram(swe_2015_age35)
 ```
 
 
-## Kin counts in non-stable populations
 
-The population of Sweden is, in reality, **non-stable**, and focal' relatives have been expossed to changing mortality and fertility rates.
-To account for this, is needed estimattions of kin counts in population with time-variant demographic rates. For this we adapted Matlab´s code from Caswell (2021). Let's take a look at the resulting kin counts at focal's age 35 using empirical single-year mortality and fertility rates as input:
+## Kin counts with time varying rates
+
+The demographic risks of population of Sweden is, in reality, changin every year, and focal relatives have been expossed to changing mortality and fertility rates.
+To account for this, is needed estimations of kin counts in population with time-variant demographic rates. Let's take a look at the resulting kin counts for 1960 cohort:
 
 ```{r, fig.height=6, fig.width=8}
-swe35_2015_nonstable <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, stable=FALSE,
-                                    focal_cohort = 1960,
-                                    selected_kin = c("d","gd","ggd","m","gm","ggm"))
+swe_2015_time_varying <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, time_invariant =FALSE,
+                                    output_cohort = 1960,
+                                    output_kin = c("d","gd","ggd","m","gm","ggm"))
 
-swe35_2015_nonstable$kin_full %>%
+swe_2015_time_varying$kin_full %>%
   group_by(kin, cohort, age_focal) %>% summarise(count = sum(count)) %>%
   ggplot(aes(age_focal,count,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
@@ -114,30 +122,33 @@ swe35_2015_nonstable$kin_full %>%
 
 ```
 
+As you see the estimates stop at age 55, because no data is after 2015.
+
 ## Death Experience
 
-Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see how many relatives focal loss during her life (output `kin_death_by_age_focal`), in a stable framework:
+Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see for a focal from 1900 cohort how many relatives loss during her life (output `kin_death_by_age_focal`):
 
 ```{r, fig.height=6, fig.width=8}
-swe35_2015_nonstable <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, stable=FALSE,
-                                    focal_cohort = 1900,
-                                    selected_kin = c("d","gd","ggd","m","gm","ggm"),
+swe_1900_time_varying <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, time_invariant = FALSE,
+                                    output_cohort = 1900,
+                                    output_kin = c("d","gd","ggd","m","gm","ggm"),
                              living = FALSE)
 
-swe35_2015_nonstable$kin_summary %>%
+swe_1900_time_varying$kin_summary %>%
   filter(alive =="no") %>%
   ggplot() +
-  geom_line(aes(age_focal, count_cum, color=cohort))  +
+  geom_line(aes(age_focal, count_cum))  +
   theme_bw() +
   facet_wrap(~kin,scales="free")
 ```
 
-Given some portion of each realtive was dead (remember we are talking about population measures), we can ask what was the mean age at lost for each kin:
+Given some portion of each relative was dead (remember we are talking about population measures), we can ask what was the mean age at lost for each kin, when focal was 50:
 
 ```{r}
-swe35_2015_nonstable$kin_summary %>% 
+swe_1900_time_varying$kin_summary %>% 
   filter(alive=="no", age_focal == 50) %>% 
   select(kin,count_cum,mean_age_lost) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
   kable()
 ```
 

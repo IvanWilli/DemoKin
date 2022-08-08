@@ -7,7 +7,7 @@
 #' @param birth_female numeric. Female portion at birth.
 #' @param pi numeric. For using some specific non-stable age distribution of childbearing (same length as ages). Default `NULL`.
 #' @param output_kin character. kin to return. For example "m" for mother, "d" for daughter. See the `vignette` for all kin types.
-#' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
+#' @param living logical. Only living kin counts `TRUE`, or including death kin `FALSE`.
 #' @param list_output logical. Results as a list. Default `FALSE`
 #'
 #' @return A data frame with focal´s age, related ages and type of kin
@@ -18,7 +18,7 @@ kin_time_invariant <- function(U = NULL, f = NULL,
                         birth_female = 1/2.04,
                         pi = NULL,
                         output_kin = NULL,
-                        pi_stable = FALSE,
+                        living = TRUE,
                         list_output = FALSE){
 
   # make matrix transition from vectors
@@ -112,15 +112,18 @@ kin_time_invariant <- function(U = NULL, f = NULL,
                ) %>%
               reduce(rbind)
 
-  # add stable results?
-  if(pi_stable){
-    out <- list(kin=kin, pi_stable=pi)
-  }else{
-    out <- kin
-  }
+  # only living kin?
+  if(living) {
+    kin <- kin %>% filter(alive == "yes")
+    kin_list <- map(kin_list, function(x) {x[1:ages,]})
+    }
 
   # results as list?
-  if(list_output) out <- kin_list
+  if(list_output) {
+    out <- kin_list
+    }else{
+      out <- kin
+    }
 
   return(out)
 }

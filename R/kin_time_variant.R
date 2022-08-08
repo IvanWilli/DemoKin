@@ -36,6 +36,17 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
+  # age distribution at childborn
+  if(is.null(pi)){
+    if(is.null(N)){
+      # create pi and fill it during the loop
+      message("Stable assumption was made for calculating pi on each year because no input data.")
+      pi <- matrix(0, nrow=ages, ncol=n_years_data)
+    }else{
+      pi <- rbind(t(t(N * f)/colSums(N * f)), matrix(0,ages,length(years_data)))
+    }
+  }
+
   # get lists of matrix
   Ul = fl = list()
   for(t in 1:n_years_data){
@@ -51,22 +62,11 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
   U <- Ul
   f <- fl
 
-  # age distribution at childborn
-  if(is.null(pi)){
-    if(is.null(N)){
-      # create pi and fill it during the loop
-      message("Stable assumption was made for calculating pi on each year because no input data.")
-      pi <- matrix(0, nrow=ages, ncol=n_years_data)
-    }else{
-      pi <- rbind(t(t(N * f)/colSums(N * f)), matrix(0,ages,length(years_data)))
-    }
-  }
-
   # loop over years (more performance here)
   kin_all <- list()
   pb <- progress_bar$new(
     format = "Running over input years [:bar] :percent",
-    total = n_years_data, clear = FALSE, width = 60)
+    total = n_years_data, clear = FALSE, width = 10)
   for (iyear in 1:n_years_data){
     # print(iyear)
     Ut <- as.matrix(U[[iyear]])
@@ -83,7 +83,8 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
       U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1, pi = pi1, birth_female = birth_female, list_output = TRUE)
+      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1, pi = pi1, birth_female = birth_female,
+                                         list_output = TRUE, living = FALSE)
     }
     kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
     pb$tick()

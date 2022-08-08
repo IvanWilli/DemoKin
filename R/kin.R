@@ -19,19 +19,6 @@
 #'  * Mean age of each type of kin at actual age of focal.  The content (living or deaths) dependes on `alive` param.
 #'  * Total of each type of kin at actual age of focal.  The content (living or deaths) dependes on `alive` param.
 #' @export
-#' @examples
-#' # If focal is 30 years old and lives in 1950. How much live kin would have if
-#' # her relatives would experience mortality and fertility in that calendar year?
-#' \dontrun{
-#' swe30_1950_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1950, stable = TRUE,selected_kin = c("m","gm"))
-#' # How much live mothers and grandmothers would have if her relatives would experience
-#' # mortality and fertility at each observed year?
-#' swe30_1950_nonstable <- kin(U = swe_surv, f = swe_asfr,N = swe_pop,
-#'                              stable = FALSE, focal_year = 1950, selected_kin = c("m","gm"))
-#' # Difference in total by kin:
-#' swe30_1950_stable$kin_by_age_focal %>% filter(age_focal==30) %>% select(kin, total)
-#' swe30_1950_nonstable$kin_by_age_focal %>% filter(age_focal==30) %>% select(kin, total)
-#' }
 #'
 # get kin ----------------------------------------------------------------
 kin <- function(U = NULL, f = NULL,
