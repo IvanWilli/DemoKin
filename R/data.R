@@ -7,7 +7,16 @@
 #'
 #' @source
 #'   HMD/HFD
-"swe_surv"
+"swe_Sx"
+
+#' Female swedish survival probabilities from 1900 to 2015
+#' @docType data
+#' @format
+#'   A matrix with years as cols and ages (0 to 100 as OAG) as rows.
+#'
+#' @source
+#'   HMD/HFD
+"swe_px"
 
 #' Swedish age-specific fertility rates from 1900 to 2015
 #'

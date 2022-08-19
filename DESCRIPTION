@@ -1,20 +1,21 @@
 Package: DemoKin
 Title: Demokin
-Description: Estimate kin counts for stable and non stable populations
+Description: Estimate population kin counts and its distribution by type and age
 Version: 0.0.0.9000
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),
-    person("Diego", "Alburez-Gutierrez", email = "alburezgutierrez@demogr.mpg.de", role = "aut"))
+    person("Diego", "Alburez-Gutierrez", email = "alburezgutierrez@demogr.mpg.de", role = "aut"),
+    person("Xi", "Song", email = "xisong@sas.upenn.edu", role = "ctb"))
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
 Suggests: 
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-Imports: tidyverse, DiagrammeR, HMDHFDplus, devtools
+Imports: tidyverse, DiagrammeR, HMDHFDplus, devtools, progress
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
     R (>= 2.10)

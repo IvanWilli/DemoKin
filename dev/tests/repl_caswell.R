@@ -9,6 +9,7 @@ library(R.matlab)
 load("tests/test.RData")
 
 # basic
+debugonce(kin_time_variant)
 swe_kin_period_pack <- kin(U = swe_surv,
                       f = swe_asfr,
                       N = swe_pop,

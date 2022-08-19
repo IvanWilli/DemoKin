@@ -7,12 +7,12 @@
 #' @param N numeric. A matrix of population with rows as ages and columns as years. Coincident with `U`.
 #' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with `U`.
 #' @param output_cohort integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.
-#' @param output_period integer. Year of focal to return as output. Could be a vector. Should be within input data years range.
+#' @param output_period integer. Year for which to return kinship structure. Could be a vector. Should be within input data years range.
 #' @param output_kin character. kin to return as output: "m" for mother, "d" for daughter,... See `vignette` for exahustive kin.
 #' @param birth_female numeric. Female portion at birth.
 #'
-#' @return A data frame with focal´s age, related ages and type of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
+#' @return A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
+#' (for example `d` is daughter, `oa` is older aunts, etc.), and age of (living or deceased) relatives.
 #' @export
 
 kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
@@ -66,7 +66,7 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
   kin_all <- list()
   pb <- progress_bar$new(
     format = "Running over input years [:bar] :percent",
-    total = n_years_data, clear = FALSE, width = 10)
+    total = n_years_data, clear = FALSE, width = 60)
   for (iyear in 1:n_years_data){
     # print(iyear)
     Ut <- as.matrix(U[[iyear]])

@@ -7,39 +7,36 @@
 kin(
   U = NULL,
   f = NULL,
+  time_invariant = TRUE,
   N = NULL,
   pi = NULL,
-  stable = TRUE,
-  focal_cohort = NULL,
-  focal_year = NULL,
-  selected_kin = NULL,
+  output_cohort = NULL,
+  output_period = NULL,
+  output_kin = NULL,
   birth_female = 1/2.04,
-  Pb = FALSE,
   living = TRUE
 )
 }
 \arguments{
-\item{U}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
+\item{U}{numeric. A vector or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
-\item{f}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
+\item{f}{numeric. Same as U but for fertility rates.}
 
-\item{N}{numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.}
+\item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Defautk \code{TRUE}.}
 
-\item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
+\item{N}{numeric. Same as U but for population distribution (counts or \verb{\%}). Optional.}
 
-\item{stable}{logical. Stable assumption given \code{year} rates, taking focal_year in case is U and f are matrix.}
+\item{pi}{numeric. Same as U but for childbearing distribution (sum to 1). Optional.}
 
-\item{focal_cohort}{integer. Year of birth of focal. Could be a vector. Should be within input data years range.}
+\item{output_cohort}{integer. Vector of year cohorts for returning results. Should be within input data years range.}
 
-\item{focal_year}{integer. Year of focal. Could be a vector. Should be within input data years range.}
+\item{output_period}{integer. Vector of period years for returning results. Should be within input data years range.}
 
-\item{selected_kin}{character. kin to return: "m" for mother, "d" for daughter,...}
+\item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
 \item{birth_female}{numeric. Female portion at birth.}
 
-\item{Pb}{logic. Is given Pb as the first row in P?. If not, takes \code{P(0,1)} as \code{P(b,1)}. Useful for fertility matrix first row. Default \code{FALSE}.}
-
-\item{living}{logial. Only living kin counts \code{TRUE}, or including death kin \code{FALSE}.}
+\item{living}{logical. Only living kin counts \code{TRUE}, or including death kin \code{FALSE}.}
 }
 \value{
 A list with:
@@ -56,19 +53,4 @@ Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
 }
 \details{
 See Caswell (2019) and Caswell (2021) for details on formulas.
-}
-\examples{
-# If focal is 30 years old and lives in 1950. How much live kin would have if
-# her relatives would experience mortality and fertility in that calendar year?
-\dontrun{
-swe30_1950_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1950, stable = TRUE,selected_kin = c("m","gm"))
-# How much live mothers and grandmothers would have if her relatives would experience
-# mortality and fertility at each observed year?
-swe30_1950_nonstable <- kin(U = swe_surv, f = swe_asfr,N = swe_pop,
-                             stable = FALSE, focal_year = 1950, selected_kin = c("m","gm"))
-# Difference in total by kin:
-swe30_1950_stable$kin_by_age_focal \%>\% filter(age_focal==30) \%>\% select(kin, total)
-swe30_1950_nonstable$kin_by_age_focal \%>\% filter(age_focal==30) \%>\% select(kin, total)
-}
-
 }

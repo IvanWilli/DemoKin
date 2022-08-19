@@ -8,8 +8,11 @@ get_HMDHFD(
   country = "SWE",
   min_year = 1900,
   max_year = 2018,
-  user = NULL,
-  pass = NULL
+  user_HMD = NULL,
+  pass_HMD = NULL,
+  user_HFD = NULL,
+  pass_HFD = NULL,
+  OAG = 100
 )
 }
 \arguments{
@@ -19,14 +22,20 @@ get_HMDHFD(
 
 \item{max_year}{numeric. Latest year to get data.}
 
-\item{user}{character. From HMD/HFD.}
+\item{user_HMD}{character. From HMD/HFD.}
 
-\item{pass}{character. From HMD/HFD.}
+\item{pass_HMD}{character. From HMD/HFD.}
+
+\item{user_HFD}{character. From HMD/HFD.}
+
+\item{pass_HFD}{character. From HMD/HFD.}
+
+\item{user}{character. From HMD/HFD.}
 }
 \value{
-A list wiith survival, fertility and poopulation age specific matrixes, with calendar year as colnames.
+A list wiith female survival probability, survival function, fertility and poopulation age specific matrixes, with calendar year as colnames.
 }
 \description{
-Wrapper function to get data.frames of survival, fertlity and population
+Wrapper function to get data.frames of female survival, fertlity and population
 of selected countriy on selected period.
 }

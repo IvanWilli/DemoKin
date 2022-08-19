@@ -4,7 +4,7 @@
 #' @details See Caswell (2019) and Caswell (2021) for details on formulas.
 #' @param U numeric. A vector or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param f numeric. Same as U but for fertility rates.
-#' @param time_invariant logical. Constant assumption for a given `year` rates.
+#' @param time_invariant logical. Constant assumption for a given `year` rates. Defautk `TRUE`.
 #' @param N numeric. Same as U but for population distribution (counts or `%`). Optional.
 #' @param pi numeric. Same as U but for childbearing distribution (sum to 1). Optional.
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
@@ -43,9 +43,9 @@ kin <- function(U = NULL, f = NULL,
   # if time dependent or not
   if(time_invariant){
       if(!is.vector(U)) {
-        focal_year <- min(years_data)
-        U <- U[,as.character(focal_year)]
-        f <- f[,as.character(focal_year)]
+        output_period <- min(years_data)
+        U <- U[,as.character(output_period)]
+        f <- f[,as.character(output_period)]
       }
       kin_full <- kin_time_invariant(U = U, f = f,
                                      output_kin = output_kin, birth_female = birth_female) %>%

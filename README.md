@@ -27,7 +27,7 @@ those in Caswell (2019). The equivalence between the two set of codes is
 given in the following table:
 
 | DemoKin | Caswell | Label                      |
-| :------ | :------ | :------------------------- |
+|:--------|:--------|:---------------------------|
 | coa     | t       | Cousins from older aunt    |
 | cya     | v       | Cousins from younger aunt  |
 | d       | a       | Daughter                   |
@@ -56,28 +56,18 @@ For this exercise, we’ll use the Swedish data pre-loaded with `DemoKin`.
 
 ``` r
 library(DemoKin)
-swe50_2015_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 2015, stable = TRUE)
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
+swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
-*U* is the survival ratio by age from a life table and *f* are the age
-specific fertility ratios by age (see `?kin` for details).
+*px* is the survival probability by age from a life table and *f* are
+the age specific fertility ratios by age (see `?kin` for details).
 
-We can visualize the implied kin counts for an Focal aged 35 yo in a
-stable population using a network or ‘Keyfitz’ kinship diagram using the
-`plot_diagram` function:
-
-``` r
-plot_diagram(swe50_2015_stable[["kin_summary"]] %>% 
-               filter(age_focal == 35) %>% 
-                select(kin, count))
-```
-
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
-
-For more details, including an extension to non-stable populations and
-relative´s death distribution, see `vignette("Use")`. Note that if the
-vignette does not load, you may need to install the package as
-`devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
+For more details, including an extension to time varying populations
+rates and relative´s death distribution, see `vignette("Use")`. Note
+that if the vignette does not load, you may need to install the package
+as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
 
@@ -106,8 +96,8 @@ Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 3.  Improve kinship diagram visualization
 4.  Improve documentation and vignette of package
 
-## Get involved\!
+## Get involved!
 
 `DemoKin` is giving its first steps. If you’re interested in
 contributing, please get in touch, create an issue, or submit a pull
-request. We look forward to hearing from you\!
+request. We look forward to hearing from you!

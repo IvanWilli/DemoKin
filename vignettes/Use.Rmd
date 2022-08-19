@@ -15,18 +15,17 @@ library(tidyverse)
 library(DiagrammeR)
 library(knitr)
 library(progress)
-library(igraph)
 ```
 
-The year is 2015 and focal is 35 years old. Focal and her relatives have all lived in Sweden. 
+The year is 2015 and focal is 35 years old^[Age should be understood as a class state, defined in a matrix transition framework.]. Focal and her relatives have all lived in Sweden. 
 We would like to know how many female relatives focal has in 2015, their mean age and the number of living kin at each age of focal. Finally, we would like to know at which age she had to suffer a death in average.
 
 ## Kin counts with time invariant rates
 
-We can estimate this in a **stable** framework using data from 2015, assuming that all of focal's relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_surv*, *swe_asfr* and *swe_pop*, matrix of age by year, with survival, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
+We can estimate this in a **stable** framework using data from 2015, assuming that all of focal's relatives experience mortality and fertility from that calendar year (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example (*swe_px*, *swe_Sx*, *swe_asfr* and *swe_pop*, matrix of age by year, with survival probability, survival ratio, fertility and population; type `data(package="DemoKin")`). This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/). These datasets were loaded using the`get_HMDHFD` function. 
 
 ```{r}
-swe_surv_2015 <- swe_surv[,"2015"]
+swe_surv_2015 <- swe_px[,"2015"]
 swe_asfr_2015 <- swe_asfr[,"2015"]
 swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
@@ -76,11 +75,9 @@ swe_2015[["kin_full"]] %>%
               facet_wrap(~kin)
 ```
 
-The function assumes that fertility input:
-- is for both sex. In case is only for one you need to set `birth_female = 1`.
-- considers *effective* births. This is important in the case you are using survival rates ($S_x$) instead of probabilities ($p_x$). In the case your are using survival and you do not want all new born survives to truncated age 0 (it means $P_b=1$ in life table notation), fertility rates must consider this risk already. This should be done for example in the previous case, using as input `swe_asfr * $P_b$` for fertility. In the case of probabilities newborn would have 0 exact age, and no additional risk must be considered,
+The function assumes that fertility input is for both sex, so in case this is only for one you need to set `birth_female = 1` in a convenient way. In the case you are using survival rates ($S_x$) instead of probabilities ($p_x$), fertility vectors should consider the adaptation for person-year exposure on females: $(\frac{f_x+f_{x+1}S_x}{2})\frac{L_0}{l_0}$ instead of only $fx$ (Preston et.al, 2002).
 
-The function also includes a summary output with the count of living kin, mean and standard devaition of kin age, by type of kin, for each focal's age:
+The `kin` function also includes a summary output with the count of living kin, mean and standard deviation of kin age, by type of kin, for each focal's age:
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_summary"]] %>% 
@@ -90,7 +87,7 @@ swe_2015[["kin_summary"]] %>%
   kable()
 ```
 
-We can visualize the estimated kin counts by kin using a network diagram. Folloing with the age 35:
+We can visualize the estimated kin counts by type of kin using a network diagram. Following with the age 35:
 
 ```{r}
 swe_2015_age35 <- swe_2015[["kin_summary"]] %>% 
@@ -100,14 +97,13 @@ plot_diagram(swe_2015_age35)
 ```
 
 
-
 ## Kin counts with time varying rates
 
 The demographic risks of population of Sweden is, in reality, changin every year, and focal relatives have been expossed to changing mortality and fertility rates.
-To account for this, is needed estimations of kin counts in population with time-variant demographic rates. Let's take a look at the resulting kin counts for 1960 cohort:
+To account for this, is needed estimations of kin counts in population with time-variant demographic rates. Let's take a look at the resulting kin counts for 1960 cohort, for some specific types:
 
 ```{r, fig.height=6, fig.width=8}
-swe_2015_time_varying <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, time_invariant =FALSE,
+swe_2015_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invariant =FALSE,
                                     output_cohort = 1960,
                                     output_kin = c("d","gd","ggd","m","gm","ggm"))
 
@@ -129,7 +125,7 @@ As you see the estimates stop at age 55, because no data is after 2015.
 Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see for a focal from 1900 cohort how many relatives loss during her life (output `kin_death_by_age_focal`):
 
 ```{r, fig.height=6, fig.width=8}
-swe_1900_time_varying <- kin(U = swe_surv, f = swe_asfr, N = swe_pop, time_invariant = FALSE,
+swe_1900_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invariant = FALSE,
                                     output_cohort = 1900,
                                     output_kin = c("d","gd","ggd","m","gm","ggm"),
                              living = FALSE)
@@ -152,8 +148,38 @@ swe_1900_time_varying$kin_summary %>%
   kable()
 ```
 
+## Prevalences
+
+Once you have a full kin distribution by age, is possible to know, for example given a set of prevalence by age, what is the expected portion of living kin in each prevalence state (could be disease, employment, etc.). 
+
+```{r}
+# let´s create some prevalence shcedule by age
+swe_2015_prevalence <- tibble(age_kin = unique(swe_2015$kin_full$age_kin),
+                              prev = .005 * exp(.05 * age_kin))
+
+plot(swe_2015_prevalence)
+
+# join to kin count estimates and plot
+swe_2015$kin_full %>% 
+  filter(alive=="yes") %>% 
+  left_join(swe_2015_prevalence) %>% 
+  group_by(kin, age_focal) %>% 
+  summarise(prevalent = sum(count * prev),
+            no_prevalent = sum(count * (1-prev))) %>% 
+  pivot_longer(cols = prevalent:no_prevalent, names_to = "prevalence_state", values_to = "count") %>% 
+  ggplot(aes(x=age_focal, y = count)) + 
+  geom_area(aes(fill=prevalence_state)) +
+  facet_wrap(~kin) +
+  theme_bw()
+
+```
+
+This can be applied for time variant cases too. 
+
 ## References
 
 Caswell, H. (2019). The formal demography of kinhip: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
 
 Caswell, H., & Song, X. (2021). The formal demography of kinhip III: kinhip dynamics with time-varying demographic rates. Demographic Research, 45, 517–546.
+
+Preston, S., Heuveline, P., & Guillot, M. (2000). Demography: Measuring and Modeling Population Processes. Wiley.
