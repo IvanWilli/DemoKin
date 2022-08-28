@@ -12,9 +12,7 @@ vignette: >
 ```{r, include=FALSE}
 devtools::load_all()
 library(tidyverse)
-library(DiagrammeR)
 library(knitr)
-library(progress)
 ```
 
 The year is 2015 and focal is 35 years old^[Age should be understood as a class state, defined in a matrix transition framework.]. Focal and her relatives have all lived in Sweden. 
@@ -68,9 +66,10 @@ We can also visualize the age distribution of relatives when focal is 35 for exa
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_full"]] %>%
-              filter(age_focal == 35) %>% 
+              filter(alive=="yes", age_focal == 35) %>% 
               ggplot() +
               geom_line(aes(age_kin, count))  +
+              geom_vline(xintercept = 35, color=2) +
               theme_bw() +
               facet_wrap(~kin)
 ```
@@ -108,6 +107,7 @@ swe_2015_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invaria
                                     output_kin = c("d","gd","ggd","m","gm","ggm"))
 
 swe_2015_time_varying$kin_full %>%
+  filter(alive=="yes") %>% 
   group_by(kin, cohort, age_focal) %>% summarise(count = sum(count)) %>%
   ggplot(aes(age_focal,count,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
@@ -127,13 +127,11 @@ Kin loss has studied consequences related to mental health, care support and hou
 ```{r, fig.height=6, fig.width=8}
 swe_1900_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invariant = FALSE,
                                     output_cohort = 1900,
-                                    output_kin = c("d","gd","ggd","m","gm","ggm"),
-                             living = FALSE)
+                                    output_kin = c("d","gd","ggd","m","gm","ggm"))
 
 swe_1900_time_varying$kin_summary %>%
-  filter(alive =="no") %>%
   ggplot() +
-  geom_line(aes(age_focal, count_cum))  +
+  geom_line(aes(age_focal, count_cum_death))  +
   theme_bw() +
   facet_wrap(~kin,scales="free")
 ```
@@ -142,15 +140,15 @@ Given some portion of each relative was dead (remember we are talking about popu
 
 ```{r}
 swe_1900_time_varying$kin_summary %>% 
-  filter(alive=="no", age_focal == 50) %>% 
-  select(kin,count_cum,mean_age_lost) %>% 
+  filter(age_focal == 50) %>% 
+  select(kin,count_cum_death,mean_age_lost) %>% 
   mutate_if(is.numeric, round, 2) %>% 
   kable()
 ```
 
 ## Prevalences
 
-Once you have a full kin distribution by age, is possible to know, for example given a set of prevalence by age, what is the expected portion of living kin in each prevalence state (could be disease, employment, etc.). 
+Once you have a full kin distribution by age, is possible to know what is the expected portion of living kin in some stage given a set of prevalence by age (could be a disease, employment, etc.). This kind of method is known as Sullivan in life table apporaches. A matrix formulation for same results can be found in Caswell (2019). This can be applied for time variant prevalence too.
 
 ```{r}
 # let´s create some prevalence shcedule by age
@@ -174,11 +172,60 @@ swe_2015$kin_full %>%
 
 ```
 
-This can be applied for time variant cases too. 
+## Multi-state
+
+In `DemoKin` is possible to obtain kin structures in a multistate framework, classifying individuals jointly by age and other feature (like stages of some disease). For that is neccesary to use mortality and fertility for each possible stage (conditionated to), indicate in which age and state the new individuals (offspring) woul be destinated to,and the probabilities for changing state by age.  
+
+Let´s take the Caswell (2021) example for Slovakia where stages are parity states. The package presents data for the year 1980, where `svk_fxs` is the fertility rate by age (rows) for each parity stage (columns). The stage 1 is related to no kids (parity zero), the 2 is 1, and so on, until finally the 6 is 5 or more. The data.frame `svk_Hxs` has same structure but with $1$ in the age where newborns are destinated, in this case always to first age. The data.frame `svk_pxs` has same structure but with survivial probabilities. Finally we need a list `svk_Uxs` that has same number of elements than ages (in this case 110, where $omega$ is 109), and for each age there is a column-stochastic transition matrix with dimension for the state space, and the entries are transition probabilities conditional on survival. Based on Caswell (2020) matrix methods is possible to know joint age-parity kin structure.
+
+```{r}
+# use birth_female=1 because fertility is for female only
+demokin_svk1980_caswell2020 <- kin_multi_stage(U = svk_Uxs,
+                                                 f = svk_fxs,
+                                                 D = svk_pxs,
+                                                 H = svk_Hxs, birth_female=1)
+
+
+```
+
+We can see age-parity distribution of aunts, when focal is 20 or 60 (similar to figure 4 in Caswell(2021)). 
+
+```{r}
+demokin_svk1980_caswell2020 %>% 
+  filter(kin %in% c("oa","ya"), alive == "yes", age_focal %in% c(20,60)) %>% 
+  mutate(parity = as.integer(stage_kin)-1,
+         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
+         parity = fct_rev(parity)) %>% 
+  group_by(age_focal, age_kin, parity) %>% 
+  summarise(count= sum(count)) %>% 
+  ggplot() +
+  geom_bar(aes(x=age_kin, y = count, fill=parity), stat = "identity") +
+  geom_vline(aes(xintercept = age_focal), col=2) +
+  theme_bw() +
+  facet_wrap(~age_focal, nrow = 2)
+```
+
+Also we can see, When focal grows up, the portion of living daughters and mothers in different parity stages (similar to figure 9 and 10 in Caswell(2021)). 
+
+```{r}
+demokin_svk1980_caswell2020 %>% 
+  filter(kin %in% c("d","m"), alive == "yes") %>% 
+  mutate(parity = as.integer(stage_kin)-1,
+         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
+         parity = fct_rev(parity)) %>% 
+  group_by(age_focal, kin, parity) %>% 
+  summarise(count= sum(count)) %>% 
+  ggplot() +
+  geom_bar(aes(x=age_focal, y = count, fill=parity), stat = "identity") +
+  theme_bw() +
+  facet_wrap(~kin, nrow = 2)
+```
 
 ## References
 
 Caswell, H. (2019). The formal demography of kinhip: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
+
+Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research, 42, 1097–1146.
 
 Caswell, H., & Song, X. (2021). The formal demography of kinhip III: kinhip dynamics with time-varying demographic rates. Demographic Research, 45, 517–546.
 

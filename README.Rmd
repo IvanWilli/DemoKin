@@ -83,7 +83,7 @@ Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation and the fr
 
 ## Next steps:
 
-1. Implement multi-stage and two-sex matrix kinship models
+1. Implement two-sex matrix kinship models
 1. Create a hex logo for package
 1. Improve kinship diagram visualization
 1. Improve documentation and vignette of package 

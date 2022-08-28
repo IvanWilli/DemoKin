@@ -2,6 +2,7 @@
 
 export(get_HMDHFD)
 export(kin)
+export(kin_multi_stage)
 export(kin_time_invariant)
 export(kin_time_variant)
 export(plot_diagram)

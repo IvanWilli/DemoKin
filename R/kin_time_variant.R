@@ -10,14 +10,15 @@
 #' @param output_period integer. Year for which to return kinship structure. Could be a vector. Should be within input data years range.
 #' @param output_kin character. kin to return as output: "m" for mother, "d" for daughter,... See `vignette` for exahustive kin.
 #' @param birth_female numeric. Female portion at birth.
-#'
+#' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
+
 #' @return A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
-#' (for example `d` is daughter, `oa` is older aunts, etc.), and age of (living or deceased) relatives.
+#' (for example `d` is daughter, `oa` is older aunts, etc.), and age of (living or deceased) relatives. If `list_output = TRUE` then this is a list.
 #' @export
 
 kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
                             output_cohort = NULL, output_period = NULL, output_kin = NULL,
-                            birth_female = 1/2.04){
+                            birth_female = 1/2.04, list_output = FALSE){
 
   # check input
   if(is.null(U) | is.null(f)) stop("You need values on U and/or f.")
@@ -64,7 +65,7 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
 
   # loop over years (more performance here)
   kin_all <- list()
-  pb <- progress_bar$new(
+  pb <- progress::progress_bar$new(
     format = "Running over input years [:bar] :percent",
     total = n_years_data, clear = FALSE, width = 60)
   for (iyear in 1:n_years_data){
@@ -84,7 +85,7 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
       kin_all[[1]] <- kin_time_invariant(U = U1, f = f1, pi = pi1, birth_female = birth_female,
-                                         list_output = TRUE, living = FALSE)
+                                         list_output = TRUE)
     }
     kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
     pb$tick()
@@ -92,18 +93,10 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
 
   # filter years and kin that were selected
   names(kin_all) <- as.character(years_data)
-  if(!is.null(output_cohort)){
-    selected_cohorts_year_age <- data.frame(age = rep(age,length(output_cohort)),
-                                            year = map(output_cohort,.f = ~.x+age) %>%
-                                              unlist(use.names = F))
-  }else{selected_cohorts_year_age <- c()}
-  if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% rename(age=1,year=2)
-  }else{selected_years_age <- c()}
-  if(is.null(output_period) & is.null(output_cohort)){
-    message("No specific output was set. Return all period data.")
-    output_period <- years_data
-  }
-  out_selected <- bind_rows(selected_years_age,selected_cohorts_year_age) %>% distinct()
+
+  # combinations to return
+  out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
+
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
   if(is.null(output_kin)){
     selected_kin_position <- 1:length(possible_kin)
@@ -112,28 +105,36 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
   }
 
   # first filter
-  kin_all <- kin_all %>%
-    keep(names(.) %in% as.character(unique(out_selected$year))) %>%
-    map(~ .[selected_kin_position])
+  kin_list <- kin_all %>%
+    purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
+    purrr::map(~ .[selected_kin_position])
 
   # long format
-  kin <- lapply(names(kin_all), function(Y){
-    X <- kin_all[[Y]]
-    X <- map2(X, names(X), function(x,y) as.data.frame(x) %>%
-                mutate(year = Y,
+  kin <- lapply(names(kin_list), function(Y){
+    X <- kin_list[[Y]]
+    X <- purrr::map2(X, names(X), function(x,y) as.data.frame(x) %>%
+                dplyr::mutate(year = Y,
                         kin=y,
                         age_kin = rep(age,2),
                         alive = c(rep("yes",ages), rep("no",ages)),
                         .before=everything())) %>%
-      bind_rows() %>%
-      setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
-      gather(age_focal, count,-age_kin, -kin, -year, -alive) %>%
-      mutate(age_focal = as.integer(age_focal),
+      dplyr::bind_rows() %>%
+      stats::setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
+      tidyr::gather(age_focal, count,-age_kin, -kin, -year, -alive) %>%
+      dplyr::mutate(age_focal = as.integer(age_focal),
              year = as.integer(year),
              cohort = year - age_focal) %>%
-      filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
-    bind_rows()
-  return(kin)
+      dplyr::filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
+    dplyr::bind_rows()
+
+  # results as list?
+  if(list_output) {
+    out <- kin_list
+  }else{
+    out <- kin
+  }
+
+  return(out)
 }
 
 
@@ -141,13 +142,13 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
 
 #' @description one time projection kin. internal function.
 #'
-#' @param Ut numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param ft numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
+#' @param Ut numeric. A matrix of survival probabilities (or ratios).
+#' @param ft numeric. A matrix of age-specific fertility rates.
+#' @param pit numeric. A matrix with distribution of childbearing.
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
 #
-timevarying_kin<- function(Ut,ft,pit,ages, pkin){
+timevarying_kin<- function(Ut, ft, pit, ages, pkin){
 
   # frequently used zero vector for initial condition
   zvec=rep(0,ages*2);
@@ -191,4 +192,31 @@ timevarying_kin<- function(Ut,ft,pit,ages, pkin){
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
   return(kin_list)
+}
+
+#' defince apc combination to return
+
+#' @description defince apc to return.
+#'
+output_period_cohort_combination <- function(output_cohort = NULL, output_period = NULL, age = NULL, years_data = NULL){
+
+  # no specific
+  if(is.null(output_period) & is.null(output_cohort)){
+    message("No specific output was set. Return all period data.")
+    output_period <- years_data
+  }
+
+  # cohort combination
+  if(!is.null(output_cohort)){
+    selected_cohorts_year_age <- data.frame(age = rep(age,length(output_cohort)),
+                                            year = purrr::map(output_cohort,.f = ~.x+age) %>%
+                                              unlist(use.names = F))
+  }else{selected_cohorts_year_age <- c()}
+
+  # period year combination
+  if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
+  }else{selected_years_age <- c()}
+
+  # end
+  return(dplyr::bind_rows(selected_years_age,selected_cohorts_year_age) %>% dplyr::distinct())
 }

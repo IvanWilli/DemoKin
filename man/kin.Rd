@@ -13,8 +13,7 @@ kin(
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
-  birth_female = 1/2.04,
-  living = TRUE
+  birth_female = 1/2.04
 )
 }
 \arguments{
@@ -22,7 +21,7 @@ kin(
 
 \item{f}{numeric. Same as U but for fertility rates.}
 
-\item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Defautk \code{TRUE}.}
+\item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Default \code{TRUE}.}
 
 \item{N}{numeric. Same as U but for population distribution (counts or \verb{\%}). Optional.}
 
@@ -35,21 +34,24 @@ kin(
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
 \item{birth_female}{numeric. Female portion at birth.}
-
-\item{living}{logical. Only living kin counts \code{TRUE}, or including death kin \code{FALSE}.}
 }
 \value{
 A list with:
 \itemize{
-\item \code{kin}: a data frame with focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.). The content (living or deaths) dependes on \code{alive} param.
-\item A data frame with kin at each age of focal´s life. The content (living or deaths) dependes on \code{alive} param.
-\item A data frame with kin at actual age of focal. The content (living or deaths) dependes on \code{alive} param.
-\item Mean age of each type of kin at actual age of focal.  The content (living or deaths) dependes on \code{alive} param.
-\item Total of each type of kin at actual age of focal.  The content (living or deaths) dependes on \code{alive} param.
+\item \code{kin_full}: a data frame with focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), with living kin and death on that age.
+\item \code{kin_summary}: a data frame with focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}:
+}
+\itemize{
+\item \code{count}: count of living kin at actual age of focal
+\item \code{mean_age}: mean age of each type of living kin.
+\item \code{sd_age}: standard deviation age of each type of living kin .
+\item \code{count_death}: count of death kin at specific age of focal.
+\item \code{count_cum_death}: cumulated count of death kin at specific age of focal.
+\item \code{mean_age_lost}: mean age where focal lost her relative.
 }
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
+Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework.
 }
 \details{
 See Caswell (2019) and Caswell (2021) for details on formulas.

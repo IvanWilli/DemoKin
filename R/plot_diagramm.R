@@ -13,7 +13,7 @@ plot_diagram <- function(kin_total, rounding = 3){
 
   kin_total <- kin_total %>% mutate(count = round(count,digits = rounding))
 
-  mermaid(
+  DiagrammeR::mermaid(
     paste0("graph TD
 
   GGM(ggm: <br>",                       kin_total$count[kin_total$kin=="ggm"]  ,")

@@ -12,7 +12,8 @@ kin_time_variant(
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
-  birth_female = 1/2.04
+  birth_female = 1/2.04,
+  list_output = FALSE
 )
 }
 \arguments{
@@ -31,10 +32,12 @@ kin_time_variant(
 \item{output_kin}{character. kin to return as output: "m" for mother, "d" for daughter,... See \code{vignette} for exahustive kin.}
 
 \item{birth_female}{numeric. Female portion at birth.}
+
+\item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
 }
 \value{
 A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.), and age of (living or deceased) relatives.
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), and age of (living or deceased) relatives. If \code{list_output = TRUE} then this is a list.
 }
 \description{
 Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).

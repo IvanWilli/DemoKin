@@ -91,7 +91,7 @@ Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 
 ## Next steps:
 
-1.  Implement multi-stage and two-sex matrix kinship models
+1.  Implement two-sex matrix kinship models
 2.  Create a hex logo for package
 3.  Improve kinship diagram visualization
 4.  Improve documentation and vignette of package

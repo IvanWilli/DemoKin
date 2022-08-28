@@ -7,15 +7,15 @@
 timevarying_kin(Ut, ft, pit, ages, pkin)
 }
 \arguments{
-\item{Ut}{numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.}
+\item{Ut}{numeric. A matrix of survival probabilities (or ratios).}
 
-\item{ft}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.}
+\item{ft}{numeric. A matrix of age-specific fertility rates.}
+
+\item{pit}{numeric. A matrix with distribution of childbearing.}
 
 \item{ages}{numeric.}
 
 \item{pkin}{numeric. A list with kin count distribution in previous year.}
-
-\item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.}
 }
 \description{
 one time projection kin. internal function.

@@ -10,12 +10,11 @@ kin_time_invariant(
   birth_female = 1/2.04,
   pi = NULL,
   output_kin = NULL,
-  living = TRUE,
   list_output = FALSE
 )
 }
 \arguments{
-\item{U}{numeric. A vector of survival ratios with same length as ages.}
+\item{U}{numeric. A vector of survival probabilities with same length as ages.}
 
 \item{f}{numeric. A vector of age-specific fertility rates with same length as ages.}
 
@@ -25,13 +24,11 @@ kin_time_invariant(
 
 \item{output_kin}{character. kin to return. For example "m" for mother, "d" for daughter. See the \code{vignette} for all kin types.}
 
-\item{living}{logical. Only living kin counts \code{TRUE}, or including death kin \code{FALSE}.}
-
-\item{list_output}{logical. Results as a list. Default \code{FALSE}}
+\item{list_output}{logical. Results as a list with \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
 }
 \value{
 A data frame with focal´s age, related ages and type of kin
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death.
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death. If \code{list_output = TRUE} then this is a list.
 }
 \description{
 Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019).
