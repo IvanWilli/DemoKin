@@ -37,7 +37,7 @@ kin_time_variant(
 }
 \value{
 A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.), and age of (living or deceased) relatives. If \code{list_output = TRUE} then this is a list.
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If \code{list_output = TRUE} then this is a list.
 }
 \description{
 Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).

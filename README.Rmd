@@ -11,11 +11,9 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
-library(tidyverse)
-library(DiagrammeR)
-library(knitr)
-library(igraph)
 devtools::load_all()
+library(tidyverse)
+library(knitr)
 library(DemoKin)
 ```
 
@@ -33,24 +31,8 @@ devtools::install_github("IvanWilli/DemoKin")
 ```
 
 ## Example
+Consider an average Swedish woman in year 2015 (i.e., 'Focal'). We assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life. 
 
-Consider an average Swedish woman in year 2015 (i.e., 'Focal'). 
-Relatives for the `selected_kin` argument are identified by a unique code.
-Note that the relationship codes used in `DemoKin` differ from those in Caswell (2019). 
-The equivalence between the two set of codes is given in the following table:
-
-```{r, fig.height=6, fig.width=8, echo=FALSE}
-
-codes <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
-caswell_codes <- c("t", "v", "a", "b", "c", "h", "g", "d", "p", "q", "r", "s", "m", "n")
-labels <- c("Cousins from older aunt", "Cousins from younger aunt", "Daughter", "Grand-daughter", "Great-grand-daughter", "Great-grandmother", "Grandmother", "Mother", "Nieces from older sister", "Nieces from younger sister", "Aunt older than mother", "Aunt younger than mother", "Older sister", "Younger sister")
-
-data.frame(DemoKin = codes, Caswell = caswell_codes, Label = labels, row.names = NULL) %>% kable(caption = "Equivalence between relative codes between DemoKin and Caswell (2019).")
-
-```
-
-Let's show a quick example. 
-We assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life.
 We then ask:
 
 > How can we characterize the kinship network of an average member of the population ('Focal')?
@@ -66,7 +48,39 @@ swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 
 *px* is the survival probability by age from a life table and *f* are the age specific fertility ratios by age (see `?kin` for details). 
 
-For more details, including an extension to time varying populations rates and relative´s death distribution, see `vignette("Use")`.
+Relatives for the `selected_kin` argument of function `kin` are identified by a unique code.
+
+```{r, fig.height=6, fig.width=8, echo=FALSE}
+
+relatives <- c(
+  "coa" = "Cousins (through aunt older than mother)"
+  , "cya" = "Cousins (through aunt younger than mother)"
+  , "d" = "Daughter"
+  , "gd" = "Grand-daughter"
+  , "ggm" = "Great-grandmother"
+  , "gm" = "Grandmother"
+  , "m" = "Mother"
+  , "nos" = "Nieces through older sister"
+  , "nys" = "Nieces through younger sister"
+  , "oa" = "Aunt older than mother"
+  , "ya" = "Aunt younger than mother"
+  , "os" = "Older sister"
+  , "ys" = "Younger sister"
+  )
+
+data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% kable()
+```
+
+We can visualize the implied kin counts for a Focal aged 35 in Sweden (with freeze rates from 2015) using a network or 'Keyfitz' kinship diagram using the `plot_diagram` function:
+
+```{r, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+plot_diagram(kin_total = swe_2015[["kin_summary"]] %>% 
+                          dplyr::filter(age_focal == 35) %>% 
+                          dplyr::select(kin, count = count_living), 
+             rounding = 2)
+```
+
+For more details, including an extension to time varying populations rates, relative´s death distribution and multi-state model, see `vignette("Use")`.
 Note that if the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation

@@ -16,7 +16,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
-Imports: dplyr, tidyr, purrr, DiagrammeR, HMDHFDplus, devtools, progress, matrixcalc, Matrix, MASS, ggplot2, stats
+Imports: dplyr, tidyr, purrr, HMDHFDplus, devtools, progress, matrixcalc, Matrix, MASS, ggplot2, stats, igraph, DiagrammeR
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
     R (>= 2.10)

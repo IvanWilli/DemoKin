@@ -38,15 +38,15 @@ kin(
 \value{
 A list with:
 \itemize{
-\item \code{kin_full}: a data frame with focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), with living kin and death on that age.
-\item \code{kin_summary}: a data frame with focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}:
+\item \code{kin_full}: a data frame with year, cohort, focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), with living kin and death on that age.
+\item \code{kin_summary}: a data frame with focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}, grouping by cohort or period (depending arguments):
 }
 \itemize{
-\item \code{count}: count of living kin at actual age of focal
+\item \code{count_living}: count of living kin at actual age of focal
 \item \code{mean_age}: mean age of each type of living kin.
 \item \code{sd_age}: standard deviation age of each type of living kin .
 \item \code{count_death}: count of death kin at specific age of focal.
-\item \code{count_cum_death}: cumulated count of death kin at specific age of focal.
+\item \code{count_cum_death}: cumulated count of death kin until specific age of focal.
 \item \code{mean_age_lost}: mean age where focal lost her relative.
 }
 }

@@ -13,7 +13,7 @@
 #' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 
 #' @return A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
-#' (for example `d` is daughter, `oa` is older aunts, etc.), and age of (living or deceased) relatives. If `list_output = TRUE` then this is a list.
+#' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If `list_output = TRUE` then this is a list.
 #' @export
 
 kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,

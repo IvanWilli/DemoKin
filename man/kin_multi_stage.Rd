@@ -29,8 +29,8 @@ kin_multi_stage(
 }
 \value{
 A data frame with focal´s age, related ages and type of kin
-(for example \code{d} is daughter, \code{oa} is older aunts, etc.), alive and death, and specific stage. If \code{list_output = TRUE} then this is a list.
+(for example \code{d} is daughter, \code{oa} is older aunts, etc.), living and death kin counts, and specific stage. If \code{list_output = TRUE} then this is a list with elements as kin types.
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019). Stages are implied in length of input lists.
+Implementation of age-stage kin estimates (multi-state) by Caswell (2020). Stages are implied in length of input lists.
 }

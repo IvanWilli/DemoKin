@@ -1,6 +1,6 @@
 #' Estimate kin counts by age and stage in a time invariant framework
 
-#' @description Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019). Stages are implied in length of input lists.
+#' @description Implementation of age-stage kin estimates (multi-state) by Caswell (2020). Stages are implied in length of input lists.
 
 #' @param U list. age elemnts with column-stochastic transition matrix with dimension for the state space, conditional on survival.
 #' @param f matrix. state-specific fertility (age in rows and states in columns).
@@ -10,7 +10,7 @@
 #' @param list_output logical. Results as a list. Default `FALSE`.
 
 #' @return A data frame with focal´s age, related ages and type of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death, and specific stage. If `list_output = TRUE` then this is a list.
+#' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and specific stage. If `list_output = TRUE` then this is a list with elements as kin types.
 #' @export
 #'
 

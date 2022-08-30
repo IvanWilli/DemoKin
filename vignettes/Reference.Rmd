@@ -33,32 +33,20 @@ Let's visualize the distribution of relatives over focal's lifecourse:
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_summary"]] %>%
               ggplot() +
-              geom_line(aes(age_focal, count))  +
+              geom_line(aes(age_focal, count_living))  +
               theme_bw() +
               facet_wrap(~kin)
 ```
 
-Where each relative type is identified by a unique code:
+Where each relative type is identified by a unique code. Note that the relationship codes used in `DemoKin` differ from those in Caswell (2019). The equivalence between the two set of codes is given in the following table:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 
-relatives <- c(
-  "coa" = "Cousins (through aunt older than mother)"
-  , "cya" = "Cousins (through aunt younger than mother)"
-  , "d" = "Daughter"
-  , "gd" = "Grand-daughter"
-  , "ggm" = "Great-grandmother"
-  , "gm" = "Grandmother"
-  , "m" = "Mother"
-  , "nos" = "Nieces through older sister"
-  , "nys" = "Nieces through younger sister"
-  , "oa" = "Aunt older than mother"
-  , "ya" = "Aunt younger than mother"
-  , "os" = "Older sister"
-  , "ys" = "Younger sister"
-  )
+codes <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+caswell_codes <- c("t", "v", "a", "b", "c", "h", "g", "d", "p", "q", "r", "s", "m", "n")
+labels <- c("Cousins from older aunt", "Cousins from younger aunt", "Daughter", "Grand-daughter", "Great-grand-daughter", "Great-grandmother", "Grandmother", "Mother", "Nieces from older sister", "Nieces from younger sister", "Aunt older than mother", "Aunt younger than mother", "Older sister", "Younger sister")
 
-data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% kable()
+data.frame(DemoKin = codes, Caswell = caswell_codes, Label = labels, row.names = NULL) %>% kable(caption = "Equivalence between relative codes between DemoKin and Caswell (2019).")
 
 ```
 
@@ -66,9 +54,9 @@ We can also visualize the age distribution of relatives when focal is 35 for exa
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_full"]] %>%
-              filter(alive=="yes", age_focal == 35) %>% 
+              filter(age_focal == 35) %>% 
               ggplot() +
-              geom_line(aes(age_kin, count))  +
+              geom_line(aes(age_kin, living))  +
               geom_vline(xintercept = 35, color=2) +
               theme_bw() +
               facet_wrap(~kin)
@@ -81,18 +69,18 @@ The `kin` function also includes a summary output with the count of living kin, 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_summary"]] %>% 
   filter(age_focal == 35) %>% 
-  select(kin, count, mean_age, sd_age) %>% 
+  select(kin, count_living, mean_age, sd_age) %>% 
   mutate_if(is.numeric, round, 2) %>% 
   kable()
 ```
 
 We can visualize the estimated kin counts by type of kin using a network diagram. Following with the age 35:
 
-```{r}
+```{r, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 swe_2015_age35 <- swe_2015[["kin_summary"]] %>% 
                 filter(age_focal == 35) %>% 
-                select(kin, count)
-plot_diagram(swe_2015_age35)
+                select(kin, count = count_living)
+plot_diagram(swe_2015_age35, rounding = 2)
 ```
 
 
@@ -107,8 +95,7 @@ swe_2015_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invaria
                                     output_kin = c("d","gd","ggd","m","gm","ggm"))
 
 swe_2015_time_varying$kin_full %>%
-  filter(alive=="yes") %>% 
-  group_by(kin, cohort, age_focal) %>% summarise(count = sum(count)) %>%
+  group_by(kin, cohort, age_focal) %>% summarise(count = sum(living)) %>%
   ggplot(aes(age_focal,count,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   geom_line(size=1,color=1)+
@@ -124,7 +111,7 @@ As you see the estimates stop at age 55, because no data is after 2015.
 
 Kin loss has studied consequences related to mental health, care support and household incomes over life course. Setting the parameter `alive="no"` we can see for a focal from 1900 cohort how many relatives loss during her life (output `kin_death_by_age_focal`):
 
-```{r, fig.height=6, fig.width=8}
+```{r, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 swe_1900_time_varying <- kin(U = swe_px, f = swe_asfr, N = swe_pop, time_invariant = FALSE,
                                     output_cohort = 1900,
                                     output_kin = c("d","gd","ggd","m","gm","ggm"))
@@ -150,20 +137,19 @@ swe_1900_time_varying$kin_summary %>%
 
 Once you have a full kin distribution by age, is possible to know what is the expected portion of living kin in some stage given a set of prevalence by age (could be a disease, employment, etc.). This kind of method is known as Sullivan in life table apporaches. A matrix formulation for same results can be found in Caswell (2019). This can be applied for time variant prevalence too.
 
-```{r}
-# let´s create some prevalence shcedule by age
+```{r, message=FALSE, warning=FALSE}
+# let´s create some prevalence by age
 swe_2015_prevalence <- tibble(age_kin = unique(swe_2015$kin_full$age_kin),
                               prev = .005 * exp(.05 * age_kin))
 
-plot(swe_2015_prevalence)
+# plot(swe_2015_prevalence)
 
 # join to kin count estimates and plot
 swe_2015$kin_full %>% 
-  filter(alive=="yes") %>% 
   left_join(swe_2015_prevalence) %>% 
   group_by(kin, age_focal) %>% 
-  summarise(prevalent = sum(count * prev),
-            no_prevalent = sum(count * (1-prev))) %>% 
+  summarise(prevalent = sum(living * prev),
+            no_prevalent = sum(living * (1-prev))) %>% 
   pivot_longer(cols = prevalent:no_prevalent, names_to = "prevalence_state", values_to = "count") %>% 
   ggplot(aes(x=age_focal, y = count)) + 
   geom_area(aes(fill=prevalence_state)) +
@@ -190,14 +176,14 @@ demokin_svk1980_caswell2020 <- kin_multi_stage(U = svk_Uxs,
 
 We can see age-parity distribution of aunts, when focal is 20 or 60 (similar to figure 4 in Caswell(2021)). 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 demokin_svk1980_caswell2020 %>% 
-  filter(kin %in% c("oa","ya"), alive == "yes", age_focal %in% c(20,60)) %>% 
+  filter(kin %in% c("oa","ya"), age_focal %in% c(20,60)) %>% 
   mutate(parity = as.integer(stage_kin)-1,
          parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
          parity = fct_rev(parity)) %>% 
   group_by(age_focal, age_kin, parity) %>% 
-  summarise(count= sum(count)) %>% 
+  summarise(count= sum(living)) %>% 
   ggplot() +
   geom_bar(aes(x=age_kin, y = count, fill=parity), stat = "identity") +
   geom_vline(aes(xintercept = age_focal), col=2) +
@@ -207,14 +193,14 @@ demokin_svk1980_caswell2020 %>%
 
 Also we can see, When focal grows up, the portion of living daughters and mothers in different parity stages (similar to figure 9 and 10 in Caswell(2021)). 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 demokin_svk1980_caswell2020 %>% 
-  filter(kin %in% c("d","m"), alive == "yes") %>% 
+  filter(kin %in% c("d","m")) %>% 
   mutate(parity = as.integer(stage_kin)-1,
          parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
          parity = fct_rev(parity)) %>% 
   group_by(age_focal, kin, parity) %>% 
-  summarise(count= sum(count)) %>% 
+  summarise(count= sum(living)) %>% 
   ggplot() +
   geom_bar(aes(x=age_focal, y = count, fill=parity), stat = "identity") +
   theme_bw() +

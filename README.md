@@ -20,34 +20,12 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Example
 
-Consider an average Swedish woman in year 2015 (i.e., ‘Focal’).
-Relatives for the `selected_kin` argument are identified by a unique
-code. Note that the relationship codes used in `DemoKin` differ from
-those in Caswell (2019). The equivalence between the two set of codes is
-given in the following table:
+Consider an average Swedish woman in year 2015 (i.e., ‘Focal’). We
+assume a female closed population in which everyone experiences the
+Swedish 2015 mortality and fertility rates at each age throughout their
+life.
 
-| DemoKin | Caswell | Label                      |
-|:--------|:--------|:---------------------------|
-| coa     | t       | Cousins from older aunt    |
-| cya     | v       | Cousins from younger aunt  |
-| d       | a       | Daughter                   |
-| gd      | b       | Grand-daughter             |
-| ggd     | c       | Great-grand-daughter       |
-| ggm     | h       | Great-grandmother          |
-| gm      | g       | Grandmother                |
-| m       | d       | Mother                     |
-| nos     | p       | Nieces from older sister   |
-| nys     | q       | Nieces from younger sister |
-| oa      | r       | Aunt older than mother     |
-| ya      | s       | Aunt younger than mother   |
-| os      | m       | Older sister               |
-| ys      | n       | Younger sister             |
-
-Equivalence between relative codes between DemoKin and Caswell (2019).
-
-Let’s show a quick example. We assume a female closed population in
-which everyone experiences the Swedish 2015 mortality and fertility
-rates at each age throughout their life. We then ask:
+We then ask:
 
 > How can we characterize the kinship network of an average member of
 > the population (‘Focal’)?
@@ -64,10 +42,43 @@ swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 *px* is the survival probability by age from a life table and *f* are
 the age specific fertility ratios by age (see `?kin` for details).
 
+Relatives for the `selected_kin` argument of function `kin` are
+identified by a unique code.
+
+| Code | Relative                                   |
+|:-----|:-------------------------------------------|
+| coa  | Cousins (through aunt older than mother)   |
+| cya  | Cousins (through aunt younger than mother) |
+| d    | Daughter                                   |
+| gd   | Grand-daughter                             |
+| ggm  | Great-grandmother                          |
+| gm   | Grandmother                                |
+| m    | Mother                                     |
+| nos  | Nieces through older sister                |
+| nys  | Nieces through younger sister              |
+| oa   | Aunt older than mother                     |
+| ya   | Aunt younger than mother                   |
+| os   | Older sister                               |
+| ys   | Younger sister                             |
+
+We can visualize the implied kin counts for a Focal aged 35 in Sweden
+(with freeze rates from 2015) using a network or ‘Keyfitz’ kinship
+diagram using the `plot_diagram` function:
+
+``` r
+plot_diagram(kin_total = swe_2015[["kin_summary"]] %>% 
+                          dplyr::filter(age_focal == 35) %>% 
+                          dplyr::select(kin, count = count_living), 
+             rounding = 2)
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
 For more details, including an extension to time varying populations
-rates and relative´s death distribution, see `vignette("Use")`. Note
-that if the vignette does not load, you may need to install the package
-as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
+rates, relative´s death distribution and multi-state model, see
+`vignette("Use")`. Note that if the vignette does not load, you may need
+to install the package as
+`devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
 

@@ -9,7 +9,7 @@ plot_diagram(kin_total, rounding = 3)
 \arguments{
 \item{rounding}{numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.}
 
-\item{kins_total}{vector. Colum names must be as \code{kins} output.}
+\item{kins_total}{data.frame. kin type and some count in columns.}
 }
 \value{
 A plot
