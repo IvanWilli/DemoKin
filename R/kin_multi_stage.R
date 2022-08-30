@@ -161,13 +161,14 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                   dplyr::mutate(kin = y,
                          age_kin = rep(sort(rep(age,s)),2),
                          stage_kin = rep(rep(1:s,ages),2),
-                         alive = c(rep("yes",s*ages),rep("no",s*ages))
+                         alive = c(rep("living",s*ages),rep("death",s*ages))
                          # age_kin = sort(rep(age,s)),
                          # stage_kin = rep(1:s,ages),
                          # alive = c(rep("yes",s*ages))
                          ) %>%
                   tidyr::pivot_longer(c(-age_kin, -stage_kin, -kin, -alive), names_to = "age_focal", values_to = "count") %>%
-                  dplyr::mutate(age_focal = as.integer(age_focal))
+                  dplyr::mutate(age_focal = as.integer(age_focal)) %>%
+                  tidyr::pivot_wider(names_from = alive, values_from = count)
               }) %>%
     purrr::reduce(rbind)
 

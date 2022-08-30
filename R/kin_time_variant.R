@@ -116,15 +116,16 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
                 dplyr::mutate(year = Y,
                         kin=y,
                         age_kin = rep(age,2),
-                        alive = c(rep("yes",ages), rep("no",ages)),
+                        alive = c(rep("living",ages), rep("death",ages)),
                         .before=everything())) %>%
       dplyr::bind_rows() %>%
       stats::setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
       tidyr::gather(age_focal, count,-age_kin, -kin, -year, -alive) %>%
       dplyr::mutate(age_focal = as.integer(age_focal),
-             year = as.integer(year),
-             cohort = year - age_focal) %>%
-      dplyr::filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)])}) %>%
+                     year = as.integer(year),
+                     cohort = year - age_focal) %>%
+      dplyr::filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)]) %>%
+      tidyr::pivot_wider(names_from = alive, values_from = count)}) %>%
     dplyr::bind_rows()
 
   # results as list?

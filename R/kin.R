@@ -52,6 +52,7 @@ kin <- function(U = NULL, f = NULL,
                                      output_kin = output_kin, birth_female = birth_female) %>%
                               dplyr::mutate(cohort = NA, year = NA)
   }else{
+      if(!is.null(output_cohort) & !is.null(output_period)) stop("sorry, you can not select cohort and period. Choose one please")
       kin_full <- kin_time_variant(U = U, f = f, N = N, pi = pi,
                               output_cohort = output_cohort, output_period = output_period,
                               output_kin = output_kin,
@@ -60,29 +61,26 @@ kin <- function(U = NULL, f = NULL,
   }
 
   # reorder
-  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, kin, age_kin, alive, count)
+  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, kin, age_kin, living, death)
 
   # summary
   kin_summary <- dplyr::bind_rows(
     kin_full %>%
-      dplyr::filter(alive=="yes") %>%
-      dplyr::rename(total=count) %>%
-      dplyr::group_by(cohort, alive, age_focal, kin) %>%
+      dplyr::rename(total=living) %>%
+      dplyr::group_by(cohort, year, age_focal, kin) %>%
       dplyr::summarise(count = sum(total),
                 mean_age = sum(total*age_kin)/sum(total),
                 sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
       tidyr::pivot_longer(count:sd_age, names_to = "indicator", "value"),
     kin_full %>%
-      dplyr::filter(alive=="no") %>%
-      dplyr::rename(total=count) %>%
-      dplyr::group_by(cohort, alive, age_focal, kin) %>%
+      dplyr::rename(total=death) %>%
+      dplyr::group_by(cohort, year, age_focal, kin) %>%
       dplyr::summarise(count_death = sum(total)) %>%
-      dplyr::group_by(cohort, alive, kin) %>%
+      dplyr::group_by(cohort, year, kin) %>%
       dplyr::mutate(count_cum_death = cumsum(count_death),
-             mean_age_lost = cumsum(count_death*age_focal)/cumsum(count_death)) %>%
+                    mean_age_lost = cumsum(count_death * age_focal)/cumsum(count_death)) %>%
       dplyr::ungroup() %>%
-      tidyr::pivot_longer(count_death:mean_age_lost, names_to = "indicator", "value")
-    ) %>%
+      tidyr::pivot_longer(count_death:mean_age_lost, names_to = "indicator", "value")) %>%
       dplyr::ungroup() %>%
       dplyr::select(cohort, age_focal, kin, indicator, value) %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
