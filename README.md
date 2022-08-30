@@ -46,7 +46,7 @@ Relatives for the `selected_kin` argument of function `kin` are
 identified by a unique code.
 
 | Code | Relative                                   |
-|:-----|:-------------------------------------------|
+| :--- | :----------------------------------------- |
 | coa  | Cousins (through aunt older than mother)   |
 | cya  | Cousins (through aunt younger than mother) |
 | d    | Daughter                                   |
@@ -77,8 +77,8 @@ plot_diagram(kin_total = swe_2015[["kin_summary"]] %>%
 For more details, including an extension to time varying populations
 rates, relative´s death distribution and multi-state model, see
 `vignette("Use")`. Note that if the vignette does not load, you may need
-to install the package as
-`devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
+to install the package as `devtools::install_github("IvanWilli/DemoKin",
+build_vignettes = T)`.
 
 ## Citation
 
@@ -107,8 +107,8 @@ Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 3.  Improve kinship diagram visualization
 4.  Improve documentation and vignette of package
 
-## Get involved!
+## Get involved\!
 
 `DemoKin` is giving its first steps. If you’re interested in
 contributing, please get in touch, create an issue, or submit a pull
-request. We look forward to hearing from you!
+request. We look forward to hearing from you\!

@@ -73,7 +73,7 @@ data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) %>% 
 
 We can visualize the implied kin counts for a Focal aged 35 in Sweden (with freeze rates from 2015) using a network or 'Keyfitz' kinship diagram using the `plot_diagram` function:
 
-```{r, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
+```{r, fig.height=6, dpi=900,fig.width=8, message=FALSE, warning=FALSE}
 plot_diagram(kin_total = swe_2015[["kin_summary"]] %>% 
                           dplyr::filter(age_focal == 35) %>% 
                           dplyr::select(kin, count = count_living), 
