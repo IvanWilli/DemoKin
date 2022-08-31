@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src="DemoKin-Logo.png" width="250px" />
+<img src="DemoKin-Logo.png" width="250px" style="display: block; margin: auto 0 auto auto;" />
 
-# DemoKin: Implementing matrix kinship models in R
+# DemoKin: Matrix kinship models in R
 
 Aug 31 2022
 
@@ -64,21 +64,22 @@ plot_diagram(kin_total, rounding = 2)
 
 Relatives are identified by a unique code:
 
-| Code | Relative                                   |
-| :--- | :----------------------------------------- |
-| coa  | Cousins (through aunt older than mother)   |
-| cya  | Cousins (through aunt younger than mother) |
-| d    | Daughter                                   |
-| gd   | Grand-daughter                             |
-| ggm  | Great-grandmother                          |
-| gm   | Grandmother                                |
-| m    | Mother                                     |
-| nos  | Nieces through mother’s older sister       |
-| nys  | Nieces through mother’s younger sister     |
-| oa   | Aunt older than mother                     |
-| ya   | Aunt younger than mother                   |
-| os   | Older sister                               |
-| ys   | Younger sister                             |
+| DemoKin | Label                      |
+| :------ | :------------------------- |
+| coa     | Cousins from older aunt    |
+| cya     | Cousins from younger aunt  |
+| d       | Daughter                   |
+| gd      | Grand-daughter             |
+| ggd     | Great-grand-daughter       |
+| ggm     | Great-grandmother          |
+| gm      | Grandmother                |
+| m       | Mother                     |
+| nos     | Nieces from older sister   |
+| nys     | Nieces from younger sister |
+| oa      | Aunt older than mother     |
+| ya      | Aunt younger than mother   |
+| os      | Older sister               |
+| ys      | Younger sister             |
 
 ## Vignette
 

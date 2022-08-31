@@ -17,11 +17,11 @@ library(knitr)
 ```
 
 
-```{r, out.width = "250px", echo=F}
+```{r, out.width = "250px", fig.align = 'right', echo=F}
 knitr::include_graphics("DemoKin-Logo.png")
 ```
 
-# DemoKin: Implementing matrix kinship models in R
+# DemoKin: Matrix kinship models in R
 `r format(Sys.time(), "%b %d %Y")`
 
 `DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. The package is an R-language implementation of Caswell (2019), Caswell (2020), and Caswell and Song (2021). It draws on previous theoretical development by Goodman, Keyfitz and Pullum (1974).
@@ -57,7 +57,7 @@ swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 
 Now, we can visualize the implied kin counts (i.e., the average number of living kin) of Focal at age 35 using a network or 'Keyfitz' kinship diagram with the function `plot_diagram`:
 
-```{r, fig.height=6, dpi=900,fig.width=8, message=FALSE, warning=FALSE}
+```{r, fig.height=6, dpi=1200,fig.width=8, message=FALSE, warning=FALSE}
 # We need to reformat the data a little bit
 kin_total <- swe_2015[["kin_summary"]]
 # Keep only data for Focal's age 35
@@ -70,23 +70,7 @@ Relatives are identified by a unique code:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 
-relatives <- c(
-  "coa" = "Cousins (through aunt older than mother)"
-  , "cya" = "Cousins (through aunt younger than mother)"
-  , "d" = "Daughter"
-  , "gd" = "Grand-daughter"
-  , "ggm" = "Great-grandmother"
-  , "gm" = "Grandmother"
-  , "m" = "Mother"
-  , "nos" = "Nieces through mother's older sister"
-  , "nys" = "Nieces through mother's younger sister"
-  , "oa" = "Aunt older than mother"
-  , "ya" = "Aunt younger than mother"
-  , "os" = "Older sister"
-  , "ys" = "Younger sister"
-  )
-
-kable(data.frame(Code = names(relatives), Relative = relatives, row.names = NULL) )
+kable(DemoKin::demokin_codes()[-2])
 ```
 
 ## Vignette
