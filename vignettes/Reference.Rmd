@@ -87,7 +87,7 @@ DemoKin::demokin_codes() %>%
   kable
 ```
 
-We can also visualize the age distribution of relatives when Focal is 35 years old (now, with full names to identify each relative type using the function `DemoKin::rename_kin()`:):
+We can also visualize the age distribution of relatives when Focal is 35 years old (now, with full names to identify each relative type using the function `DemoKin::rename_kin()`):
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_full"]] %>%
