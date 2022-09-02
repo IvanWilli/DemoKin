@@ -1,14 +1,13 @@
 #' plot a Kin diagram (network)
 
-#' @description Given estimation of kin counts from `kins` function, draw a diagramm.
-#' @param kins_total data.frame. kin type and some count in columns.
+#' @description Given estimation of kin counts from `kins` function, draw a network diagramm.
+#' @param kin_total data.frame. With columns `kin` with type and `count` with some measeure.
 #' @param rounding numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.
 #' @return A plot
-#' @importFrom DiagrammeR mermaid
 #' @export
 
 plot_diagram <- function(kin_total, rounding = 3){
-  library(igraph)
+
   vertices <- data.frame(
     nodes =  c("ggd", "gd", "d", "Focal", "m", "gm", "ggm", "oa", "coa", "os", "nos", "ya", "cya", "ys", "nys")
     , x = c(1, 1, 1, 1, 1, 1, 1, 0, -1, 0, -1, 2, 3, 2, 3)

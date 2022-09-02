@@ -61,7 +61,7 @@ kin <- function(U = NULL, f = NULL,
   }
 
   # reorder
-  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, kin, age_kin, living, death)
+  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, kin, age_kin, living, dead)
 
   # summary
   # select period/cohort
@@ -84,15 +84,15 @@ kin <- function(U = NULL, f = NULL,
                 sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
       tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", "value"),
     kin_full %>%
-      dplyr::rename(total=death) %>%
+      dplyr::rename(total=dead) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-      dplyr::summarise(count_death = sum(total)) %>%
+      dplyr::summarise(count_dead = sum(total)) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
-      dplyr::mutate(count_cum_death = cumsum(count_death),
-                    mean_age_lost = cumsum(count_death * age_focal)/cumsum(count_death)) %>%
+      dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                    mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
       dplyr::ungroup() %>%
-      tidyr::pivot_longer(count_death:mean_age_lost, names_to = "indicator", "value")) %>%
+      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", "value")) %>%
       dplyr::ungroup() %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
 

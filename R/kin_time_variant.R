@@ -116,7 +116,7 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
                 dplyr::mutate(year = Y,
                         kin=y,
                         age_kin = rep(age,2),
-                        alive = c(rep("living",ages), rep("death",ages)),
+                        alive = c(rep("living",ages), rep("dead",ages)),
                         .before=everything())) %>%
       dplyr::bind_rows() %>%
       stats::setNames(c("year","kin","age_kin","alive",as.character(age))) %>%

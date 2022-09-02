@@ -9,7 +9,7 @@ kin_multi_stage(
   f = NULL,
   D = NULL,
   H = NULL,
-  birth_female = 1,
+  birth_female = 1/2.04,
   output_kin = NULL,
   list_output = FALSE
 )
@@ -22,6 +22,8 @@ kin_multi_stage(
 \item{D}{matrix. survival probabilities by state (age in rows and states in columns)}
 
 \item{H}{matrix. assigns the offspring of individuals in some stage to the appropriate age class with 1 (age in rows and states in columns).}
+
+\item{birth_female}{numeric. Female portion at birth.}
 
 \item{output_kin}{character. kin to return. For example "m" for mother, "d" for daughter. See the \code{vignette} for all kin types.}
 

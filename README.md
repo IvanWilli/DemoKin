@@ -5,7 +5,7 @@
 
 # DemoKin: Matrix kinship models in R
 
-Aug 31 2022
+sep. 02 2022
 
 `DemoKin` uses matrix demographic methods to compute expected (average)
 kin counts from demographic rates under a range of scenarios and
@@ -39,8 +39,8 @@ Let’s explore this Using the Swedish data included with `DemoKin`.
 
 ``` r
 library(DemoKin)
-swe_surv_2015 <- DemoKin::swe_px[,"2015"]
-swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
 swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
@@ -53,7 +53,7 @@ diagram with the function `plot_diagram`:
 
 ``` r
 # We need to reformat the data a little bit
-kin_total <- swe_2015[["kin_summary"]]
+kin_total <- swe_2015$kin_summary
 # Keep only data for Focal's age 35
 kin_total <- kin_total[kin_total$age_focal == 35 , c("kin", "count_living")]
 names(kin_total) <- c("kin", "count")
@@ -65,7 +65,7 @@ plot_diagram(kin_total, rounding = 2)
 Relatives are identified by a unique code:
 
 | DemoKin | Label                      |
-| :------ | :------------------------- |
+|:--------|:---------------------------|
 | coa     | Cousins from older aunt    |
 | cya     | Cousins from younger aunt  |
 | d       | Daughter                   |
@@ -84,10 +84,10 @@ Relatives are identified by a unique code:
 ## Vignette
 
 For more details, including an extension to time varying-populations
-rates, deceased kin, and multi-state models, see `vignette("Reference",
-package = "DemoKin")`. If the vignette does not load, you may need to
-install the package as `devtools::install_github("IvanWilli/DemoKin",
-build_vignettes = T)`.
+rates, deceased kin, and multi-state models, see
+`vignette("Reference", package = "DemoKin")`. If the vignette does not
+load, you may need to install the package as
+`devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
 
@@ -95,11 +95,11 @@ Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell.
 (2021) DemoKin: An R package to implement demographic matrix kinship
 models. URL: <https://github.com/IvanWilli/DemoKin>.
 
-## Get involved\!
+## Get involved!
 
 `DemoKin` is under constant development. If you’re interested in
 contributing, please get in touch, create an issue, or submit a pull
-request. We look forward to hearing from you\!
+request. We look forward to hearing from you!
 
 ## References
 
@@ -120,7 +120,5 @@ and the frequency of various kinship relationships. Theoretical
 Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 
 <!-- ## Next steps: -->
-
 <!-- 1. Implement two-sex matrix kinship models -->
-
 <!-- 1. Improve documentation and vignette of package  -->

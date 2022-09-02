@@ -4,7 +4,7 @@
 \alias{rename_kin}
 \title{rename kin}
 \usage{
-rename_kin(df, consolidate = FALSE)
+rename_kin(df, consolidate_column = "no")
 }
 \description{
 Rename kin labels depending consolidate some types

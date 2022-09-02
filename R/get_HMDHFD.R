@@ -1,16 +1,16 @@
 #' Get time serie matrix data from HMD/HFD
 
-#' @description Wrapper function to get data.frames of female survival, fertlity and population
-#' of selected countriy on selected period.
+#' @description Wrapper function to get data of female survival, fertlity and population
+#' of selected country on selected period.
 
 #' @param country numeric. Country code from rom HMD/HFD.
 #' @param max_year numeric. Latest year to get data.
 #' @param min_year integer. Older year to get data.
-#' @param user character. From HMD/HFD.
-#' @param user_HMD character. From HMD/HFD.
-#' @param user_HFD character. From HMD/HFD.
-#' @param pass_HMD character. From HMD/HFD.
-#' @param pass_HFD character. From HMD/HFD.
+#' @param user_HMD character. From HMD.
+#' @param user_HFD character. From HFD.
+#' @param pass_HMD character. From HMD.
+#' @param pass_HFD character. From HFD.
+#' @param OAG numeric. Open age group to standarize output.
 #' @return A list wiith female survival probability, survival function, fertility and poopulation age specific matrixes, with calendar year as colnames.
 #' @export
 
@@ -28,13 +28,13 @@ get_HMDHFD <- function(country = "SWE",
   }
 
   # source HMD HFD -----------------------------------------------------------------
-  pop <- readHMDweb(CNTRY = country, "Population", user_HMD, pass_HMD, fixup = TRUE) %>%
-          select(Year, Age, N = Female1)%>%
-          filter(Year >= min_year, Year <= max_year)
-  lt <- readHMDweb(country, "fltper_1x1", user_HMD, pass_HMD, fixup = TRUE) %>%
-          filter(Year >= min_year, Year <= max_year)
-  asfr <- readHFDweb(country, "asfrRR", user_HFD, pass_HFD, fixup = TRUE)%>%
-          filter(Year >= min_year, Year <= max_year)
+  pop <- HMDHFDplus::readHMDweb(CNTRY = country, "Population", user_HMD, pass_HMD, fixup = TRUE) %>%
+          dplyr::select(Year, Age, N = Female1)%>%
+          dplyr::filter(Year >= min_year, Year <= max_year)
+  lt <- HMDHFDplus::readHMDweb(country, "fltper_1x1", user_HMD, pass_HMD, fixup = TRUE) %>%
+          dplyr::filter(Year >= min_year, Year <= max_year)
+  asfr <- HMDHFDplus::readHFDweb(country, "asfrRR", user_HFD, pass_HFD, fixup = TRUE)%>%
+          dplyr::filter(Year >= min_year, Year <= max_year)
 
   # list of yearly Leslie matrix ---------------------------------------------------
 
@@ -46,22 +46,22 @@ get_HMDHFD <- function(country = "SWE",
 
   # survival probability
   px <- lt %>%
-    filter(Age<=OAG) %>%
-    mutate(px = 1 - qx,
+    dplyr::filter(Age<=OAG) %>%
+    dplyr::mutate(px = 1 - qx,
            px = ifelse(Age==OAG, 0, px)) %>%
-    select(Year, Age, px) %>%
-    pivot_wider(names_from = "Year", values_from = "px") %>%
-    select(-Age) %>%
+    dplyr::select(Year, Age, px) %>%
+    tidyr::pivot_wider(names_from = "Year", values_from = "px") %>%
+    dplyr::select(-Age) %>%
     as.matrix()
   rownames(px) = 0:OAG
 
   # survival function
   Lx <- lt %>%
-    filter(Age<=OAG) %>%
-    mutate(Lx = ifelse(Age==OAG, Tx, Lx)) %>%
-    select(Year, Age, Lx) %>%
-    pivot_wider(names_from = "Year", values_from = "Lx") %>%
-    select(-Age) %>%
+    dplyr::filter(Age<=OAG) %>%
+    dplyr::mutate(Lx = ifelse(Age==OAG, Tx, Lx)) %>%
+    dplyr::select(Year, Age, Lx) %>%
+    tidyr::pivot_wider(names_from = "Year", values_from = "Lx") %>%
+    dplyr::select(-Age) %>%
     as.matrix()
 
   Sx <- rbind(Lx[c(-1,-ages),]/Lx[-c(w:ages),],
@@ -71,26 +71,26 @@ get_HMDHFD <- function(country = "SWE",
 
   # fertility
   fx <- asfr %>%
-    filter(Year >= min_year) %>%
-    select(-OpenInterval) %>%
+    dplyr::filter(Year >= min_year) %>%
+    dplyr::select(-OpenInterval) %>%
     rbind(
       expand.grid(Year = years,
                   Age = c(0:(min(asfr$Age)-1),(max(asfr$Age)+1):OAG),
                   ASFR = 0)) %>%
-    arrange(Year, Age) %>%
-    spread(Year, ASFR) %>%
-    select(-Age) %>%
+    dplyr::arrange(Year, Age) %>%
+    tidyr::spread(Year, ASFR) %>%
+    dplyr::select(-Age) %>%
     as.matrix()
   rownames(fx) = 0:OAG
 
   # population
   Nx <- pop %>%
-    mutate(Age = ifelse(Age>OAG, OAG, Age)) %>%
-    group_by(Year, Age) %>% summarise(N = sum(N)) %>%
-    filter(Age<=OAG, Year >= min_year) %>%
-    arrange(Year, Age) %>%
-    spread(Year, N) %>%
-    select(-Age) %>%
+    dplyr::mutate(Age = ifelse(Age>OAG, OAG, Age)) %>%
+    dplyr::group_by(Year, Age) %>% summarise(N = sum(N)) %>%
+    dplyr::filter(Age<=OAG, Year >= min_year) %>%
+    dplyr::arrange(Year, Age) %>%
+    tidyr::spread(Year, N) %>%
+    dplyr::select(-Age) %>%
     as.matrix()
   rownames(Nx) = 0:OAG
 

@@ -103,7 +103,7 @@ kin_time_invariant <- function(U = NULL, f = NULL,
                     out %>%
                       dplyr::mutate(kin = y,
                                    age_kin = rep(age,2),
-                                   alive = c(rep("living",ages), rep("death",ages))) %>%
+                                   alive = c(rep("living",ages), rep("dead",ages))) %>%
                       tidyr::pivot_longer(c(-age_kin, -kin, -alive), names_to = "age_focal", values_to = "count") %>%
                       dplyr::mutate(age_focal = as.integer(age_focal)) %>%
                       tidyr::pivot_wider(names_from = alive, values_from = count)

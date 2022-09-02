@@ -22,20 +22,20 @@ get_HMDHFD(
 
 \item{max_year}{numeric. Latest year to get data.}
 
-\item{user_HMD}{character. From HMD/HFD.}
+\item{user_HMD}{character. From HMD.}
 
-\item{pass_HMD}{character. From HMD/HFD.}
+\item{pass_HMD}{character. From HMD.}
 
-\item{user_HFD}{character. From HMD/HFD.}
+\item{user_HFD}{character. From HFD.}
 
-\item{pass_HFD}{character. From HMD/HFD.}
+\item{pass_HFD}{character. From HFD.}
 
-\item{user}{character. From HMD/HFD.}
+\item{OAG}{numeric. Open age group to standarize output.}
 }
 \value{
 A list wiith female survival probability, survival function, fertility and poopulation age specific matrixes, with calendar year as colnames.
 }
 \description{
-Wrapper function to get data.frames of female survival, fertlity and population
-of selected countriy on selected period.
+Wrapper function to get data of female survival, fertlity and population
+of selected country on selected period.
 }

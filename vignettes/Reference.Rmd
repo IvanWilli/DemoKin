@@ -12,8 +12,6 @@ vignette: >
 
 ```{r, include=FALSE}
 devtools::load_all()
-library(tidyverse)
-library(knitr)
 ```
 
 In this vignette, we'll demonstrate how `DemoKin` can be used to compute kinship networks for an average member of a given (female) population. Let us call her Focal: an average Swedish woman who has always lived in Sweden and whose family has never left the country.
@@ -25,13 +23,13 @@ First, we compute kin counts in a **time-invariant** framework. We assume that F
 
 In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of sruvival ratios and another vector of fertility rates. IN this example, we get the data for the year 2015, and run the matrix models:
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
+library(DemoKin)
 library(tidyverse)
 library(knitr)
-
 # First, get vectors for a given year
-swe_surv_2015 <- DemoKin::swe_px[,"2015"]
-swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
 # Run kinship models
 swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
@@ -58,7 +56,7 @@ Consider this simplified example for living kin counts:
 ```{r}
 kin_summary_example <- 
   swe_2015$kin_full %>% 
-  select(year, cohort, kin, age_focal, age_kin, living, death) %>% 
+  select(year, cohort, kin, age_focal, age_kin, living, dead) %>% 
   group_by(year, cohort, kin, age_focal) %>% 
   summarise(count_living = sum(living)) 
 
@@ -166,7 +164,7 @@ The function `kin` also includes information on the number of relatives lost by 
 swe_time_varying$kin_summary %>%
   DemoKin::rename_kin() %>% 
   ggplot() +
-  geom_line(aes(age_focal, count_cum_death)) +
+  geom_line(aes(age_focal, count_cum_dead)) +
   labs(y = "Expected number of deceased relatives") +
   theme_bw() +
   facet_wrap(~kin,scales="free")
@@ -176,9 +174,9 @@ Given these population-level measures, we can compute Focal's the mean age at th
 
 ```{r}
 swe_time_varying$kin_summary %>% 
-  DemoKin::rename_kin() %>% 
+  rename_kin() %>% 
   filter(age_focal == 50) %>% 
-  select(kin,count_cum_death,mean_age_lost) %>% 
+  select(kin,count_cum_dead,mean_age_lost) %>% 
   mutate_if(is.numeric, round, 2) %>% 
   kable()
 ```
@@ -201,7 +199,7 @@ swe_2015_prevalence <-
 swe_2015$kin_full %>% 
   left_join(swe_2015_prevalence) %>% 
   group_by(kin, age_focal) %>% 
-  DemoKin::rename_kin() %>% 
+  rename_kin() %>% 
   summarise(
     prevalent = sum(living * prev),
     no_prevalent = sum(living * (1-prev))

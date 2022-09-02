@@ -48,8 +48,8 @@ Let's explore this Using the Swedish data included with `DemoKin`.
 
 ```{r, fig.height=6, fig.width=8}
 library(DemoKin)
-swe_surv_2015 <- DemoKin::swe_px[,"2015"]
-swe_asfr_2015 <- DemoKin::swe_asfr[,"2015"]
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
 swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
@@ -59,7 +59,7 @@ Now, we can visualize the implied kin counts (i.e., the average number of living
 
 ```{r, fig.height=6, dpi=1200,fig.width=8, message=FALSE, warning=FALSE}
 # We need to reformat the data a little bit
-kin_total <- swe_2015[["kin_summary"]]
+kin_total <- swe_2015$kin_summary
 # Keep only data for Focal's age 35
 kin_total <- kin_total[kin_total$age_focal == 35 , c("kin", "count_living")]
 names(kin_total) <- c("kin", "count")
@@ -69,7 +69,6 @@ plot_diagram(kin_total, rounding = 2)
 Relatives are identified by a unique code:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
-
 kable(DemoKin::demokin_codes()[-2])
 ```
 

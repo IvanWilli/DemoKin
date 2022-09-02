@@ -7,6 +7,7 @@
 #' @param D matrix. survival probabilities by state (age in rows and states in columns)
 #' @param H matrix. assigns the offspring of individuals in some stage to the appropriate age class with 1 (age in rows and states in columns).
 #' @param output_kin character. kin to return. For example "m" for mother, "d" for daughter. See the `vignette` for all kin types.
+#' @param birth_female numeric. Female portion at birth.
 #' @param list_output logical. Results as a list. Default `FALSE`.
 
 #' @return A data frame with focal´s age, related ages and type of kin
@@ -15,7 +16,7 @@
 #'
 
 kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
-                               birth_female = 1,
+                               birth_female = 1/2.04,
                                output_kin = NULL,
                                list_output = FALSE){
 
@@ -149,7 +150,7 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
 
   # only selected kin
   if(!is.null(output_kin)){
-    kin_list <- kin_list %>% keep(names(.) %in% output_kin)
+    kin_list <- kin_list %>% purrr::keep(names(.) %in% output_kin)
   }
 
   # as data.frame
@@ -161,7 +162,7 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                   dplyr::mutate(kin = y,
                          age_kin = rep(sort(rep(age,s)),2),
                          stage_kin = rep(rep(1:s,ages),2),
-                         alive = c(rep("living",s*ages),rep("death",s*ages))
+                         alive = c(rep("living",s*ages),rep("dead",s*ages))
                          # age_kin = sort(rep(age,s)),
                          # stage_kin = rep(1:s,ages),
                          # alive = c(rep("yes",s*ages))
