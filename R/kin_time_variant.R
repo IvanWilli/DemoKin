@@ -84,7 +84,7 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
       U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1, pi = pi1, birth_female = birth_female,
+      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1/birth_female, pi = pi1, birth_female = birth_female,
                                          list_output = TRUE)
     }
     kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
@@ -166,7 +166,7 @@ timevarying_kin<- function(Ut, ft, pit, ages, pkin){
   gm[1:ages,1] = pkin[["m"]][1:ages,] %*% pit[1:ages]
   ggm[1:ages,1]= pkin[["gm"]][1:ages,] %*% pit[1:ages]
   os[1:ages,1] = pkin[["d"]][1:ages,] %*% pit[1:ages]
-  ys[1:ages,1] = pkin[["gd"]][1:ages,] %*% pit[1:ages]
+  nos[1:ages,1] = pkin[["gd"]][1:ages,] %*% pit[1:ages]
   oa[1:ages,1] = pkin[["os"]][1:ages,] %*% pit[1:ages]
   ya[1:ages,1] = pkin[["ys"]][1:ages,] %*% pit[1:ages]
   coa[1:ages,1]= pkin[["nos"]][1:ages,] %*% pit[1:ages]
