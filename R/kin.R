@@ -32,6 +32,7 @@ kin <- function(U = NULL, f = NULL,
 
   age <- as.integer(rownames(U))
   years_data <- as.integer(colnames(U))
+  `%>%` <- magrittr::`%>%`
 
   # kin to return
   all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
