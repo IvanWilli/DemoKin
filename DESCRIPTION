@@ -27,7 +27,8 @@ Imports:
     MASS,
     stats,
     igraph,
-    magrittr
+    magrittr,
+    lifecycle
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
     R (>= 2.10)

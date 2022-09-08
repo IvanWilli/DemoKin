@@ -17,14 +17,21 @@ library(knitr)
 ```
 
 
-```{r, out.width = "250px", fig.align = 'right', echo=F}
-knitr::include_graphics("DemoKin-Logo.png")
-```
+# DemoKin 
 
-# DemoKin: Matrix kinship models in R
-`r format(Sys.time(), "%b %d %Y")`
+:::::::::::::: {.columns}
+::: {.column width="60%"}
+
 
 `DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. The package is an R-language implementation of Caswell (2019), Caswell (2020), and Caswell and Song (2021). It draws on previous theoretical development by Goodman, Keyfitz and Pullum (1974).
+
+:::
+::: {.column width="40%"}
+
+<img src="DemoKin-Logo.png" align="right" width="200" />
+
+:::
+::::::::::::::
 
 ## Installation
 
@@ -35,16 +42,15 @@ You can install the development version from GitHub with:
 devtools::install_github("IvanWilli/DemoKin")
 ```
 
-## Time-invariant example
+## Usage
 
 Consider an average Swedish woman called 'Focal'. For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life (the 'time-invariant' assumption in Caswell [2019]). 
 
 We then ask:
 
-<!-- > How can we characterize Focal's kinship network? -->
 > How many living relatives does Focal have at each age?
 
-Let's explore this Using the Swedish data included with `DemoKin`.
+Let's explore this using the Swedish data already included with `DemoKin`.
 
 ```{r, fig.height=6, fig.width=8}
 library(DemoKin)
@@ -53,7 +59,7 @@ swe_asfr_2015 <- swe_asfr[,"2015"]
 swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
-*px* is the survival probability by age from a life table and *f* are the age specific fertility ratios by age (see `?kin` for details). 
+*px* is the survival probability by age from a life table and *f* are the age specific fertility raties by age (see `?kin` for details). 
 
 Now, we can visualize the implied kin counts (i.e., the average number of living kin) of Focal at age 35 using a network or 'Keyfitz' kinship diagram with the function `plot_diagram`:
 

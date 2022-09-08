@@ -1,8 +1,8 @@
 #' Estimate kin counts
 
 #' @description Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework.
-#' @details See Caswell (2019) and Caswell (2021) for details on formulas.
-#' @param U numeric. A vector or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
+#' @details See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by deafult).
+#' @param U numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param f numeric. Same as U but for fertility rates.
 #' @param time_invariant logical. Constant assumption for a given `year` rates. Default `TRUE`.
 #' @param N numeric. Same as U but for population distribution (counts or `%`). Optional.
@@ -10,16 +10,22 @@
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
-#' @param birth_female numeric. Female portion at birth.
+#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
 #' @return A list with:
-#'  * `kin_full`: a data frame with year, cohort, focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), with living kin and death on that age.
-#'  * `kin_summary`: a data frame with focal´s age, related ages and type of kin, with indicators obtained processing `kin_full`, grouping by cohort or period (depending arguments):
-#'  - `count_living`: count of living kin at actual age of focal
-#'  - `mean_age`: mean age of each type of living kin.
-#'  - `sd_age`: standard deviation age of each type of living kin .
-#'  - `count_death`: count of death kin at specific age of focal.
-#'  - `count_cum_death`: cumulated count of death kin until specific age of focal.
-#'  - `mean_age_lost`: mean age where focal lost her relative.
+#' \itemize{
+#'  \item{kin_full}{a data frame with year, cohort, focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), with living kin and death on that age.}
+#'  \item{kin_summary}{a data frame with focal´s age, related ages and type of kin, with indicators obtained processing `kin_full`, grouping by cohort or period (depending arguments):}
+#'  {\itemize{
+#'  \item{`count_living`}{: count of living kin at actual age of focal}
+#'  \item{`mean_age`}{: mean age of each type of living kin.}
+#'  \item{`sd_age`}{: standard deviation age of each type of living kin .}
+#'  \item{`count_death`}{: count of death kin at specific age of focal.}
+#'  \item{`count_cum_death`}{: cumulated count of death kin until specific age of focal.}
+#'  \item{`mean_age_lost`}{: mean age where focal lost her relative.}
+#'  }
+#'  }
+#' }
+
 #' @export
 #'
 # get kin ----------------------------------------------------------------
@@ -27,12 +33,17 @@ kin <- function(U = NULL, f = NULL,
                  time_invariant = TRUE,
                  N = NULL, pi = NULL,
                  output_cohort = NULL, output_period = NULL, output_kin=NULL,
-                 birth_female = 1/2.04)
+                 birth_female = 1/2.04,
+                 stable = lifecycle::deprecated())
   {
 
   age <- as.integer(rownames(U))
   years_data <- as.integer(colnames(U))
-  `%>%` <- magrittr::`%>%`
+
+  if (lifecycle::is_present(stable)) {
+    lifecycle::deprecate_warn("0.0.0.9000", "kin(stable)", details = "Used time_invariant")
+    time_invariant <- stable
+  }
 
   # kin to return
   all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")

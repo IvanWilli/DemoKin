@@ -1,17 +1,27 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src="DemoKin-Logo.png" width="250px" style="display: block; margin: auto 0 auto auto;" />
+# DemoKin
 
-# DemoKin: Matrix kinship models in R
+<div class="columns">
 
-sep. 02 2022
+<div class="column" width="60%">
 
 `DemoKin` uses matrix demographic methods to compute expected (average)
 kin counts from demographic rates under a range of scenarios and
 assumptions. The package is an R-language implementation of Caswell
 (2019), Caswell (2020), and Caswell and Song (2021). It draws on
 previous theoretical development by Goodman, Keyfitz and Pullum (1974).
+
+</div>
+
+<div class="column" width="40%">
+
+<img src="DemoKin-Logo.png" align="right" width="200" />
+
+</div>
+
+</div>
 
 ## Installation
 
@@ -22,7 +32,7 @@ You can install the development version from GitHub with:
 devtools::install_github("IvanWilli/DemoKin")
 ```
 
-## Time-invariant example
+## Usage
 
 Consider an average Swedish woman called ‘Focal’. For this exercise, we
 assume a female closed population in which everyone experiences the
@@ -31,11 +41,10 @@ life (the ‘time-invariant’ assumption in Caswell \[2019\]).
 
 We then ask:
 
-<!-- > How can we characterize Focal's kinship network? -->
-
 > How many living relatives does Focal have at each age?
 
-Let’s explore this Using the Swedish data included with `DemoKin`.
+Let’s explore this using the Swedish data already included with
+`DemoKin`.
 
 ``` r
 library(DemoKin)
@@ -45,7 +54,7 @@ swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 *px* is the survival probability by age from a life table and *f* are
-the age specific fertility ratios by age (see `?kin` for details).
+the age specific fertility raties by age (see `?kin` for details).
 
 Now, we can visualize the implied kin counts (i.e., the average number
 of living kin) of Focal at age 35 using a network or ‘Keyfitz’ kinship
@@ -60,7 +69,7 @@ names(kin_total) <- c("kin", "count")
 plot_diagram(kin_total, rounding = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
 Relatives are identified by a unique code:
 
