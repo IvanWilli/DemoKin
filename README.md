@@ -104,6 +104,16 @@ Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell.
 (2021) DemoKin: An R package to implement demographic matrix kinship
 models. URL: <https://github.com/IvanWilli/DemoKin>.
 
+## Acknowledgments
+
+We thank Silvia Leek from the Max Planck Institute for Demographic
+Research for designing the DemoKin logo. The logo includes elements that
+have been taken or adapted [from this
+file](https://commons.wikimedia.org/wiki/File:Escudo_de_la_Orden_de_San_Jer%C3%B3nimo.svg),
+originally by Ansunando, [CC BY-SA
+4.0](https://creativecommons.org/licenses/by-sa/4.0) via Wikimedia
+Commons. Sha Jiang provided useful comments for improving the package.
+
 ## Get involved!
 
 `DemoKin` is under constant development. If you’re interested in

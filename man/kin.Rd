@@ -39,15 +39,15 @@ kin(
 \value{
 A list with:
 \itemize{
-\item{kin_full}{a data frame with year, cohort, focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), with living kin and death on that age.}
-\item{kin_summary}{a data frame with focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}, grouping by cohort or period (depending arguments):}
+\item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), including living and dead kin at that age.}
+\item{kin_summary}{ a data frame with Focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}, grouping by cohort or period (depending on the given arguments):}
 {\itemize{
-\item{\code{count_living}}{: count of living kin at actual age of focal}
+\item{\code{count_living}}{: count of living kin at actual age of Focal}
 \item{\code{mean_age}}{: mean age of each type of living kin.}
-\item{\code{sd_age}}{: standard deviation age of each type of living kin .}
-\item{\code{count_death}}{: count of death kin at specific age of focal.}
-\item{\code{count_cum_death}}{: cumulated count of death kin until specific age of focal.}
-\item{\code{mean_age_lost}}{: mean age where focal lost her relative.}
+\item{\code{sd_age}}{: standard deviation of age of each type of living kin.}
+\item{\code{count_death}}{: count of dead kin at specific age of Focal.}
+\item{\code{count_cum_death}}{: cumulated count of dead kin until specific age of Focal.}
+\item{\code{mean_age_lost}}{: mean age where Focal lost her relative.}
 }
 }
 }
@@ -56,5 +56,5 @@ A list with:
 Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework.
 }
 \details{
-See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by deafult).
+See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
 }

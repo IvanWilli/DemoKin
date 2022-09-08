@@ -21,7 +21,7 @@ Here, we'll show how `DemoKin` can be used to compute the number and age distrib
 
 First, we compute kin counts in a **time-invariant** framework. We assume that Focal and all of her relatives experience the 2015 mortality and fertility rates throughout their entire lives (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example: age-by-year matrices of survival probabilities (*swe_px*), survival ratios (*swe_Sx*), fertility rates (*swe_asfr*), and population numbers (*swe_pop*). You can see the data contained in `DemoKin` with `data(package="DemoKin")`. This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/) (see `?DemoKin::get_HMDHFD`). 
 
-In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of sruvival ratios and another vector of fertility rates. IN this example, we get the data for the year 2015, and run the matrix models:
+In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of sruvival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
 
 ```{r, message=FALSE, warning=FALSE}
 library(DemoKin)
@@ -38,7 +38,7 @@ swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 
 `DemoKin::kin()` returns a list containing two data frames: `kin_full` and `kin_summary`. 
 
-`kin_full` contains expected kin counts by year (or cohort), age of Focal and age of kin. Note that the columns `year` and `cohort` are empty if the argument if `time_invariant = TRUE` in `kin` (as in this example).
+`kin_full` contains expected kin counts by year (or cohort), age of Focal and age of kin. Note that the columns `year` and `cohort` are empty if the argument is `time_invariant = TRUE` in `kin` (as in this example).
 
 ```{r}
 head(swe_2015$kin_full)
