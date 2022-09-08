@@ -1,92 +1,114 @@
 #' Estimate kin counts
 
-#' @description Implementation of Goodman-Keyfitz-Pullum equations in a stable or not framework.
-#' @details See Caswell (2019) and Caswell (2021) for details on formulas.
-#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. The name of each col must be the year.
-#' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. The name of each col must be the year.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. The name of each col must be the year.
-#' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. The name of each col must be the year.
-#' @param focal_cohort integer. Year of birth of focal. Could be a vector. Should be within input data years range.
-#' @param focal_year integer. Year of focal. Could be a vector. Should be within input data years range.
-#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
-#' @param birth_female numeric. Female portion at birth.
-#' @param Pb logic. Is given Pb as the first row in P?. If not, takes `P(0,1)` as `P(b,1)`. Useful for fertility matrix first row. Default `FALSE`.
-#' @param stable logical. Stable assumption given `year` rates, taking focal_year in case is U and f are matrix.
-#' @param living logial. Only living kin counts `TRUE`, or including death kin `FALSE`.
+#' @description Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework.
+#' @details See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
+#' @param U numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
+#' @param f numeric. Same as U but for fertility rates.
+#' @param time_invariant logical. Constant assumption for a given `year` rates. Default `TRUE`.
+#' @param N numeric. Same as U but for population distribution (counts or `%`). Optional.
+#' @param pi numeric. Same as U but for childbearing distribution (sum to 1). Optional.
+#' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
+#' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
+#' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
+#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
 #' @return A list with:
-#'  * `kin`: a data frame with focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.). The content (living or deaths) dependes on `alive` param.
-#'  * A data frame with kin at each age of focal´s life. The content (living or deaths) dependes on `alive` param.
-#'  * A data frame with kin at actual age of focal. The content (living or deaths) dependes on `alive` param.
-#'  * Mean age of each type of kin at actual age of focal.  The content (living or deaths) dependes on `alive` param.
-#'  * Total of each type of kin at actual age of focal.  The content (living or deaths) dependes on `alive` param.
-#' @export
-#' @examples
-#' # If focal is 30 years old and lives in 1950. How much live kin would have if
-#' # her relatives would experience mortality and fertility in that calendar year?
-#' \dontrun{
-#' swe30_1950_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 1950, stable = TRUE,selected_kin = c("m","gm"))
-#' # How much live mothers and grandmothers would have if her relatives would experience
-#' # mortality and fertility at each observed year?
-#' swe30_1950_nonstable <- kin(U = swe_surv, f = swe_asfr,N = swe_pop,
-#'                              stable = FALSE, focal_year = 1950, selected_kin = c("m","gm"))
-#' # Difference in total by kin:
-#' swe30_1950_stable$kin_by_age_focal %>% filter(age_focal==30) %>% select(kin, total)
-#' swe30_1950_nonstable$kin_by_age_focal %>% filter(age_focal==30) %>% select(kin, total)
+#' \itemize{
+#'  \item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age.}
+#'  \item{kin_summary}{ a data frame with Focal´s age, related ages and type of kin, with indicators obtained processing `kin_full`, grouping by cohort or period (depending on the given arguments):}
+#'  {\itemize{
+#'  \item{`count_living`}{: count of living kin at actual age of Focal}
+#'  \item{`mean_age`}{: mean age of each type of living kin.}
+#'  \item{`sd_age`}{: standard deviation of age of each type of living kin.}
+#'  \item{`count_death`}{: count of dead kin at specific age of Focal.}
+#'  \item{`count_cum_death`}{: cumulated count of dead kin until specific age of Focal.}
+#'  \item{`mean_age_lost`}{: mean age where Focal lost her relative.}
+#'  }
+#'  }
 #' }
+
+#' @export
 #'
 # get kin ----------------------------------------------------------------
-kin <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
-                 stable = TRUE,
-                 focal_cohort = NULL, focal_year = NULL, selected_kin=NULL,
+kin <- function(U = NULL, f = NULL,
+                 time_invariant = TRUE,
+                 N = NULL, pi = NULL,
+                 output_cohort = NULL, output_period = NULL, output_kin=NULL,
                  birth_female = 1/2.04,
-                 Pb = FALSE,
-                 living = TRUE)
+                 stable = lifecycle::deprecated())
   {
 
-  age = as.integer(rownames(U))
-  years_data = as.integer(colnames(U))
+  age <- as.integer(rownames(U))
+  years_data <- as.integer(colnames(U))
 
-  # if stable or not
-  if(stable){
-      if(!is.vector(U)) {
-        U = U[,as.character(focal_year)]
-        f = f[,as.character(focal_year)]
-      }
-      kin_full <- kin_stable(U = U, f = f, selected_kin=selected_kin, birth_female = birth_female) %>%
-        mutate(cohort = 0, year = 0)
+  if (lifecycle::is_present(stable)) {
+    lifecycle::deprecate_warn("0.0.0.9000", "kin(stable)", details = "Used time_invariant")
+    time_invariant <- stable
+  }
+
+  # kin to return
+  all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+  if(is.null(output_kin)){
+    output_kin <- all_possible_kin
   }else{
-      kin_full <- kin_non_stable(U = U, f = f, N = N, pi = pi,
-                              focal_cohort = focal_cohort, focal_year = focal_year,
-                              selected_kin=selected_kin,
-                              birth_female = birth_female,
-                              Pb = Pb)
+    output_kin <- match.arg(tolower(output_kin), all_possible_kin, several.ok = TRUE)
+  }
+
+  # if time dependent or not
+  if(time_invariant){
+      if(!is.vector(U)) {
+        output_period <- min(years_data)
+        U <- U[,as.character(output_period)]
+        f <- f[,as.character(output_period)]
+      }
+      kin_full <- kin_time_invariant(U = U, f = f,
+                                     output_kin = output_kin, birth_female = birth_female) %>%
+                              dplyr::mutate(cohort = NA, year = NA)
+  }else{
+      if(!is.null(output_cohort) & !is.null(output_period)) stop("sorry, you can not select cohort and period. Choose one please")
+      kin_full <- kin_time_variant(U = U, f = f, N = N, pi = pi,
+                              output_cohort = output_cohort, output_period = output_period,
+                              output_kin = output_kin,
+                              birth_female = birth_female)
       message(paste0("Assuming stable population before ", min(years_data), "."))
   }
-  # reorder
-  kin_full <- kin_full %>% select(year, cohort, age_focal, kin, age_kin, alive, count)
 
-  # return
-  kin_summary <- kin_full %>%
-    filter(alive=="yes") %>%
-    rename(total=count) %>%
-    group_by(year, cohort, age_focal, kin) %>%
-    summarise(count    = sum(total),
-              mean_age = sum(total*age_kin)/sum(total),
-              sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-    ungroup()
-  if(living){
-    kin_out <- list(kin_full=kin_full %>% filter(alive=="yes"), kin_summary=kin_summary)
-  }else{
-    kin_summary <- kin_full %>%
-      rename(total=count) %>%
-      group_by(cohort, age_focal, kin, alive) %>%
-      summarise(count = sum(total)) %>%
-      ungroup() %>%
-      group_by(cohort, kin, alive) %>%
-      mutate(count_cum = cumsum(count),
-             mean_age_lost = cumsum(count*age_focal)/cumsum(count)) %>%
-      ungroup()
-    kin_out <- list(kin_full=kin_full, kin_summary=kin_summary)
+  # reorder
+  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, kin, age_kin, living, dead)
+
+  # summary
+  # select period/cohort
+  if(!is.null(output_cohort)){
+    agrupar <- "cohort"
+  } else if(!is.null(output_period)){
+    agrupar <- "year"
+  } else{
+    agrupar <- c("year", "cohort")
   }
+  agrupar_no_age_focal <- c("kin", agrupar)
+  agrupar <- c("age_focal", "kin", agrupar)
+
+  kin_summary <- dplyr::bind_rows(
+    kin_full %>%
+      dplyr::rename(total=living) %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+      dplyr::summarise(count_living = sum(total),
+                mean_age = sum(total*age_kin)/sum(total),
+                sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
+      tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", "value"),
+    kin_full %>%
+      dplyr::rename(total=dead) %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+      dplyr::summarise(count_dead = sum(total)) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
+      dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                    mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
+      dplyr::ungroup() %>%
+      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", "value")) %>%
+      dplyr::ungroup() %>%
+      tidyr::pivot_wider(names_from = indicator, values_from = value)
+
+    # return
+    kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
   return(kin_out)
 }

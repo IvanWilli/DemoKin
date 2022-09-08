@@ -3,11 +3,25 @@
 
 # DemoKin
 
+<div class="columns">
+
+<div class="column" width="60%">
+
 `DemoKin` uses matrix demographic methods to compute expected (average)
 kin counts from demographic rates under a range of scenarios and
 assumptions. The package is an R-language implementation of Caswell
-(2019) and Caswell and Song (2021). It draws on previous theoretical
-development by Goodman, Keyfitz and Pullum (1974).
+(2019), Caswell (2020), and Caswell and Song (2021). It draws on
+previous theoretical development by Goodman, Keyfitz and Pullum (1974).
+
+</div>
+
+<div class="column" width="40%">
+
+<img src="DemoKin-Logo.png" align="right" width="200" />
+
+</div>
+
+</div>
 
 ## Installation
 
@@ -18,78 +32,103 @@ You can install the development version from GitHub with:
 devtools::install_github("IvanWilli/DemoKin")
 ```
 
-## Example
+## Usage
 
-Consider an average Swedish woman in year 2015 (i.e., ‘Focal’).
-Relatives for the `selected_kin` argument are identified by a unique
-code. Note that the relationship codes used in `DemoKin` differ from
-those in Caswell (2019). The equivalence between the two set of codes is
-given in the following table:
+Consider an average Swedish woman called ‘Focal’. For this exercise, we
+assume a female closed population in which everyone experiences the
+Swedish 2015 mortality and fertility rates at each age throughout their
+life (the ‘time-invariant’ assumption in Caswell \[2019\]).
 
-| DemoKin | Caswell | Label                      |
-| :------ | :------ | :------------------------- |
-| coa     | t       | Cousins from older aunt    |
-| cya     | v       | Cousins from younger aunt  |
-| d       | a       | Daughter                   |
-| gd      | b       | Grand-daughter             |
-| ggd     | c       | Great-grand-daughter       |
-| ggm     | h       | Great-grandmother          |
-| gm      | g       | Grandmother                |
-| m       | d       | Mother                     |
-| nos     | p       | Nieces from older sister   |
-| nys     | q       | Nieces from younger sister |
-| oa      | r       | Aunt older than mother     |
-| ya      | s       | Aunt younger than mother   |
-| os      | m       | Older sister               |
-| ys      | n       | Younger sister             |
+We then ask:
 
-Equivalence between relative codes between DemoKin and Caswell (2019).
+> How many living relatives does Focal have at each age?
 
-Let’s show a quick example. We assume a female closed population in
-which everyone experiences the Swedish 2015 mortality and fertility
-rates at each age throughout their life. We then ask:
-
-> How can we characterize the kinship network of an average member of
-> the population (‘Focal’)?
-
-For this exercise, we’ll use the Swedish data pre-loaded with `DemoKin`.
+Let’s explore this using the Swedish data already included with
+`DemoKin`.
 
 ``` r
 library(DemoKin)
-swe50_2015_stable <- kin(U = swe_surv, f = swe_asfr, focal_year = 2015, stable = TRUE)
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
+swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
-*U* is the survival ratio by age from a life table and *f* are the age
-specific fertility ratios by age (see `?kin` for details).
+*px* is the survival probability by age from a life table and *f* are
+the age specific fertility raties by age (see `?kin` for details).
 
-We can visualize the implied kin counts for an Focal aged 35 yo in a
-stable population using a network or ‘Keyfitz’ kinship diagram using the
-`plot_diagram` function:
+Now, we can visualize the implied kin counts (i.e., the average number
+of living kin) of Focal at age 35 using a network or ‘Keyfitz’ kinship
+diagram with the function `plot_diagram`:
 
 ``` r
-plot_diagram(swe50_2015_stable[["kin_summary"]] %>% 
-               filter(age_focal == 35) %>% 
-                select(kin, count))
+# We need to reformat the data a little bit
+kin_total <- swe_2015$kin_summary
+# Keep only data for Focal's age 35
+kin_total <- kin_total[kin_total$age_focal == 35 , c("kin", "count_living")]
+names(kin_total) <- c("kin", "count")
+plot_diagram(kin_total, rounding = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-For more details, including an extension to non-stable populations and
-relative´s death distribution, see `vignette("Use")`. Note that if the
-vignette does not load, you may need to install the package as
+Relatives are identified by a unique code:
+
+| DemoKin | Label                      |
+|:--------|:---------------------------|
+| coa     | Cousins from older aunt    |
+| cya     | Cousins from younger aunt  |
+| d       | Daughter                   |
+| gd      | Grand-daughter             |
+| ggd     | Great-grand-daughter       |
+| ggm     | Great-grandmother          |
+| gm      | Grandmother                |
+| m       | Mother                     |
+| nos     | Nieces from older sister   |
+| nys     | Nieces from younger sister |
+| oa      | Aunt older than mother     |
+| ya      | Aunt younger than mother   |
+| os      | Older sister               |
+| ys      | Younger sister             |
+
+## Vignette
+
+For more details, including an extension to time varying-populations
+rates, deceased kin, and multi-state models, see
+`vignette("Reference", package = "DemoKin")`. If the vignette does not
+load, you may need to install the package as
 `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
 
 Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell.
-(2021) DemoKin: An R package to estimate kinship networks in stable and
-non-stable populations. URL: <https://github.com/IvanWilli/DemoKin>.
+(2021) DemoKin: An R package to implement demographic matrix kinship
+models. URL: <https://github.com/IvanWilli/DemoKin>.
+
+## Acknowledgments
+
+We thank Silvia Leek from the Max Planck Institute for Demographic
+Research for designing the DemoKin logo. The logo includes elements that
+have been taken or adapted [from this
+file](https://commons.wikimedia.org/wiki/File:Escudo_de_la_Orden_de_San_Jer%C3%B3nimo.svg),
+originally by Ansunando, [CC BY-SA
+4.0](https://creativecommons.org/licenses/by-sa/4.0) via Wikimedia
+Commons. Sha Jiang provided useful comments for improving the package.
+
+## Get involved!
+
+`DemoKin` is under constant development. If you’re interested in
+contributing, please get in touch, create an issue, or submit a pull
+request. We look forward to hearing from you!
 
 ## References
 
-Caswell, H. (2019). The formal demography of kinship: A matrix
+Caswell, H. 2019. The formal demography of kinship: A matrix
 formulation. Demographic Research 41:679–712.
 <doi:10.4054/DemRes.2019.41.24>.
+
+Caswell, H. 2020. The formal demography of kinship II: Multistate
+models, parity, and sibship. Demographic Research 42: 1097-1144.
+<doi:10.4054/DemRes.2020.42.38>.
 
 Caswell, Hal and Xi Song. 2021. “The Formal Demography of Kinship. III.
 Kinship Dynamics with Time-Varying Demographic Rates.” Demographic
@@ -99,15 +138,6 @@ Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation
 and the frequency of various kinship relationships. Theoretical
 Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
 
-## Next steps:
-
-1.  Implement multi-stage and two-sex matrix kinship models
-2.  Create a hex logo for package
-3.  Improve kinship diagram visualization
-4.  Improve documentation and vignette of package
-
-## Get involved\!
-
-`DemoKin` is giving its first steps. If you’re interested in
-contributing, please get in touch, create an issue, or submit a pull
-request. We look forward to hearing from you\!
+<!-- ## Next steps: -->
+<!-- 1. Implement two-sex matrix kinship models -->
+<!-- 1. Improve documentation and vignette of package  -->
