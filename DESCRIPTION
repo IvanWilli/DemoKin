@@ -1,7 +1,7 @@
 Package: DemoKin
 Title: Demokin
 Description: Estimate population kin counts and its distribution by type and age
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),
     person("Diego", "Alburez-Gutierrez", email = "alburezgutierrez@demogr.mpg.de", role = "aut"),
