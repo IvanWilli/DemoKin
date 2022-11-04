@@ -35,6 +35,8 @@ kin(
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
 \item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring, this needs to be set as 1.}
+
+\item{stable}{logic. Deprecated. Use \code{time_invariant}.}
 }
 \value{
 A list with:
