@@ -11,6 +11,7 @@
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
+#' @param stable logic. Deprecated. Use `time_invariant`.
 #' @return A list with:
 #' \itemize{
 #'  \item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age.}

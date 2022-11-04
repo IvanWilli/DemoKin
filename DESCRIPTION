@@ -14,12 +14,14 @@ RoxygenNote: 7.2.1
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    ggplot2
 VignetteBuilder: knitr
 Imports: 
     dplyr,
     tidyr,
     purrr,
+    forcats,
     HMDHFDplus,
     progress,
     matrixcalc,

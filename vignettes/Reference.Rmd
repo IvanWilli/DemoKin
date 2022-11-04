@@ -11,7 +11,7 @@ vignette: >
 ---
 
 ```{r, include=FALSE}
-devtools::load_all()
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
 In this vignette, we'll demonstrate how `DemoKin` can be used to compute kinship networks for an average member of a given (female) population. Let us call her Focal: an average Swedish woman who has always lived in Sweden and whose family has never left the country.
@@ -25,7 +25,9 @@ In order to implement the time-invariant models, the function `DemoKin::kin` exp
 
 ```{r, message=FALSE, warning=FALSE}
 library(DemoKin)
-library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
 library(knitr)
 # First, get vectors for a given year
 swe_surv_2015 <- swe_px[,"2015"]
@@ -245,7 +247,7 @@ demokin_svk1980_caswell2020 %>%
   filter(kin %in% c("oa","ya"), age_focal %in% c(20,60)) %>% 
   mutate(parity = as.integer(stage_kin)-1,
          parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
-         parity = fct_rev(parity)) %>% 
+         parity = forcats::fct_rev(parity)) %>% 
   group_by(age_focal, age_kin, parity) %>% 
   summarise(count= sum(living)) %>% 
   ggplot() +
@@ -263,7 +265,7 @@ demokin_svk1980_caswell2020 %>%
   filter(kin %in% c("d","m")) %>% 
   mutate(parity = as.integer(stage_kin)-1,
          parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
-         parity = fct_rev(parity)) %>% 
+         parity = forcats::fct_rev(parity)) %>% 
   group_by(age_focal, kin, parity) %>% 
   summarise(count= sum(living)) %>% 
   DemoKin::rename_kin() %>% 
