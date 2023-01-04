@@ -1,24 +1,22 @@
-#' Estimate kin counts in a stable framework
+#' Estimate kin counts in a time invariant framework
 
 #' @description Implementation of Goodman-Keyfitz-Pullum equations adapted by Caswell (2019).
 
-#' @param U numeric. A vector of survival ratios.
-#' @param f numeric. A vector of age-specific fertility rates.
+#' @param U numeric. A vector of survival probabilities with same length as ages.
+#' @param f numeric. A vector of age-specific fertility rates with same length as ages.
 #' @param birth_female numeric. Female portion at birth.
-#' @param pi numeric. For using the non-stable distribution of childbearing. Default `NULL`.
-#' @param selected_kin character. kin to return: "m" for mother, "d" for daughter,...
-#' @param pi_stable logical. Want mean age at childbearing as a result too. Default `FALSE`
-#' @param list_output logical. Want kin results as a list. Default `FALSE`
+#' @param pi numeric. For using some specific non-stable age distribution of childbearing (same length as ages). Default `NULL`.
+#' @param output_kin character. kin to return. For example "m" for mother, "d" for daughter. See the `vignette` for all kin types.
+#' @param list_output logical. Results as a list with `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 #'
 #' @return A data frame with focal´s age, related ages and type of kin
-#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death.
+#' (for example `d` is daughter, `oa` is older aunts, etc.), alive and death. If `list_output = TRUE` then this is a list.
 #' @export
 
-kin_stable <- function(U = NULL, f = NULL,
+kin_time_invariant <- function(U = NULL, f = NULL,
                         birth_female = 1/2.04,
                         pi = NULL,
-                        selected_kin = NULL,
-                        pi_stable = FALSE,
+                        output_kin = NULL,
                         list_output = FALSE){
 
   # make matrix transition from vectors
@@ -31,9 +29,7 @@ kin_stable <- function(U = NULL, f = NULL,
   Ut = rbind(cbind(Ut,zeros),
              cbind(Mt,Dcum))
   ft = matrix(0, nrow=ages*2, ncol=ages*2)
-
-  # Caswell's assumption
-  ft[1,1:ages] = f * U * birth_female
+  ft[1,1:ages] = f * birth_female
 
   # stable age distr
   if(is.null(pi)){
@@ -44,13 +40,14 @@ kin_stable <- function(U = NULL, f = NULL,
     pi = w*A[1,]/sum(w*A[1,])
   }
 
-  # identity
+  # identity matrix
   e = matrix(0, ages * 2, ages * 2)
   diag(e[1:ages,1:ages]) = 1
 
   # initial vectors
   d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0, ages * 2, ages)
 
+  # focal´s trip
   m[,1] = c(pi, rep(0,ages))
   for(i in 1:(ages-1)){
     d[,i+1]   = Ut %*% d[,i] + ft %*% e[,i]
@@ -94,31 +91,33 @@ kin_stable <- function(U = NULL, f = NULL,
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
   # only selected kin
-  if(!is.null(selected_kin)){
-    kin_list <- kin_list %>% keep(names(.) %in% selected_kin)
+  if(!is.null(output_kin)){
+    kin_list <- kin_list %>% purrr::keep(names(.) %in% output_kin)
   }
 
-  kin <- map2(kin_list, names(kin_list),
+  # as data.frame
+  kin <- purrr::map2(kin_list, names(kin_list),
                function(x,y){
-                    out = as.data.frame(x)
-                    colnames(out) = age
+                    out <- as.data.frame(x)
+                    colnames(out) <- age
                     out %>%
-                      mutate(kin = y,
-                             age_kin = rep(age,2),
-                             alive = c(rep("yes",ages), rep("no",ages))) %>%
-                      gather(age_focal,count,-age_kin, -kin, -alive) %>%
-                      mutate(age_focal = as.integer(age_focal))
+                      dplyr::mutate(kin = y,
+                                   age_kin = rep(age,2),
+                                   alive = c(rep("living",ages), rep("dead",ages))) %>%
+                      tidyr::pivot_longer(c(-age_kin, -kin, -alive), names_to = "age_focal", values_to = "count") %>%
+                      dplyr::mutate(age_focal = as.integer(age_focal)) %>%
+                      tidyr::pivot_wider(names_from = alive, values_from = count)
                     }
                ) %>%
-              reduce(rbind)
+              purrr::reduce(rbind)
 
-  if(pi_stable){
-    out <- list(kin=kin, pi_stable=pi)
-  }else{
-    out <- kin
-  }
 
-  if(list_output) out <- kin_list
+  # results as list?
+  if(list_output) {
+    out <- kin_list
+    }else{
+      out <- kin
+    }
 
   return(out)
 }
