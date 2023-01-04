@@ -49,7 +49,7 @@ plot_diagram <-
       , layout = b_auto_layout_scaled * 3
       , rescale = FALSE
       , xlim = c(-3.3,3.3)
-      , ylim = c(-2.5,2.5)
+      , ylim = c(-3.1,3.1)
     )
     # Add relative names
     # Thanks to Egor Kotov for this tip!
@@ -69,7 +69,7 @@ plot_diagram <-
       , layout = b_auto_layout_scaled * 3
       , rescale = FALSE
       , xlim = c(-3.3,3.3)
-      , ylim = c(-2.5,2.5)
+      , ylim = c(-3.1,3.1)
       , add = T
     )
   }
