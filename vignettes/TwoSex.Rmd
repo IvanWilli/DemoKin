@@ -1,5 +1,5 @@
 ---
-title: "Expected kin counts by type of relative: A matrix implementation"
+title: "TwoExpected kin counts by type of relative: A matrix implementation"
 output: 
   html_document:
     toc: true
@@ -47,20 +47,20 @@ data.frame(value = c(fra_fert_f, fra_fert_m, fra_surv_f, fra_surv_m),
 Compared with one sex functions, here the user needs to specify risk by sex and decide results for which ego´s sex wants. (**this should be wrapped on a kin general formula? (note for Diego)**)
 
 ```{r}
-kin_out <- kin_time_invariant_2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
+kin_out <- kin2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
 ```
 
 Let´s group aunts and siblings and see living kin by age (**should reply fig 6 (note for Diego)**).
 
 ```{r}
-kin_out <- kin_out %>% 
+kin_out <- kin_out$kin_summary %>% 
   mutate(kin = case_when(kin %in% c("s", "s") ~ "s",
                          kin %in% c("ya", "oa") ~ "a",
                          T ~ kin)) %>%
   filter(kin %in% c("d", "m", "gm", "ggm", "s", "a"))
 kin_out %>% 
   group_by(kin, age_focal, sex) %>%
-  summarise(count=sum(living)) %>%
+  summarise(count=sum(count_living)) %>%
   ggplot(aes(age_focal, count, fill=sex))+
   geom_area()+
   theme_bw() +
@@ -72,7 +72,7 @@ Kin availability by sex allows to inspect its distribution, a traditional measur
 ```{r}
 kin_out %>% 
   group_by(kin, age_focal) %>%
-  summarise(sex_ratio=sum(living[sex=="m"], na.rm=T)/sum(living[sex=="f"], na.rm=T)) %>%
+  summarise(sex_ratio=sum(count_living[sex=="m"], na.rm=T)/sum(count_living[sex=="f"], na.rm=T)) %>%
   ggplot(aes(age_focal, sex_ratio))+
   geom_line()+
   theme_bw() +
@@ -85,7 +85,7 @@ How ego experiences relative deaths depends mainly on how wide is the sex-gap in
 # sex ratio
 kin_out %>%
   group_by(kin, sex, age_focal) %>%
-  summarise(count=sum(dead)) %>%
+  summarise(count=sum(count_dead)) %>%
   ggplot(aes(age_focal, count, col=sex))+
   geom_line()+
   theme_bw() +
@@ -97,15 +97,13 @@ kin_out %>%
 Caswell (2022) mentions some ways to approximate to 2-sex distribution of living kins. Here we compare the full 2-sex model that introduced before with *androgynous* variant (male fertility and survival are the same as females) and the use of GKP factors. The first comparison can be done by age, having very similar results in this case, except for grandfathers and great-grandfathers who transits higher ages and sex-gap is higher.
 
 ```{r}
-kin_out <- kin_time_invariant_2sex(fra_surv_f, fra_surv_m, 
-                                   fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
-kin_out_androgynous <- kin_time_invariant_2sex(fra_surv_f, fra_surv_f, 
-                                          fra_fert_f, fra_fert_f, sex_focal = "f", birth_female = .5)
+kin_out <- kin2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
+kin_out_androgynous <- kin2sex(fra_surv_f, fra_surv_f, fra_fert_f, fra_fert_f, sex_focal = "f", birth_female = .5)
 bind_rows(
-  kin_out %>% mutate(type = "full"),
-  kin_out_androgynous %>% mutate(type = "androgynous")) %>%
+  kin_out$kin_summary %>% mutate(type = "full"),
+  kin_out_androgynous$kin_summary %>% mutate(type = "androgynous")) %>%
   group_by(kin, age_focal, sex, type) %>%
-  summarise(count = sum(living)) %>%
+  summarise(count = sum(count_living)) %>%
   ggplot(aes(age_focal, count, linetype = type)) +
   geom_line() +
   theme_bw() +
@@ -118,25 +116,25 @@ Now we can multiply results from 1-sex model by the GKP factors by kin, to obtai
 ```{r}
 # with gkp
 kin_out_1sex <- kin(fra_surv_f, fra_fert_f, birth_female = .5)
-kin_out_GKP <- kin_out_1sex$kin_full %>%
-  mutate(living = case_when(kin == "m" ~ living * 2,
-                            kin == "gm" ~ living * 4,
-                            kin == "ggm" ~ living * 8,
-                            kin == "d" ~ living * 2,
-                            kin == "gd" ~ living * 4,
-                            kin == "ggd" ~ living * 4,
-                            kin == "oa" ~ living * 4,
-                            kin == "ya" ~ living * 4,
-                            kin == "os" ~ living * 2,
-                            kin == "ys" ~ living * 2,
-                            kin == "coa" ~ living * 8,
-                            kin == "cya" ~ living * 8,
-                            kin == "nos" ~ living * 4,
-                            kin == "nys" ~ living * 4))
+kin_out_GKP <- kin_out_1sex$kin_summary%>%
+  mutate(count_living = case_when(kin == "m" ~ count_living * 2,
+                            kin == "gm" ~ count_living * 4,
+                            kin == "ggm" ~ count_living * 8,
+                            kin == "d" ~ count_living * 2,
+                            kin == "gd" ~ count_living * 4,
+                            kin == "ggd" ~ count_living * 4,
+                            kin == "oa" ~ count_living * 4,
+                            kin == "ya" ~ count_living * 4,
+                            kin == "os" ~ count_living * 2,
+                            kin == "ys" ~ count_living * 2,
+                            kin == "coa" ~ count_living * 8,
+                            kin == "cya" ~ count_living * 8,
+                            kin == "nos" ~ count_living * 4,
+                            kin == "nys" ~ count_living * 4))
 
 bind_rows(
-  kin_out %>% mutate(type = "full"),
-  kin_out_androgynous %>% mutate(type = "androgynous"),
+  kin_out$kin_summary %>% mutate(type = "full"),
+  kin_out_androgynous$kin_summary %>% mutate(type = "androgynous"),
   kin_out_GKP %>% mutate(type = "gkp")) %>%
   mutate(kin = case_when(kin %in% c("ys", "os") ~ "s",
                           kin %in% c("ya", "oa") ~ "a",
@@ -145,7 +143,7 @@ bind_rows(
                           T ~ kin)) %>%
   filter(age_focal %in% c(5, 15, 30, 60, 80)) %>%
   group_by(kin, age_focal, type) %>%
-  summarise(count = sum(living)) %>%
+  summarise(count = sum(count_living)) %>%
   ggplot(aes(type, count)) +
   geom_bar(aes(fill=type), stat = "identity") +
   theme_bw()+theme(axis.text.x = element_text(angle = 90), legend.position = "bottom")+
@@ -165,7 +163,6 @@ swe_fert_f_matrix <- swe_asfr
 swe_fert_m_matrix <- rbind(matrix(0, 5, years), 
             swe_asfr[-((ages-4):ages),]) * 1.05
 par(mfrow=c(1,2))
-main("Sweden year 1900")
 plot(swe_surv_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Survival probability")
 lines(swe_surv_m_matrix[,"1900"], col=2)
 plot(swe_fert_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Fertility rate")
@@ -174,26 +171,26 @@ lines(swe_fert_m_matrix[,"1900"], col=2)
 There is a n increase of living relatives because of mortality improvements, very small for grandparents because main advantages in health conditions made a huge effect in infant mortality first. Less children would have this woman in case of varying rates, due to fertility transition in the first decades in Sweden.
 
 ```{r}
-kin_out_time_invariant <- kin_time_invariant_2sex(
+kin_out_time_invariant <- kin2sex(
                       swe_surv_f_matrix[,"1900"], swe_surv_m_matrix[,"1900"], 
                       swe_fert_f_matrix[,"1900"], swe_fert_m_matrix[,"1900"], 
                       sex_focal = "f", birth_female = .5)
-kin_out_time_variant <- kin_time_variant_2sex(
+kin_out_time_variant <- kin2sex(
                       swe_surv_f_matrix, swe_surv_m_matrix,
                       swe_fert_f_matrix, swe_fert_m_matrix,
-                      sex_focal = "f",
+                      sex_focal = "f",time_invariant = FALSE,
                       birth_female = .5,
                       output_cohort = 1900)
 
-kin_out_time_variant %>%
+kin_out_time_variant$kin_summary %>%
   filter(cohort == 1900) %>% mutate(type = "variant") %>%
-  bind_rows(kin_out_time_invariant %>% mutate(type = "invariant")) %>% 
+  bind_rows(kin_out_time_invariant$kin_summary %>% mutate(type = "invariant")) %>% 
   mutate(kin = case_when(kin %in% c("ys", "os") ~ "s",
                          kin %in% c("ya", "oa") ~ "a",
                          T ~ kin)) %>%
   filter(kin %in% c("d", "m", "gm", "ggm", "s", "a")) %>%
   group_by(type, kin, age_focal, sex) %>%
-  summarise(count=sum(living)) %>%
+  summarise(count=sum(count_living)) %>%
   ggplot(aes(age_focal, count, linetype=type))+
   geom_line()+ theme_bw() +
   facet_grid(cols = vars(kin), rows=vars(sex), scales = "free")
