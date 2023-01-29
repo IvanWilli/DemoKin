@@ -1,11 +1,11 @@
 ---
-title: "TwoExpected kin counts by type of relative: A matrix implementation"
+title: "Two-Sex expected kin counts by type of relative: A matrix implementation"
 output: 
   html_document:
     toc: true
     toc_depth: 1
 vignette: >
-  %\VignetteIndexEntry{Use}
+  %\VignetteIndexEntry{TwoSex}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -17,12 +17,13 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 Age distribution of Focal´s father when she born depends on male fertility pattern. Living siblings depends on sex composition (brothers and sisters) due to differential mortality risk. Intensity in care tasks is not the same between sex in many societies, so the sex of ego and his/her "sandwichness" change, because an average family network expects different roles in supporting. For these reasons, and many others, sex specific kin count estimates are important. Here we implement relations in Caswell (2022), not focusing in applications that can be analogous to the one-sex model, but in the specific advantages.
 
 ```{r, message=FALSE, warning=FALSE}
-library(DemoKin)
+# library(DemoKin)
+library(devtools)
+load_all()
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
-devtools::load_all()
 ```
 
 ### 1.1. Rates by sex
@@ -30,8 +31,8 @@ devtools::load_all()
 Female fertility by age is not a widespread available data source. Caswell (2022) takes Schoumaker (2019) makes available estimates for 160 countries, reporting  that male TFR almost always exceeds female TFR. We take the case of France in 2012 for showing how functions works (fertility and mortality data are available with the package, with column-sex values). Let´s see main differences in age distribution (TFR of 1.98 and 1.99 for males and females, practically the same)
 
 ```{r}
-fra_fert_f <- fra_fert_sex[,"ff"]
-fra_fert_m <- fra_fert_sex[,"fm"]
+fra_fert_f <- fra_asfr_sex[,"ff"]
+fra_fert_m <- fra_asfr_sex[,"fm"]
 fra_surv_f <- fra_surv_sex[,"pf"]
 fra_surv_m <- fra_surv_sex[,"pm"]
 sum(fra_fert_m)-sum(fra_fert_f)
@@ -59,9 +60,9 @@ kin_out <- kin_out$kin_summary %>%
                          T ~ kin)) %>%
   filter(kin %in% c("d", "m", "gm", "ggm", "s", "a"))
 kin_out %>% 
-  group_by(kin, age_focal, sex) %>%
+  group_by(kin, age_focal, sex_kin) %>%
   summarise(count=sum(count_living)) %>%
-  ggplot(aes(age_focal, count, fill=sex))+
+  ggplot(aes(age_focal, count, fill=sex_kin))+
   geom_area()+
   theme_bw() +
   facet_wrap(~kin)
@@ -72,7 +73,7 @@ Kin availability by sex allows to inspect its distribution, a traditional measur
 ```{r}
 kin_out %>% 
   group_by(kin, age_focal) %>%
-  summarise(sex_ratio=sum(count_living[sex=="m"], na.rm=T)/sum(count_living[sex=="f"], na.rm=T)) %>%
+  summarise(sex_ratio=sum(count_living[sex_kin=="m"], na.rm=T)/sum(count_living[sex_kin=="f"], na.rm=T)) %>%
   ggplot(aes(age_focal, sex_ratio))+
   geom_line()+
   theme_bw() +
@@ -84,9 +85,9 @@ How ego experiences relative deaths depends mainly on how wide is the sex-gap in
 ```{r}
 # sex ratio
 kin_out %>%
-  group_by(kin, sex, age_focal) %>%
+  group_by(kin, sex_kin, age_focal) %>%
   summarise(count=sum(count_dead)) %>%
-  ggplot(aes(age_focal, count, col=sex))+
+  ggplot(aes(age_focal, count, col=sex_kin))+
   geom_line()+
   theme_bw() +
   facet_wrap(~kin)
@@ -102,13 +103,13 @@ kin_out_androgynous <- kin2sex(fra_surv_f, fra_surv_f, fra_fert_f, fra_fert_f, s
 bind_rows(
   kin_out$kin_summary %>% mutate(type = "full"),
   kin_out_androgynous$kin_summary %>% mutate(type = "androgynous")) %>%
-  group_by(kin, age_focal, sex, type) %>%
+  group_by(kin, age_focal, sex_kin, type) %>%
   summarise(count = sum(count_living)) %>%
   ggplot(aes(age_focal, count, linetype = type)) +
   geom_line() +
   theme_bw() +
   theme(legend.position = "bottom", axis.text.x = element_blank()) +
-  facet_grid(row = vars(sex), col = vars(kin), scales = "free")
+  facet_grid(row = vars(sex_kin), col = vars(kin), scales = "free")
 ```
 
 Now we can multiply results from 1-sex model by the GKP factors by kin, to obtain a simple but very consistent approximation of totals (both sex) at different ages of Focal.  
@@ -189,11 +190,11 @@ kin_out_time_variant$kin_summary %>%
                          kin %in% c("ya", "oa") ~ "a",
                          T ~ kin)) %>%
   filter(kin %in% c("d", "m", "gm", "ggm", "s", "a")) %>%
-  group_by(type, kin, age_focal, sex) %>%
+  group_by(type, kin, age_focal, sex_kin) %>%
   summarise(count=sum(count_living)) %>%
   ggplot(aes(age_focal, count, linetype=type))+
   geom_line()+ theme_bw() +
-  facet_grid(cols = vars(kin), rows=vars(sex), scales = "free")
+  facet_grid(cols = vars(kin), rows=vars(sex_kin), scales = "free")
 ```
 
  

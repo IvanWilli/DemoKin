@@ -5,7 +5,7 @@ output:
     toc: true
     toc_depth: 1
 vignette: >
-  %\VignetteIndexEntry{Use}
+  %\VignetteIndexEntry{Reference}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,10 +21,11 @@ Here, we'll show how `DemoKin` can be used to compute the number and age distrib
 
 First, we compute kin counts in a **time-invariant** framework. We assume that Focal and all of her relatives experience the 2015 mortality and fertility rates throughout their entire lives (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example: age-by-year matrices of survival probabilities (*swe_px*), survival ratios (*swe_Sx*), fertility rates (*swe_asfr*), and population numbers (*swe_pop*). You can see the data contained in `DemoKin` with `data(package="DemoKin")`. This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/) (see `?DemoKin::get_HMDHFD`). 
 
-In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of sruvival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
+In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of survival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
 
 ```{r, message=FALSE, warning=FALSE}
-library(DemoKin)
+library(devtools)
+load_all()
 library(tidyr)
 library(dplyr)
 library(ggplot2)
@@ -33,7 +34,7 @@ library(knitr)
 swe_surv_2015 <- swe_px[,"2015"]
 swe_asfr_2015 <- swe_asfr[,"2015"]
 # Run kinship models
-swe_2015 <- kin(U = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
+swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 ### 1.1. Value
@@ -135,9 +136,9 @@ Let's take a look at the resulting kin counts for a Focal born in 1960, limiting
 ```{r, fig.height=6, fig.width=8}
 swe_time_varying <- 
   kin(
-    U = swe_px,
+    p = swe_px,
     f = swe_asfr,
-    N = swe_pop,
+    n = swe_pop,
     time_invariant =FALSE,
     output_cohort = 1960,
     output_kin = c("d","gd","ggd","m","gm","ggm")
@@ -240,7 +241,7 @@ demokin_svk1980_caswell2020 <-
     )
 ```
 
-As an example, consider the age-parity distribution of aunts, when Focal is 20 and 60 yo (this is equivalent to Figure 4 in Caswell [2021]). 
+Note that the function ask for risks already in a certain matrix format. As an example, consider the age-parity distribution of aunts, when Focal is 20 and 60 yo (this is equivalent to Figure 4 in Caswell [2021]). 
 
 ```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
 demokin_svk1980_caswell2020 %>% 

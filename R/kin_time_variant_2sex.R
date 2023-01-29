@@ -1,23 +1,45 @@
-#' Estimate kin counts in a time variant framework
+#' Estimate kin counts in a time variant framework (dynamic rates) in a two-sex framework (Caswell, 2022)
 
-kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
-                                   Ff = NULL, Fm = NULL,
+#' @description Two-sex matrix framework for kin count estimates with varying rates.
+#' This produces kin counts grouped by kin, age and sex of each relatives at each Focal´s age.
+#' For example, male cousins from aunts and uncles from different sibling's parents are grouped in one male count of cousins.
+#' @details See Caswell (2022) for details on formulas.
+#' @param pf numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
+#' @param pm numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
+#' @param ff numeric. Same as pf but for fertility rates.
+#' @param fm numeric. Same as pm but for fertility rates.
+#' @param time_invariant logical. Constant assumption for a given `year` rates. Default `TRUE`.
+#' @param sex_focal character. "f" for female or "m" for male.
+#' @param pif numeric. For using some specific age distribution of childbearing for mothers (same length as ages). Default `NULL`.
+#' @param pim numeric. For using some specific age distribution of childbearing for fathers (same length as ages). Default `NULL`.
+#' @param nf numeric. Same as pf but for population distribution (counts or `%`). Optional.
+#' @param nm numeric. Same as pm but for population distribution (counts or `%`). Optional.
+#' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
+#' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
+#' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
+#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
+#' @param stable logic. Deprecated. Use `time_invariant`.
+#' @return A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age and sex.
+#' @export
+
+kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
+                                   ff = NULL, fm = NULL,
                                    sex_focal = "f",
                                    birth_female = 1/2.04,
-                                   Pif = NULL, Pim = NULL,
-                                   Nf = NULL, Nm = NULL,
+                                   pif = NULL, pim = NULL,
+                                   nf = NULL, nm = NULL,
                                    output_cohort = NULL, output_period = NULL, output_kin = NULL,
                                    list_output = FALSE){
 
   # same input length
-  if(!all(dim(Pf) == dim(Pm), dim(Pf) == dim(Ff), dim(Pf) == dim(Fm))) stop("Dimension of P's and F's should be the same")
+  if(!all(dim(pf) == dim(pm), dim(pf) == dim(ff), dim(pf) == dim(fm))) stop("Dimension of P's and F's should be the same")
 
   # data should be from same interval years
-  years_data <- as.integer(colnames(Pf))
+  years_data <- as.integer(colnames(pf))
   if(var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
 
   # utils
-  age          <- 0:(nrow(Pf)-1)
+  age          <- 0:(nrow(pf)-1)
   n_years_data <- length(years_data)
   ages         <- length(age)
   agess        <- ages*2
@@ -25,17 +47,19 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
   # age distribution at childborn
-  if(is.null(Pif)){
-    if(!is.null(Nf)){
-      Pif <- rbind(t(t(Nf * Ff)/colSums(Nf * Ff)), matrix(0,ages,length(years_data)))
+  Pif <- pif
+  Pim <- pim
+  if(is.null(pif)){
+    if(!is.null(nf)){
+      Pif <- rbind(t(t(nf * ff)/colSums(nf * ff)), matrix(0,ages,length(years_data)))
     }else{
       Pif <- matrix(0, nrow=ages, ncol=n_years_data)
       no_Pif <- TRUE
     }
   }
-  if(is.null(Pim)){
-    if(!is.null(Nm)){
-      Pim <- rbind(t(t(Nm * Fm)/colSums(Nm * Fm)), matrix(0,ages,length(years_data)))
+  if(is.null(pim)){
+    if(!is.null(nm)){
+      Pim <- rbind(t(t(nm * fm)/colSums(nm * fm)), matrix(0,ages,length(years_data)))
     }else{
       Pim <- matrix(0, nrow=ages, ncol=n_years_data)
       no_Pim <- TRUE
@@ -44,21 +68,25 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
 
   # get lists of matrix
   Ul = Fl = Fl_star = list()
+  kin_all <- list()
+  pb <- progress::progress_bar$new(
+    format = "Running over input years [:bar] :percent",
+    total = n_years_data + 1, clear = FALSE, width = 60)
   for(t in 1:n_years_data){
     # t = 1
     Uf = Um = Fft = Fmt = Mm = Mf = Gt = zeros = matrix(0, nrow=ages, ncol=ages)
-    Uf[row(Uf)-1 == col(Uf)] <- Pf[-ages,t]
-    Uf[ages, ages] = Pf[ages,t]
-    Um[row(Um)-1 == col(Um)] <- Pm[-ages,t]
-    Um[ages, ages] = Pm[ages,t]
-    Mm <- diag(1-Pm[,t])
-    Mf <- diag(1-Pf[,t])
+    Uf[row(Uf)-1 == col(Uf)] <- pf[-ages,t]
+    Uf[ages, ages] = pf[ages,t]
+    Um[row(Um)-1 == col(Um)] <- pm[-ages,t]
+    Um[ages, ages] = pm[ages,t]
+    Mm <- diag(1-pm[,t])
+    Mf <- diag(1-pf[,t])
     Ut <- as.matrix(rbind(
       cbind(Matrix::bdiag(Uf, Um), Matrix::bdiag(zeros, zeros)),
       cbind(Matrix::bdiag(Mf, Mm), Matrix::bdiag(zeros, zeros))))
     Ul[[as.character(years_data[t])]] <- Ut
-    Fft[1,] = Ff[,t]
-    Fmt[1,] = Fm[,t]
+    Fft[1,] = ff[,t]
+    Fmt[1,] = fm[,t]
     Ft <- Ft_star <- matrix(0, agess*2, agess*2)
     Ft[1:agess,1:agess] <- rbind(cbind(birth_female * Fft, birth_female * Fmt),
                                  cbind((1-birth_female) * Fft, (1-birth_female) * Fmt))
@@ -77,26 +105,18 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
       w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
       Pim[,t] <- w*A[1,]/sum(w*A[1,])
     }
-  }
-
-  # loop over years (more performance here)
-  kin_all <- list()
-  pb <- progress::progress_bar$new(
-    format = "Running over input years [:bar] :percent",
-    total = n_years_data, clear = FALSE, width = 60)
-  for (iyear in 1:n_years_data){
-    # iyear = 1
-    Ut <- as.matrix(Ul[[iyear]])
-    Ft <- as.matrix(Fl[[iyear]])
-    Ft_star <- as.matrix(Fl_star[[iyear]])
-    pitf <- Pif[,iyear]
-    pitm <- Pim[,iyear]
+    # project
+    Ut <- as.matrix(Ul[[t]])
+    Ft <- as.matrix(Fl[[t]])
+    Ft_star <- as.matrix(Fl_star[[t]])
+    pitf <- Pif[,t]
+    pitm <- Pim[,t]
     pit <- c(pitf, pitm)
-    if (iyear==1){
-      p1f <- Pf[,1]
-      p1m <- Pm[,1]
-      f1f <- Ff[,1]
-      f1m <- Fm[,1]
+    if (t==1){
+      p1f <- pf[,1]
+      p1m <- pm[,1]
+      f1f <- ff[,1]
+      f1m <- fm[,1]
       pif1 <- Pif[,1]
       pim1 <- Pim[,1]
       kin_all[[1]] <- kin_time_invariant_2sex(pf = p1f, pm = p1m,
@@ -104,7 +124,7 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
                                               pif = pif1, pim = pim1,
                                               birth_female = birth_female, list_output = TRUE)
     }
-    kin_all[[iyear+1]] <- timevarying_kin_2sex(Ut=Ut, Ft=Ft, Ft_star=Ft_star, pit=pit, sex_focal, ages, pkin=kin_all[[iyear]])
+    kin_all[[t+1]] <- timevarying_kin_2sex(Ut=Ut, Ft=Ft, Ft_star=Ft_star, pit=pit, sex_focal, ages, pkin=kin_all[[t]])
     pb$tick()
   }
 
@@ -125,30 +145,28 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
   kin_list <- kin_all %>%
     purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
     purrr::map(~ .[selected_kin_position])
-
   # long format
-  kin <- lapply(names(kin_list), function(Y){
+  kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
-      # browser()
-      as.data.frame(x) %>%
-        dplyr::mutate(year = Y,
-                      kin=y,
-                      sex = rep(c(rep("f",ages), rep("m",ages)),2),
-                      age_kin = rep(age,4),
-                      alive = c(rep("living",agess), rep("dead",agess)),
-                      .before=everything())
-      }) %>%
-      dplyr::bind_rows() %>%
-      stats::setNames(c("year","kin", "sex", "age_kin","alive",as.character(age))) %>%
-      tidyr::gather(age_focal, count,-age_kin, -kin, -year, -sex, -alive) %>%
-      dplyr::mutate(age_focal = as.integer(age_focal),
-                    year = as.integer(year),
-                    cohort = year - age_focal) %>%
-      dplyr::filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)]) %>%
-      tidyr::pivot_wider(names_from = alive, values_from = count)
-      }) %>%
-    dplyr::bind_rows()
+      x <- as.data.frame(x)
+      x$year <- Y
+      x$kin <- y
+      x$sex_kin <- rep(c(rep("f",ages), rep("m",ages)),2)
+      x$age_kin <- rep(age,2)
+      x$alive <- c(rep("living",ages), rep("dead",ages))
+      return(x)
+    }) %>%
+      data.table::rbindlist() %>%
+      stats::setNames(c(as.character(age), "year","kin","sex_kin","age_kin","alive")) %>%
+      data.table::melt(id.vars = c("year","kin","sex_kin","age_kin","alive"), variable.name = "age_focal", value.name = "count")
+    X$age_focal = as.integer(as.character(X$age_focal))
+    X$year = as.integer(X$year)
+    X$cohort = X$year - X$age_focal
+    X <- X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],]
+    X <- data.table::dcast(X, year + kin + sex_kin + age_kin + age_focal + cohort ~ alive, value.var = "count", fun.aggregate = sum)
+  }) %>% data.table::rbindlist()
+  pb$tick()
 
   # results as list?
   if(list_output) {
@@ -156,7 +174,6 @@ kin_time_variant_2sex <- function(Pf = NULL, Pm = NULL,
   }else{
     out <- kin
   }
-
   return(out)
 }
 

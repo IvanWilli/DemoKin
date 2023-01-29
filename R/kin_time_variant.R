@@ -1,8 +1,8 @@
-#' Estimate kin counts in a time variant framework
+#' Estimate kin counts in a time variant framework (dynamic rates) for one-sex model (matrilineal/patrilineal)
 
-#' @description Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).
-#'
-#' @param U numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.
+#' @description Matrix implementation of time variant Goodman-Keyfitz-Pullum equations in a matrix framework.
+#' @details See Caswell (2021) for details on formulas.
+#' @param p numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.
 #' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. Coincident with `U`.
 #' @param N numeric. A matrix of population with rows as ages and columns as years. Coincident with `U`.
 #' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with `U`.
@@ -16,22 +16,22 @@
 #' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If `list_output = TRUE` then this is a list.
 #' @export
 
-kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
+kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
                             output_cohort = NULL, output_period = NULL, output_kin = NULL,
                             birth_female = 1/2.04, list_output = FALSE){
 
   # check input
-  if(is.null(U) | is.null(f)) stop("You need values on U and/or f.")
+  if(is.null(p) | is.null(f)) stop("You need values on p and f.")
 
   # diff years
-  if(!any(as.integer(colnames(U)) == as.integer(colnames(f)))) stop("Data should be from same years.")
+  if(!any(as.integer(colnames(p)) == as.integer(colnames(f)))) stop("Data should be from same years.")
 
   # data should be from same interval years
-  years_data <- as.integer(colnames(U))
+  years_data <- as.integer(colnames(p))
   if(var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
 
   # utils
-  age          <- 0:(nrow(U)-1)
+  age          <- 0:(nrow(p)-1)
   n_years_data <- length(years_data)
   ages         <- length(age)
   om           <- max(age)
@@ -39,55 +39,46 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
 
   # age distribution at childborn
   if(is.null(pi)){
-    if(is.null(N)){
+    if(is.null(n)){
       # create pi and fill it during the loop
       message("Stable assumption was made for calculating pi on each year because no input data.")
       pi <- matrix(0, nrow=ages, ncol=n_years_data)
     }else{
-      pi <- rbind(t(t(N * f)/colSums(N * f)), matrix(0,ages,length(years_data)))
+      pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,length(years_data)))
     }
   }
-
-  # get lists of matrix
-  Ul = fl = list()
-  for(t in 1:n_years_data){
-    Ut = Mt = Dcum = matrix(0, nrow=ages, ncol=ages)
-    Ut[row(Ut)-1 == col(Ut)] <- U[-ages,t]
-    Ut[ages, ages]=U[ages,t]
-    diag(Mt) = 1 - U[,t]
-    Ul[[as.character(years_data[t])]] <- rbind(cbind(Ut,zeros),cbind(Mt,Dcum))
-    ft = matrix(0, nrow=ages*2, ncol=ages*2)
-    ft[1,1:ages] = f[,t] * birth_female
-    fl[[as.character(years_data[t])]] <- ft
-  }
-  U <- Ul
-  f <- fl
 
   # loop over years (more performance here)
   kin_all <- list()
   pb <- progress::progress_bar$new(
     format = "Running over input years [:bar] :percent",
-    total = n_years_data, clear = FALSE, width = 60)
-  for (iyear in 1:n_years_data){
-    # print(iyear)
-    Ut <- as.matrix(U[[iyear]])
-    ft <- as.matrix(f[[iyear]])
+    total = n_years_data + 1, clear = FALSE, width = 50)
+  for (t in 1:n_years_data){
+    # build matrix
+    Ut = Mt = matrix(0, nrow=ages, ncol=ages)
+    Ut[row(Ut)-1 == col(Ut)] <- p[-ages,t]
+    Ut[ages, ages] = p[ages,t]
+    diag(Mt) = 1 - p[,t]
+    Ut = rbind(cbind(Ut,zeros),cbind(Mt,zeros))
+    ft = matrix(0, nrow=ages*2, ncol=ages*2)
+    ft[1,1:ages] = f[,t] * birth_female
     if(is.null(pi)){
       A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
       A_decomp = eigen(A)
       w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-      pit <- pi[,iyear] <- w*A[1,]/sum(w*A[1,])
+      pit <- pi[,t] <- w*A[1,]/sum(w*A[1,])
     }else{
-      pit <- pi[,iyear]
+      pit <- pi[,t]
     }
-    if (iyear==1){
-      U1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
+    # proj
+    if (t==1){
+      p1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
       f1 <- ft[1,][1:ages]
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_time_invariant(U = U1, f = f1/birth_female, pi = pi1, birth_female = birth_female,
+      kin_all[[1]] <- kin_time_invariant(p = p1, f = f1/birth_female, pi = pi1, birth_female = birth_female,
                                          list_output = TRUE)
     }
-    kin_all[[iyear+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[iyear]])
+    kin_all[[t+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[t]])
     pb$tick()
   }
 
@@ -110,23 +101,26 @@ kin_time_variant <- function(U = NULL, f = NULL, N = NULL, pi = NULL,
     purrr::map(~ .[selected_kin_position])
 
   # long format
-  kin <- lapply(names(kin_list), function(Y){
+  kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
-    X <- purrr::map2(X, names(X), function(x,y) as.data.frame(x) %>%
-                dplyr::mutate(year = Y,
-                        kin=y,
-                        age_kin = rep(age,2),
-                        alive = c(rep("living",ages), rep("dead",ages)),
-                        .before=everything())) %>%
-      dplyr::bind_rows() %>%
-      stats::setNames(c("year","kin","age_kin","alive",as.character(age))) %>%
-      tidyr::gather(age_focal, count,-age_kin, -kin, -year, -alive) %>%
-      dplyr::mutate(age_focal = as.integer(age_focal),
-                     year = as.integer(year),
-                     cohort = year - age_focal) %>%
-      dplyr::filter(age_focal %in% out_selected$age[out_selected$year==as.integer(Y)]) %>%
-      tidyr::pivot_wider(names_from = alive, values_from = count)}) %>%
-    dplyr::bind_rows()
+    X <- purrr::map2(X, names(X), function(x,y){
+      x <- as.data.frame(x)
+      x$year <- Y
+      x$kin <- y
+      x$age_kin <- rep(age,2)
+      x$alive <- c(rep("living",ages), rep("dead",ages))
+      return(x)
+      }) %>%
+      data.table::rbindlist() %>%
+      stats::setNames(c(as.character(age), "year","kin","age_kin","alive")) %>%
+      data.table::melt(id.vars = c("year","kin","age_kin","alive"), variable.name = "age_focal", value.name = "count")
+    X$age_focal = as.integer(as.character(X$age_focal))
+    X$year = as.integer(X$year)
+    X$cohort = X$year - X$age_focal
+    X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],] %>%
+      data.table::dcast(year + kin + age_kin + age_focal + cohort ~ alive, value.var = "count")
+    }) %>% data.table::rbindlist()
+  pb$tick()
 
   # results as list?
   if(list_output) {
@@ -172,7 +166,8 @@ timevarying_kin<- function(Ut, ft, pit, ages, pkin){
   coa[1:ages,1]= pkin[["nos"]][1:ages,] %*% pit[1:ages]
   cya[1:ages,1]= pkin[["nys"]][1:ages,] %*% pit[1:ages]
 
-  for (ix in 1:om){
+  # vers1
+  for(ix in 1:om){
     d[,ix+1]   = Ut %*% pkin[["d"]][,ix]   + ft %*% I[,ix]
     gd[,ix+1]  = Ut %*% pkin[["gd"]][,ix]  + ft %*% pkin[["d"]][,ix]
     ggd[,ix+1] = Ut %*% pkin[["ggd"]][,ix] + ft %*% pkin[["gd"]][,ix]

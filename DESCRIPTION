@@ -21,7 +21,6 @@ Imports:
     dplyr,
     tidyr,
     purrr,
-    forcats,
     HMDHFDplus,
     progress,
     matrixcalc,
@@ -30,6 +29,7 @@ Imports:
     stats,
     igraph,
     magrittr,
+    data.table,
     lifecycle
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 

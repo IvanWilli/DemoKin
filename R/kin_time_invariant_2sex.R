@@ -1,7 +1,9 @@
-#' Estimate kin counts in a time invariant framework considering two sex
+#' Estimate kin counts in a time invariant framework for two-sex model.
 
-#' @description Two sex matrix framework for kin count estimates. Implementation of Caswell (2022).
-
+#' @description Two-sex matrix framework for kin count estimates.This produces kin counts grouped by kin, age and sex of
+#' each relatives at each Focal´s age. For example, male cousins from aunts and uncles from different sibling's parents
+#' are grouped in one male count of cousins.
+#' @details See Caswell (2022) for details on formulas.
 #' @param pf numeric. A vector of survival probabilities for females with same length as ages.
 #' @param ff numeric. A vector of age-specific fertility rates for females with same length as ages.
 #' @param pm numeric. A vector of survival probabilities for males with same length as ages.
@@ -141,9 +143,9 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                        out %>%
                          dplyr::mutate(kin = y,
                                        age_kin = rep(age,4),
-                                       sex = rep(c(rep("f",ages), rep("m",ages)),2),
+                                       sex_kin = rep(c(rep("f",ages), rep("m",ages)),2),
                                        alive = c(rep("living",2*ages), rep("dead",2*ages))) %>%
-                         tidyr::pivot_longer(c(-age_kin, -kin, -sex, -alive), names_to = "age_focal", values_to = "count") %>%
+                         tidyr::pivot_longer(c(-age_kin, -kin, -sex_kin, -alive), names_to = "age_focal", values_to = "count") %>%
                          dplyr::mutate(age_focal = as.integer(age_focal)) %>%
                          tidyr::pivot_wider(names_from = alive, values_from = count)
                      }

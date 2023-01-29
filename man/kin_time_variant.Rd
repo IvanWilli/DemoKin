@@ -2,13 +2,13 @@
 % Please edit documentation in R/kin_time_variant.R
 \name{kin_time_variant}
 \alias{kin_time_variant}
-\title{Estimate kin counts in a time variant framework}
+\title{Estimate kin counts in a time variant framework (dynamic rates) for one-sex model (matrilineal/patrilineal)}
 \usage{
 kin_time_variant(
-  U = NULL,
+  p = NULL,
   f = NULL,
-  N = NULL,
   pi = NULL,
+  n = NULL,
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
@@ -17,11 +17,9 @@ kin_time_variant(
 )
 }
 \arguments{
-\item{U}{numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.}
+\item{p}{numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.}
 
 \item{f}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. Coincident with \code{U}.}
-
-\item{N}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
 
 \item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with \code{U}.}
 
@@ -34,11 +32,16 @@ kin_time_variant(
 \item{birth_female}{numeric. Female portion at birth.}
 
 \item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
+
+\item{N}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
 }
 \value{
 A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If \code{list_output = TRUE} then this is a list.
 }
 \description{
-Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).
+Matrix implementation of time variant Goodman-Keyfitz-Pullum equations in a matrix framework.
+}
+\details{
+See Caswell (2021) for details on formulas.
 }
