@@ -1,7 +1,0 @@
-1) Set no specific argument for Pb: in the case the user wants to use it, that can be included by her/himself in the F matrix, implicitly. - ok
-1.1) caswell´s assumption stable: ft[1,1:ages] = f * U * birth_female
-2) Include a paragraph in the "using" vignette to show this option.
-3) Non-stable without pi or N as argument: give user an output anyways and a message "A stable assumption was used for the age distribution of the mother in each input year".
-4) Replicate Hal´s output for dinamycs.
-5) Correct the appendix: survival/probabilities.
-6) Finish Multi-stage.

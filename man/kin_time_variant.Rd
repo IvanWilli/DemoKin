@@ -2,13 +2,13 @@
 % Please edit documentation in R/kin_time_variant.R
 \name{kin_time_variant}
 \alias{kin_time_variant}
-\title{Estimate kin counts in a time variant framework}
+\title{Estimate kin counts in a time variant framework (dynamic rates) for one-sex model (matrilineal/patrilineal)}
 \usage{
 kin_time_variant(
-  U = NULL,
+  p = NULL,
   f = NULL,
-  N = NULL,
   pi = NULL,
+  n = NULL,
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
@@ -17,13 +17,13 @@ kin_time_variant(
 )
 }
 \arguments{
-\item{U}{numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.}
+\item{p}{numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.}
 
 \item{f}{numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. Coincident with \code{U}.}
 
-\item{N}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
-
 \item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with \code{U}.}
+
+\item{n}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
 
 \item{output_cohort}{integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.}
 
@@ -40,5 +40,8 @@ A data frame of population kinship structure, with focal's cohort, focal´s age,
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If \code{list_output = TRUE} then this is a list.
 }
 \description{
-Implementation of time variant Goodman-Keyfitz-Pullum equations based on Caswell (2021).
+Matrix implementation of time variant Goodman-Keyfitz-Pullum equations in a matrix framework.
+}
+\details{
+See Caswell (2021) for details on formulas.
 }

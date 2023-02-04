@@ -127,3 +127,25 @@
 #' @source
 #'   Caswell (2021)
 "kin_svk1990_caswell2020"
+
+#' Fertility for France (2012) by sex in Caswell (2022).
+#'
+#' Fertility for France (2012) by sex in Caswell (2022).
+#' @docType data
+#' @format
+#' A data.frame with age specific fertility rates by age and sex.
+#'
+#' @source
+#'   Caswell (2022)
+"fra_asfr_sex"
+
+#' Survival probability for France (2012) by sex in Caswell (2022).
+#'
+#' Survival probability for France (2012) by sex in Caswell (2022).
+#' @docType data
+#' @format
+#' A data.frame with survival probabilities by age and sex.
+#'
+#' @source
+#'   Caswell (2022)
+"fra_surv_sex"

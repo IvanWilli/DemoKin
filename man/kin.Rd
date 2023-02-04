@@ -2,31 +2,33 @@
 % Please edit documentation in R/kin.R
 \name{kin}
 \alias{kin}
-\title{Estimate kin counts}
+\title{Estimate kin counts in a one-sex framework.}
 \usage{
 kin(
-  U = NULL,
+  p = NULL,
   f = NULL,
   time_invariant = TRUE,
-  N = NULL,
   pi = NULL,
+  n = NULL,
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
   birth_female = 1/2.04,
-  stable = lifecycle::deprecated()
+  stable = lifecycle::deprecated(),
+  U = lifecycle::deprecated()
 )
 }
 \arguments{
-\item{U}{numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
+\item{p}{numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class
+in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
-\item{f}{numeric. Same as U but for fertility rates.}
+\item{f}{numeric. Same as p but for fertility rates.}
 
 \item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Default \code{TRUE}.}
 
-\item{N}{numeric. Same as U but for population distribution (counts or \verb{\%}). Optional.}
-
 \item{pi}{numeric. Same as U but for childbearing distribution (sum to 1). Optional.}
+
+\item{n}{numeric. Same as p but for population distribution (counts or \verb{\%}). Optional.}
 
 \item{output_cohort}{integer. Vector of year cohorts for returning results. Should be within input data years range.}
 
@@ -34,15 +36,20 @@ kin(
 
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
-\item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring, this needs to be set as 1.}
+\item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring,
+this needs to be set as 1.}
 
 \item{stable}{logic. Deprecated. Use \code{time_invariant}.}
+
+\item{U}{logic. Deprecated. Use \code{p}.}
 }
 \value{
 A list with:
 \itemize{
-\item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), including living and dead kin at that age.}
-\item{kin_summary}{ a data frame with Focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full}, grouping by cohort or period (depending on the given arguments):}
+\item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example \code{d} is daughter,
+\code{oa} is older aunts, etc.), including living and dead kin at that age.}
+\item{kin_summary}{ a data frame with Focal´s age, related ages and type of kin, with indicators obtained processing \code{kin_full},
+grouping by cohort or period (depending on the given arguments):}
 {\itemize{
 \item{\code{count_living}}{: count of living kin at actual age of Focal}
 \item{\code{mean_age}}{: mean age of each type of living kin.}
@@ -55,8 +62,19 @@ A list with:
 }
 }
 \description{
-Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework.
+Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework. This produce a matrilineal (or patrilineal)
+kin count distribution by kin and age.
 }
 \details{
 See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
+}
+\examples{
+\dontrun{
+# Kin expected matrilineal count for a Swedish female based on 2015 rates.
+swe_surv_2015 <- swe_px[,"2015"]
+swe_asfr_2015 <- swe_asfr[,"2015"]
+# Run kinship models
+swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015)
+head(swe_2015)
+}
 }

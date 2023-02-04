@@ -1,0 +1,203 @@
+---
+title: "Two-Sex expected kin counts by type of relative: A matrix implementation"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 1
+vignette: >
+  %\VignetteIndexEntry{TwoSex}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Age distribution of Focal´s father when she born depends on male fertility pattern. Living siblings depends on sex composition (brothers and sisters) due to differential mortality risk. Intensity in care tasks is not the same between sex in many societies, so the sex of ego and his/her "sandwichness" change, because an average family network expects different roles in supporting. For these reasons, and many others, sex specific kin count estimates are important. Here we implement relations in Caswell (2022), not focusing in applications that can be analogous to the one-sex model, but in the specific advantages.
+
+```{r, message=FALSE, warning=FALSE}
+# library(DemoKin)
+library(devtools)
+load_all()
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+
+### 1.1. Rates by sex
+
+Female fertility by age is not a widespread available data source. Caswell (2022) takes Schoumaker (2019) makes available estimates for 160 countries, reporting  that male TFR almost always exceeds female TFR. We take the case of France in 2012 for showing how functions works (fertility and mortality data are available with the package, with column-sex values). Let´s see main differences in age distribution (TFR of 1.98 and 1.99 for males and females, practically the same)
+
+```{r}
+fra_fert_f <- fra_asfr_sex[,"ff"]
+fra_fert_m <- fra_asfr_sex[,"fm"]
+fra_surv_f <- fra_surv_sex[,"pf"]
+fra_surv_m <- fra_surv_sex[,"pm"]
+sum(fra_fert_m)-sum(fra_fert_f)
+data.frame(value = c(fra_fert_f, fra_fert_m, fra_surv_f, fra_surv_m),
+           age = rep(0:100, 4),
+           sex = rep(c(rep("f", 101), rep("m", 101)), 2),
+           risk = c(rep("fertility rate", 101 * 2), rep("survival probability", 101 * 2))) %>%
+  ggplot(aes(age, value, col=sex)) + geom_line() + facet_wrap(~ risk, scales = "free_y") + theme_bw()
+```
+
+### 1.1. Visualizing the distribution of kin
+
+Compared with one sex functions, here the user needs to specify risk by sex and decide results for which ego´s sex wants. (**this should be wrapped on a kin general formula? (note for Diego)**)
+
+```{r}
+kin_out <- kin2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
+```
+
+Let´s group aunts and siblings and see living kin by age (**should reply fig 6 (note for Diego)**).
+
+```{r}
+kin_out <- kin_out$kin_summary %>% 
+  mutate(kin = case_when(kin %in% c("s", "s") ~ "s",
+                         kin %in% c("ya", "oa") ~ "a",
+                         T ~ kin)) %>%
+  filter(kin %in% c("d", "m", "gm", "ggm", "s", "a"))
+kin_out %>% 
+  group_by(kin, age_focal, sex_kin) %>%
+  summarise(count=sum(count_living)) %>%
+  ggplot(aes(age_focal, count, fill=sex_kin))+
+  geom_area()+
+  theme_bw() +
+  facet_wrap(~kin)
+```
+
+Kin availability by sex allows to inspect its distribution, a traditional measure in demography is the sex ratio (with females in denominator). A French woman would expect to have half grandfathers for each grandmother at 25 years old.  
+
+```{r}
+kin_out %>% 
+  group_by(kin, age_focal) %>%
+  summarise(sex_ratio=sum(count_living[sex_kin=="m"], na.rm=T)/sum(count_living[sex_kin=="f"], na.rm=T)) %>%
+  ggplot(aes(age_focal, sex_ratio))+
+  geom_line()+
+  theme_bw() +
+  facet_wrap(~kin, scales = "free")
+```
+
+How ego experiences relative deaths depends mainly on how wide is the sex-gap in mortality. She starts to lose fathers earlier than mothers. The difference on the level by sex in grandparents is due to initial availability by sex.
+
+```{r}
+# sex ratio
+kin_out %>%
+  group_by(kin, sex_kin, age_focal) %>%
+  summarise(count=sum(count_dead)) %>%
+  ggplot(aes(age_focal, count, col=sex_kin))+
+  geom_line()+
+  theme_bw() +
+  facet_wrap(~kin)
+```
+
+### 2 Approximations
+
+Caswell (2022) mentions some ways to approximate to 2-sex distribution of living kins. Here we compare the full 2-sex model that introduced before with *androgynous* variant (male fertility and survival are the same as females) and the use of GKP factors. The first comparison can be done by age, having very similar results in this case, except for grandfathers and great-grandfathers who transits higher ages and sex-gap is higher.
+
+```{r}
+kin_out <- kin2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m, sex_focal = "f", birth_female = .5)
+kin_out_androgynous <- kin2sex(fra_surv_f, fra_surv_f, fra_fert_f, fra_fert_f, sex_focal = "f", birth_female = .5)
+bind_rows(
+  kin_out$kin_summary %>% mutate(type = "full"),
+  kin_out_androgynous$kin_summary %>% mutate(type = "androgynous")) %>%
+  group_by(kin, age_focal, sex_kin, type) %>%
+  summarise(count = sum(count_living)) %>%
+  ggplot(aes(age_focal, count, linetype = type)) +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom", axis.text.x = element_blank()) +
+  facet_grid(row = vars(sex_kin), col = vars(kin), scales = "free")
+```
+
+Now we can multiply results from 1-sex model by the GKP factors by kin, to obtain a simple but very consistent approximation of totals (both sex) at different ages of Focal.  
+
+```{r}
+# with gkp
+kin_out_1sex <- kin(fra_surv_f, fra_fert_f, birth_female = .5)
+kin_out_GKP <- kin_out_1sex$kin_summary%>%
+  mutate(count_living = case_when(kin == "m" ~ count_living * 2,
+                            kin == "gm" ~ count_living * 4,
+                            kin == "ggm" ~ count_living * 8,
+                            kin == "d" ~ count_living * 2,
+                            kin == "gd" ~ count_living * 4,
+                            kin == "ggd" ~ count_living * 4,
+                            kin == "oa" ~ count_living * 4,
+                            kin == "ya" ~ count_living * 4,
+                            kin == "os" ~ count_living * 2,
+                            kin == "ys" ~ count_living * 2,
+                            kin == "coa" ~ count_living * 8,
+                            kin == "cya" ~ count_living * 8,
+                            kin == "nos" ~ count_living * 4,
+                            kin == "nys" ~ count_living * 4))
+
+bind_rows(
+  kin_out$kin_summary %>% mutate(type = "full"),
+  kin_out_androgynous$kin_summary %>% mutate(type = "androgynous"),
+  kin_out_GKP %>% mutate(type = "gkp")) %>%
+  mutate(kin = case_when(kin %in% c("ys", "os") ~ "s",
+                          kin %in% c("ya", "oa") ~ "a",
+                          kin %in% c("coa", "cya") ~ "c",
+                          kin %in% c("nys", "nos") ~ "n",
+                          T ~ kin)) %>%
+  filter(age_focal %in% c(5, 15, 30, 60, 80)) %>%
+  group_by(kin, age_focal, type) %>%
+  summarise(count = sum(count_living)) %>%
+  ggplot(aes(type, count)) +
+  geom_bar(aes(fill=type), stat = "identity") +
+  theme_bw()+theme(axis.text.x = element_text(angle = 90), legend.position = "bottom")+
+  facet_grid(col = vars(kin), row = vars(age_focal), scales = "free")
+```
+ 
+### 2 Time variant
+
+But Focal will see his/her tree developing with current risk, being part of the evolving demographic transition, in any of its stages. Let´s compare what would be living kin for Swedish female if she would experienced time varying rates instead of period ones from 1950. We can use data already loaded in the package.
+
+```{r}
+years <- ncol(swe_px)
+ages <- nrow(swe_px)
+swe_surv_f_matrix <- swe_px
+swe_surv_m_matrix <- swe_px ^ 1.5 # this could be replaced with downloaded data from UN
+swe_fert_f_matrix <- swe_asfr
+swe_fert_m_matrix <- rbind(matrix(0, 5, years), 
+            swe_asfr[-((ages-4):ages),]) * 1.05
+par(mfrow=c(1,2))
+plot(swe_surv_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Survival probability")
+lines(swe_surv_m_matrix[,"1900"], col=2)
+plot(swe_fert_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Fertility rate")
+lines(swe_fert_m_matrix[,"1900"], col=2)
+```
+There is a n increase of living relatives because of mortality improvements, very small for grandparents because main advantages in health conditions made a huge effect in infant mortality first. Less children would have this woman in case of varying rates, due to fertility transition in the first decades in Sweden.
+
+```{r}
+kin_out_time_invariant <- kin2sex(
+                      swe_surv_f_matrix[,"1900"], swe_surv_m_matrix[,"1900"], 
+                      swe_fert_f_matrix[,"1900"], swe_fert_m_matrix[,"1900"], 
+                      sex_focal = "f", birth_female = .5)
+kin_out_time_variant <- kin2sex(
+                      swe_surv_f_matrix, swe_surv_m_matrix,
+                      swe_fert_f_matrix, swe_fert_m_matrix,
+                      sex_focal = "f",time_invariant = FALSE,
+                      birth_female = .5,
+                      output_cohort = 1900)
+
+kin_out_time_variant$kin_summary %>%
+  filter(cohort == 1900) %>% mutate(type = "variant") %>%
+  bind_rows(kin_out_time_invariant$kin_summary %>% mutate(type = "invariant")) %>% 
+  mutate(kin = case_when(kin %in% c("ys", "os") ~ "s",
+                         kin %in% c("ya", "oa") ~ "a",
+                         T ~ kin)) %>%
+  filter(kin %in% c("d", "m", "gm", "ggm", "s", "a")) %>%
+  group_by(type, kin, age_focal, sex_kin) %>%
+  summarise(count=sum(count_living)) %>%
+  ggplot(aes(age_focal, count, linetype=type))+
+  geom_line()+ theme_bw() +
+  facet_grid(cols = vars(kin), rows=vars(sex_kin), scales = "free")
+```
+
+ 
+## References
+
+Caswell, H. (2022). The formal demography of kinship IV: Two-sex models and their approximations. Demographic Research, 47, 359–396. 
