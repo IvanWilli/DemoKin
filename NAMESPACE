@@ -2,7 +2,6 @@
 
 export("%>%")
 export(demokin_codes)
-export(get_HMDHFD)
 export(kin)
 export(kin2sex)
 export(kin_multi_stage)

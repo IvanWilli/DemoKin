@@ -9,13 +9,16 @@ timevarying_kin_2sex(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
 \arguments{
 \item{Ut}{numeric. A matrix of survival probabilities (or ratios).}
 
-\item{pit}{numeric. A matrix with distribution of childbearing.}
+\item{Ft}{numeric. A matrix of age-specific fertility rates.}
+
+\item{Ft_star}{numeric. Ft but for female fertility.}
+
+\item{pit}{numeric. A matrix with distribution of childbearing.
+sex_focal}
 
 \item{ages}{numeric.}
 
 \item{pkin}{numeric. A list with kin count distribution in previous year.}
-
-\item{ft}{numeric. A matrix of age-specific fertility rates.}
 }
 \description{
 one time projection kin. internal function.

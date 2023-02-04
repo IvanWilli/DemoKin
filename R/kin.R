@@ -15,6 +15,7 @@
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring,
 #' this needs to be set as 1.
 #' @param stable logic. Deprecated. Use `time_invariant`.
+#' @param U logic. Deprecated. Use `p`.
 #' @return A list with:
 #' \itemize{
 #'  \item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example `d` is daughter,

@@ -1,17 +1,18 @@
 ---
-title: "Expected kin counts by type of relative: A matrix implementation"
+title: "Expected kin counts by type of relative in a one-sex framework"
 output: 
   html_document:
     toc: true
     toc_depth: 1
 vignette: >
-  %\VignetteIndexEntry{Reference}
+  %\VignetteIndexEntry{Reference_OneSex}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(devtools); load_all()
 ```
 
 In this vignette, we'll demonstrate how `DemoKin` can be used to compute kinship networks for an average member of a given (female) population. Let us call her Focal: an average Swedish woman who has always lived in Sweden and whose family has never left the country.
@@ -24,8 +25,7 @@ First, we compute kin counts in a **time-invariant** framework. We assume that F
 In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of survival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
 
 ```{r, message=FALSE, warning=FALSE}
-library(devtools)
-load_all()
+library(DemoKin)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
@@ -56,7 +56,7 @@ head(swe_2015$kin_summary)
 To produce it, we sum over all ages of kin to produce a data frame of expected kin counts by year or cohort and age of Focal (but not by age of kin). 
 Consider this simplified example for living kin counts:
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 kin_summary_example <- 
   swe_2015$kin_full %>% 
   select(year, cohort, kin, age_focal, age_kin, living, dead) %>% 

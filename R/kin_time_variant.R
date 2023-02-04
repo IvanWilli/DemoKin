@@ -4,7 +4,7 @@
 #' @details See Caswell (2021) for details on formulas.
 #' @param p numeric. A matrix of survival ratios with rows as ages and columns as years. Column names must be equal interval.
 #' @param f numeric. A matrix of age-specific fertility rates with rows as ages and columns as years. Coincident with `U`.
-#' @param N numeric. A matrix of population with rows as ages and columns as years. Coincident with `U`.
+#' @param n numeric. A matrix of population with rows as ages and columns as years. Coincident with `U`.
 #' @param pi numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with `U`.
 #' @param output_cohort integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.
 #' @param output_period integer. Year for which to return kinship structure. Could be a vector. Should be within input data years range.

@@ -40,6 +40,8 @@ in a more general perspective) with rows as ages (and columns as years in case o
 this needs to be set as 1.}
 
 \item{stable}{logic. Deprecated. Use \code{time_invariant}.}
+
+\item{U}{logic. Deprecated. Use \code{p}.}
 }
 \value{
 A list with:

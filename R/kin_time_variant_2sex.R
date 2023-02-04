@@ -8,7 +8,6 @@
 #' @param pm numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param ff numeric. Same as pf but for fertility rates.
 #' @param fm numeric. Same as pm but for fertility rates.
-#' @param time_invariant logical. Constant assumption for a given `year` rates. Default `TRUE`.
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param pif numeric. For using some specific age distribution of childbearing for mothers (same length as ages). Default `NULL`.
 #' @param pim numeric. For using some specific age distribution of childbearing for fathers (same length as ages). Default `NULL`.
@@ -18,7 +17,7 @@
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
-#' @param stable logic. Deprecated. Use `time_invariant`.
+#' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 #' @return A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age and sex.
 #' @export
 
@@ -182,8 +181,10 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
 #' @description one time projection kin. internal function.
 #'
 #' @param Ut numeric. A matrix of survival probabilities (or ratios).
-#' @param ft numeric. A matrix of age-specific fertility rates.
+#' @param Ft numeric. A matrix of age-specific fertility rates.
+#' @param Ft_star numeric. Ft but for female fertility.
 #' @param pit numeric. A matrix with distribution of childbearing.
+#' sex_focal
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
 #
@@ -243,9 +244,9 @@ timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
   return(kin_list)
 }
 
-#' defince apc combination to return
+#' APC combination to return
 
-#' @description defince apc to return.
+#' @description define apc combination to return in `kin` and `kin2sex`.
 #'
 output_period_cohort_combination <- function(output_cohort = NULL, output_period = NULL, age = NULL, years_data = NULL){
 

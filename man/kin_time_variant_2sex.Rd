@@ -48,9 +48,7 @@ kin_time_variant_2sex(
 
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
-\item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Default \code{TRUE}.}
-
-\item{stable}{logic. Deprecated. Use \code{time_invariant}.}
+\item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
 }
 \value{
 A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), including living and dead kin at that age and sex.

@@ -1,6 +1,8 @@
 Package: DemoKin
-Title: Demokin
-Description: Estimate population kin counts and its distribution by type and age
+Title: Estimate population kin counts.
+Description: Estimate population kin counts and its distribution by type, age and sex.
+    The package implements one-sex and two-sex framework for studying living-death availability,
+    with time varying rates or not, and multi-stage model.
 Version: 1.0.0
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),
@@ -31,6 +33,7 @@ Imports:
     magrittr,
     data.table,
     lifecycle
+URL: https://github.com/IvanWilli/DemoKin
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
     R (>= 2.10)

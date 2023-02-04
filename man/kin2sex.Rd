@@ -22,9 +22,9 @@ kin2sex(
 )
 }
 \arguments{
-\item{pf}{numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
+\item{pf}{numeric. A vector (atomic) or  matrix with female probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
-\item{pm}{numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
+\item{pm}{numeric. A vector (atomic) or  matrix with male probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
 \item{ff}{numeric. Same as pf but for fertility rates.}
 
@@ -49,13 +49,12 @@ kin2sex(
 \item{output_period}{integer. Vector of period years for returning results. Should be within input data years range.}
 
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
-
-\item{stable}{logic. Deprecated. Use \code{time_invariant}.}
 }
 \value{
 A list with:
 \itemize{
-\item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example \code{d} is daughter, \code{oa} is older aunts, etc.), including living and dead kin at that age.}
+\item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example \code{d} could be daughter or son depending \code{sex_kin},
+\code{oa} is older aunts or uncles also depending \code{sex_kin} value, etc.), including living and dead kin at that age.}
 \item{kin_summary}{ a data frame with Focal´s age, related ages, sex and type of kin, with indicators obtained processing \code{kin_full}, grouping by cohort or period (depending on the given arguments):}
 {\itemize{
 \item{\code{count_living}}{: count of living kin at actual age of Focal}
@@ -71,7 +70,8 @@ A list with:
 \description{
 Implementation of two-sex matrix kinship model. This produces kin counts grouped by kin, age and sex of
 each relatives at each Focal´s age. For example, male cousins from aunts and uncles from different sibling's parents
-are grouped in one male count of cousins.
+are grouped in one male count of cousins. Note that the output labels relative following female notation: the label \code{m}
+refers to either mothers or fathers, and column \code{sex_kin} determine the sex of the relative.
 }
 \details{
 See Caswell (2022) for details on formulas.

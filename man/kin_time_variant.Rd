@@ -23,6 +23,8 @@ kin_time_variant(
 
 \item{pi}{numeric. A matrix with distribution of childbearing with rows as ages and columns as years. Coincident with \code{U}.}
 
+\item{n}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
+
 \item{output_cohort}{integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.}
 
 \item{output_period}{integer. Year for which to return kinship structure. Could be a vector. Should be within input data years range.}
@@ -32,8 +34,6 @@ kin_time_variant(
 \item{birth_female}{numeric. Female portion at birth.}
 
 \item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
-
-\item{N}{numeric. A matrix of population with rows as ages and columns as years. Coincident with \code{U}.}
 }
 \value{
 A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives

@@ -21,5 +21,5 @@ output_period_cohort_combination(
 \description{
 defince apc to return.
 
-defince apc to return.
+define apc combination to return in \code{kin} and \code{kin2sex}.
 }
