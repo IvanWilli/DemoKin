@@ -42,6 +42,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     if(is.null(n)){
       # create pi and fill it during the loop
       message("Stable assumption was made for calculating pi on each year because no input data.")
+      pi_N_null_flag <- TRUE
       pi <- matrix(0, nrow=ages, ncol=n_years_data)
     }else{
       pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,length(years_data)))
