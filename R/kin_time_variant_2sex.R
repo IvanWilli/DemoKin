@@ -46,8 +46,8 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
   # age distribution at childborn
-  Pif <- pif
-  Pim <- pim
+  Pif <- pif; no_Pif <- FALSE
+  Pim <- pim; no_Pim <- FALSE
   if(is.null(pif)){
     if(!is.null(nf)){
       Pif <- rbind(t(t(nf * ff)/colSums(nf * ff)), matrix(0,ages,length(years_data)))
