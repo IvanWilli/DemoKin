@@ -92,13 +92,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   }
 
   # reorder
-  kin_full <- kin_full %>%
-    dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead) %>%
-    dplyr::mutate(kin_group =  dplyr::case_when(kin %in% c("ys", "os") ~ "s",
-                                                kin %in% c("ya", "oa") ~ "a",
-                                                kin %in% c("coa", "cya") ~ "c",
-                                                kin %in% c("nys", "nos") ~ "n",
-                                                T ~ kin))
+  kin_full <- kin_full %>%dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead)
 
   # summary
   # select period/cohort

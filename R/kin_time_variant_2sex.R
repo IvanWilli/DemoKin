@@ -148,12 +148,12 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
-      x <- as.data.frame(x)
+      x <- data.table::as.data.table(x)
       x$year <- Y
       x$kin <- y
       x$sex_kin <- rep(c(rep("f",ages), rep("m",ages)),2)
-      x$age_kin <- rep(age,2)
-      x$alive <- c(rep("living",ages), rep("dead",ages))
+      x$age_kin <- rep(agess, 2)
+      x$alive <- c(rep("living",agess), rep("dead",agess))
       return(x)
     }) %>%
       data.table::rbindlist() %>%
@@ -220,7 +220,6 @@ timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
   cya[1:agess,1] = pkin[["nys"]][1:agess,] %*% (pif + pim)
 
   for (ix in 1:om){
-    # ix = 1
     phi[,ix+1] = Gt %*% phi[, ix]
     d[,ix+1]   = Ut %*% pkin[["d"]][,ix]   + Ft %*% phi[,ix]
     gd[,ix+1]  = Ut %*% pkin[["gd"]][,ix]  + Ft %*% pkin[["d"]][,ix]
