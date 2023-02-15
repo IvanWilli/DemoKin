@@ -50,7 +50,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   Pim <- pim; no_Pim <- FALSE
   if(is.null(pif)){
     if(!is.null(nf)){
-      Pif <- rbind(t(t(nf * ff)/colSums(nf * ff)), matrix(0,ages,length(years_data)))
+      Pif <- t(t(nf * ff)/colSums(nf * ff))
     }else{
       Pif <- matrix(0, nrow=ages, ncol=n_years_data)
       no_Pif <- TRUE
@@ -58,7 +58,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   }
   if(is.null(pim)){
     if(!is.null(nm)){
-      Pim <- rbind(t(t(nm * fm)/colSums(nm * fm)), matrix(0,ages,length(years_data)))
+      Pim <- t(t(nm * fm)/colSums(nm * fm))
     }else{
       Pim <- matrix(0, nrow=ages, ncol=n_years_data)
       no_Pim <- TRUE
@@ -152,7 +152,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
       x$year <- Y
       x$kin <- y
       x$sex_kin <- rep(c(rep("f",ages), rep("m",ages)),2)
-      x$age_kin <- rep(agess, 2)
+      x$age_kin <- rep(age, 4)
       x$alive <- c(rep("living",agess), rep("dead",agess))
       return(x)
     }) %>%

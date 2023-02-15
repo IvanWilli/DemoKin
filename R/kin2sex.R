@@ -92,7 +92,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   }
 
   # reorder
-  kin_full <- kin_full %>%dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead)
+  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead)
 
   # summary
   # select period/cohort
@@ -107,14 +107,14 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   agrupar <- c("age_focal", "kin", "sex_kin", agrupar)
 
   kin_summary <- dplyr::bind_rows(
-    kin_full %>%
+    as.data.frame(kin_full) %>%
       dplyr::rename(total=living) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
       dplyr::summarise(count_living = sum(total),
                 mean_age = sum(total*age_kin)/sum(total),
                 sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
       tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", "value"),
-    kin_full %>%
+    as.data.frame(kin_full) %>%
       dplyr::rename(total=dead) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
       dplyr::summarise(count_dead = sum(total)) %>%
