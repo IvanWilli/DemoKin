@@ -110,7 +110,7 @@ kin <- function(p = NULL, f = NULL,
       dplyr::summarise(count_living = sum(total),
                 mean_age = sum(total*age_kin)/sum(total),
                 sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-      tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", "value"),
+      tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
     kin_full %>%
       dplyr::rename(total=dead) %>%
       dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
@@ -120,7 +120,7 @@ kin <- function(p = NULL, f = NULL,
       dplyr::mutate(count_cum_dead = cumsum(count_dead),
                     mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
       dplyr::ungroup() %>%
-      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", "value")) %>%
+      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
       dplyr::ungroup() %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
 

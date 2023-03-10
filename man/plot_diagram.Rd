@@ -7,13 +7,13 @@
 plot_diagram(kin_total, rounding = 3)
 }
 \arguments{
-\item{kin_total}{data.frame. With columns \code{kin} with type and \code{count} with some measeure.}
+\item{kin_total}{data.frame. values in column \code{kin} define the relative type - see \code{demokin_codes()}. Values in column \code{count} are the expected number of relatives.}
 
-\item{rounding}{numeric. Estimation could have a lot of decimals. Rounding will make looks more clear the diagramm.}
+\item{rounding}{numeric. Number of decimals to show in diagram.}
 }
 \value{
-A plot
+A Keyfitz-style kinship plot.
 }
 \description{
-Given estimation of kin counts from \code{kins} function, draw a network diagramm.
+Draws a Keyfitz-style kinship diagram given a kinship object created by the \code{kin} function. Displays expected kin counts for a Focal aged 'a'.
 }
