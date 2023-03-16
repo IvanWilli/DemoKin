@@ -45,7 +45,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
-  # age distribution at childborn
+  # age distribution at child born
   Pif <- pif; no_Pif <- FALSE
   Pim <- pim; no_Pim <- FALSE
   if(is.null(pif)){
@@ -92,18 +92,18 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     Ft_star[1:agess,1:ages] <- rbind(birth_female * Fft, (1-birth_female) * Fft)
     Fl[[as.character(years_data[t])]] <- Ft
     Fl_star[[as.character(years_data[t])]] <- Ft_star
-    if(no_Pif){
-      A <- Uf + Fft
+    # parents age distribution under stable assumption in case no input
+    if(no_Pim | no_Pif){
+      A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
       A_decomp = eigen(A)
-      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-      Pif[,t] <- w*A[1,]/sum(w*A[1,])
+      lambda = as.double(A_decomp$values[1])
+      w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+      wf = w[1:ages]
+      wm = w[(ages+1):(2*ages)]
+      Pif[,t] = wf * ff[,t] / sum(wf * ff[,t])
+      Pim[,t] = wm * fm[,t] / sum(wm * fm[,t])
     }
-    if(no_Pim){
-      A <- Um + Fmt
-      A_decomp = eigen(A)
-      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-      Pim[,t] <- w*A[1,]/sum(w*A[1,])
-    }
+
     # project
     Ut <- as.matrix(Ul[[t]])
     Ft <- as.matrix(Fl[[t]])

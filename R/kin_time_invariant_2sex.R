@@ -54,21 +54,15 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   Ft_star[1:agess,1:ages] <- rbind(birth_female * Ff, (1-birth_female) * Ff)
 
   # parents age distribution under stable assumption in case no input
-  if(is.null(pif)){
-    A = Uf + Ff
-    A_decomp = eigen(A)
-    lambda = as.double(A_decomp$values[1])
-    w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-    pif = w*A[1,]/sum(w*A[1,])
-    if(all(is.na(pif))) pif <- rep(1/ages, ages)
-  }
-  if(is.null(pim)){
-    A = Um + Fm
-    A_decomp = eigen(A)
-    lambda = as.double(A_decomp$values[1])
-    w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-    pim = w*A[1,]/sum(w*A[1,])
-    if(all(is.na(pim))) pim <- rep(1/ages, ages)
+  if(is.null(pim) | is.null(pif)){
+  A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
+  A_decomp = eigen(A)
+  lambda = as.double(A_decomp$values[1])
+  w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+  wf = w[1:ages]
+  wm = w[(ages+1):(2*ages)]
+  pif = wf * ff / sum(wf * ff)
+  pim = wm * fm / sum(wm * fm)
   }
 
   # initial count matrix (kin ages in rows and focal age in column)
@@ -89,12 +83,12 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   m[1:(agess),1] = c(pif, pim)
   for(i in 1:(ages-1)){
     # i = 1
-    phi[,i+1] = Gt %*% phi[, i]
-    d[,i+1]   = Ut %*% d[,i] + Ft %*% phi[,i]
-    gd[,i+1]  = Ut %*% gd[,i] + Ft %*% d[,i]
+    phi[,i+1] = Gt %*% phi[,i]
+    d[,i+1]   = Ut %*% d[,i]   + Ft %*% phi[,i]
+    gd[,i+1]  = Ut %*% gd[,i]  + Ft %*% d[,i]
     ggd[,i+1] = Ut %*% ggd[,i] + Ft %*% gd[,i]
     m[,i+1]   = Ut %*% m[,i]
-    ys[,i+1]  = Ut %*% ys[,i] + Ft_star %*% m[,i]
+    ys[,i+1]  = Ut %*% ys[,i]  + Ft_star %*% m[,i]
     nys[,i+1] = Ut %*% nys[,i] + Ft %*% ys[,i]
   }
 
@@ -151,7 +145,6 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                      }
   ) %>%
     purrr::reduce(rbind)
-
 
   # results as list?
   if(list_output) {
