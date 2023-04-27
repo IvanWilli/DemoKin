@@ -45,6 +45,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
       pi_N_null_flag <- TRUE
       pi <- matrix(0, nrow=ages, ncol=n_years_data)
     }else{
+      pi_N_null_flag <- FALSE
       pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,length(years_data)))
     }
   }
@@ -63,7 +64,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     Ut = rbind(cbind(Ut,zeros),cbind(Mt,zeros))
     ft = matrix(0, nrow=ages*2, ncol=ages*2)
     ft[1,1:ages] = f[,t] * birth_female
-    if(is.null(pi)){
+    if(pi_N_null_flag){
       A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
       A_decomp = eigen(A)
       w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
