@@ -38,6 +38,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
   # age distribution at childborn
+  pi_N_null_flag <- FALSE
   if(is.null(pi)){
     if(is.null(n)){
       # create pi and fill it during the loop
