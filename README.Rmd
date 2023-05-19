@@ -42,7 +42,7 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Usage
 
-Consider an average Swedish woman called 'Focal'. For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life (the 'time-invariant' assumption in Caswell [2019]). 
+Consider an average Swedish woman called 'Focal'. For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life (the 'time-invariant' assumption in Caswell (2019)). 
 
 We then ask:
 
@@ -73,7 +73,7 @@ plot_diagram(kin_total, rounding = 2)
 Relatives are identified by a unique code:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
-kable(DemoKin::demokin_codes()[-2])
+kable(DemoKin::demokin_codes[,c(1,3)])
 ```
 
 ## Vignette

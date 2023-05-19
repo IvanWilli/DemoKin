@@ -13,8 +13,9 @@ timevarying_kin_2sex(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
 
 \item{Ft_star}{numeric. Ft but for female fertility.}
 
-\item{pit}{numeric. A matrix with distribution of childbearing.
-sex_focal}
+\item{pit}{numeric. A matrix with distribution of childbearing.}
+
+\item{sex_focal}{character. "f" for female or "m" for male.}
 
 \item{ages}{numeric.}
 

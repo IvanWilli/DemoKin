@@ -84,7 +84,7 @@ Here, each relative type is identified by a unique code. Note that `DemoKin` use
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 library(knitr)
 
-DemoKin::demokin_codes() %>% 
+demokin_codes %>% 
   kable
 ```
 
@@ -92,7 +92,6 @@ We can also visualize the age distribution of relatives when Focal is 35 years o
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_full"]] %>%
-  DemoKin::rename_kin() %>% 
   filter(age_focal == 35) %>% 
   ggplot() +
   geom_line(aes(age_kin, living))  +
@@ -110,7 +109,6 @@ The `kin` function also includes a summary output with the count of living kin, 
 
 ```{r, fig.height=6, fig.width=8}
 swe_2015[["kin_summary"]] %>% 
-  DemoKin::rename_kin() %>% 
   filter(age_focal == 35) %>% 
   select(kin, count_living, mean_age, sd_age) %>% 
   mutate_if(is.numeric, round, 2) %>% 
@@ -145,7 +143,6 @@ swe_time_varying <-
     )
 
 swe_time_varying$kin_summary %>%
-  DemoKin::rename_kin() %>% 
   ggplot(aes(age_focal,count_living,color=factor(cohort))) +
   scale_y_continuous(name = "",labels = seq(0,3,.2),breaks = seq(0,3,.2))+
   geom_line(color = 1)+
@@ -165,7 +162,6 @@ The function `kin` also includes information on the number of relatives lost by 
 
 ```{r, fig.height=6, fig.width=8, message=FALSE, warning=FALSE}
 swe_time_varying$kin_summary %>%
-  DemoKin::rename_kin() %>% 
   ggplot() +
   geom_line(aes(age_focal, count_cum_dead)) +
   labs(y = "Expected number of deceased relatives") +
@@ -177,7 +173,6 @@ Given these population-level measures, we can compute Focal's the mean age at th
 
 ```{r}
 swe_time_varying$kin_summary %>% 
-  rename_kin() %>% 
   filter(age_focal == 50) %>% 
   select(kin,count_cum_dead,mean_age_lost) %>% 
   mutate_if(is.numeric, round, 2) %>% 
@@ -202,7 +197,6 @@ swe_2015_prevalence <-
 swe_2015$kin_full %>% 
   left_join(swe_2015_prevalence) %>% 
   group_by(kin, age_focal) %>% 
-  rename_kin() %>% 
   summarise(
     prevalent = sum(living * prev),
     no_prevalent = sum(living * (1-prev))
@@ -237,8 +231,8 @@ demokin_svk1980_caswell2020 <-
     f = svk_fxs,
     D = svk_pxs,
     H = svk_Hxs, 
-    birth_female=1
-    )
+    birth_female=1,
+    parity = TRUE)
 ```
 
 Note that the function ask for risks already in a certain matrix format. As an example, consider the age-parity distribution of aunts, when Focal is 20 and 60 yo (this is equivalent to Figure 4 in Caswell [2021]). 
@@ -247,8 +241,8 @@ Note that the function ask for risks already in a certain matrix format. As an e
 demokin_svk1980_caswell2020 %>% 
   filter(kin %in% c("oa","ya"), age_focal %in% c(20,60)) %>% 
   mutate(parity = as.integer(stage_kin)-1,
-         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
-         parity = forcats::fct_rev(parity)) %>% 
+         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity))
+         ) %>% 
   group_by(age_focal, age_kin, parity) %>% 
   summarise(count= sum(living)) %>% 
   ggplot() +
@@ -265,8 +259,7 @@ We can also see the portion of living daughters and mothers at different parity 
 demokin_svk1980_caswell2020 %>% 
   filter(kin %in% c("d","m")) %>% 
   mutate(parity = as.integer(stage_kin)-1,
-         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity)),
-         parity = forcats::fct_rev(parity)) %>% 
+         parity = case_when(parity == 5 ~ "5+", T ~ as.character(parity))) %>% 
   group_by(age_focal, kin, parity) %>% 
   summarise(count= sum(living)) %>% 
   DemoKin::rename_kin() %>% 

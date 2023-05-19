@@ -11,21 +11,24 @@ kin_multi_stage(
   H = NULL,
   birth_female = 1/2.04,
   output_kin = NULL,
+  parity = FALSE,
   list_output = FALSE
 )
 }
 \arguments{
-\item{U}{list. age elemnts with column-stochastic transition matrix with dimension for the state space, conditional on survival.}
+\item{U}{list. age elements with column-stochastic transition matrix with dimension for the state space, conditional on survival.}
 
-\item{f}{matrix. state-specific fertility (age in rows and states in columns).}
+\item{f}{matrix. state-specific fertility (age in rows and states in columns). Is accepted also a list with for each age-class.}
 
-\item{D}{matrix. survival probabilities by state (age in rows and states in columns)}
+\item{D}{matrix. survival probabilities by state (age in rows and states in columns). Is accepted also a list for each state with survival matrices.}
 
-\item{H}{matrix. assigns the offspring of individuals in some stage to the appropriate age class with 1 (age in rows and states in columns).}
+\item{H}{matrix. assigns the offspring of individuals in some stage to the appropriate age class (age in rows and states in columns). Is accepted also a list with a matrix for each state.}
 
 \item{birth_female}{numeric. Female portion at birth.}
 
 \item{output_kin}{character. kin to return. For example "m" for mother, "d" for daughter. See the \code{vignette} for all kin types.}
+
+\item{parity}{logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default \code{TRUE}.}
 
 \item{list_output}{logical. Results as a list. Default \code{FALSE}.}
 }

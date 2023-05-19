@@ -149,3 +149,12 @@
 #' @source
 #'   Caswell (2022)
 "fra_surv_sex"
+
+#' DemoKin codes, Caswell (2020) codes, and useful labels.
+#'
+#' DemoKin codes, Caswell (2020) codes, and useful labels.
+#' @docType data
+#' @format
+#' A data.frame with codes and labels for distinction between kin types.
+
+"demokin_codes"

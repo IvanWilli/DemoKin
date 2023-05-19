@@ -52,6 +52,9 @@ kin <- function(p = NULL, f = NULL,
                 U = lifecycle::deprecated())
   {
 
+  # global vars
+  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+
   # changed arguments
   if (lifecycle::is_present(stable)) {
     lifecycle::deprecate_warn("0.0.0.9000", "kin(stable)", details = "Used time_invariant")
@@ -64,9 +67,15 @@ kin <- function(p = NULL, f = NULL,
 
   # kin to return
   all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
+  output_kin_asked <- output_kin
   if(is.null(output_kin)){
     output_kin <- all_possible_kin
   }else{
+    if("s" %in% output_kin) output_kin <- c(output_kin, "os", "ys")
+    if("c" %in% output_kin) output_kin <- c(output_kin, "coa", "cya")
+    if("a" %in% output_kin) output_kin <- c(output_kin, "oa", "ya")
+    if("n" %in% output_kin) output_kin <- c(output_kin, "nos", "nys")
+    output_kin <- output_kin[!output_kin %in% c("s", "c", "a", "n")]
     output_kin <- match.arg(tolower(output_kin), all_possible_kin, several.ok = TRUE)
   }
 
@@ -89,6 +98,17 @@ kin <- function(p = NULL, f = NULL,
                               output_kin = output_kin,
                               birth_female = birth_female)
       message(paste0("Assuming stable population before ", min(years_data), "."))
+  }
+
+  # re-group if grouped type is asked
+  if(length(output_kin_asked)!=length(output_kin)){
+    if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
+    if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
+    if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
+    if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
+    kin_full <- kin_full %>%
+      dplyr::summarise(living = sum(living), dead = sum(dead),
+                       .by = c(kin, age_kin, age_focal, cohort, year))
   }
 
   # select period/cohort

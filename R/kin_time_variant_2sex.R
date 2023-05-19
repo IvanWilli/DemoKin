@@ -30,6 +30,9 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
                                    output_cohort = NULL, output_period = NULL, output_kin = NULL,
                                    list_output = FALSE){
 
+  # global vars
+  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+
   # same input length
   if(!all(dim(pf) == dim(pm), dim(pf) == dim(ff), dim(pf) == dim(fm))) stop("Dimension of P's and F's should be the same")
 
@@ -145,6 +148,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
     purrr::map(~ .[selected_kin_position])
   # long format
+  cat("Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
@@ -165,7 +169,6 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     X <- X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],]
     X <- data.table::dcast(X, year + kin + sex_kin + age_kin + age_focal + cohort ~ alive, value.var = "count", fun.aggregate = sum)
   }) %>% data.table::rbindlist()
-  pb$tick()
 
   # results as list?
   if(list_output) {
@@ -184,7 +187,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
 #' @param Ft numeric. A matrix of age-specific fertility rates.
 #' @param Ft_star numeric. Ft but for female fertility.
 #' @param pit numeric. A matrix with distribution of childbearing.
-#' sex_focal
+#' @param sex_focal character. "f" for female or "m" for male.
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
 #
@@ -241,31 +244,4 @@ timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
   return(kin_list)
-}
-
-#' APC combination to return
-
-#' @description define apc combination to return in `kin` and `kin2sex`.
-#'
-output_period_cohort_combination <- function(output_cohort = NULL, output_period = NULL, age = NULL, years_data = NULL){
-
-  # no specific
-  if(is.null(output_period) & is.null(output_cohort)){
-    message("No specific output was set. Return all period data.")
-    output_period <- years_data
-  }
-
-  # cohort combination
-  if(!is.null(output_cohort)){
-    selected_cohorts_year_age <- data.frame(age = rep(age,length(output_cohort)),
-                                            year = purrr::map(output_cohort,.f = ~.x+age) %>%
-                                              unlist(use.names = F))
-  }else{selected_cohorts_year_age <- c()}
-
-  # period year combination
-  if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
-  }else{selected_years_age <- c()}
-
-  # end
-  return(dplyr::bind_rows(selected_years_age,selected_cohorts_year_age) %>% dplyr::distinct())
 }

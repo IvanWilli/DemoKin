@@ -35,7 +35,7 @@ devtools::install_github("IvanWilli/DemoKin")
 Consider an average Swedish woman called ‘Focal’. For this exercise, we
 assume a female closed population in which everyone experiences the
 Swedish 2015 mortality and fertility rates at each age throughout their
-life (the ‘time-invariant’ assumption in Caswell \[2019\]).
+life (the ‘time-invariant’ assumption in Caswell (2019)).
 
 We then ask:
 
@@ -71,22 +71,26 @@ plot_diagram(kin_total, rounding = 2)
 
 Relatives are identified by a unique code:
 
-| DemoKin | Label                      |
-|:--------|:---------------------------|
-| coa     | Cousins from older aunt    |
-| cya     | Cousins from younger aunt  |
-| d       | Daughter                   |
-| gd      | Grand-daughter             |
-| ggd     | Great-grand-daughter       |
-| ggm     | Great-grandmother          |
-| gm      | Grandmother                |
-| m       | Mother                     |
-| nos     | Nieces from older sister   |
-| nys     | Nieces from younger sister |
-| oa      | Aunt older than mother     |
-| ya      | Aunt younger than mother   |
-| os      | Older sister               |
-| ys      | Younger sister             |
+| DemoKin | Labels_female               |
+|:--------|:----------------------------|
+| coa     | Cousins from older aunts    |
+| cya     | Cousins from younger aunts  |
+| c       | Cousins                     |
+| d       | Daughters                   |
+| gd      | Grand-daughters             |
+| ggd     | Great-grand-daughters       |
+| ggm     | Great-grandmothers          |
+| gm      | Grandmothers                |
+| m       | Mother                      |
+| nos     | Nieces from older sisters   |
+| nys     | Nieces from younger sisters |
+| n       | Nieces                      |
+| oa      | Aunts older than mother     |
+| ya      | Aunts younger than mother   |
+| a       | Aunts                       |
+| os      | Older sisters               |
+| ys      | Younger sisters             |
+| s       | Sisters                     |
 
 ## Vignette
 

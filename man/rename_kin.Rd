@@ -4,8 +4,16 @@
 \alias{rename_kin}
 \title{rename kin}
 \usage{
-rename_kin(df, consolidate_column = "no")
+rename_kin(df, sex = "f")
+}
+\arguments{
+\item{df}{data.frame. A data frame with variable \code{kin} with \code{DemoKin} codes to be labelled.}
+
+\item{sex}{character. "f" for female, "m" for male or "2sex" for both sex naming.}
 }
 \description{
-Rename kin labels depending consolidate some types
+Add kin labels depending the sex
+}
+\details{
+See table \code{demokin_codes} to know label options.
 }

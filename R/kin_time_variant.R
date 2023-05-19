@@ -20,15 +20,18 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
                             output_cohort = NULL, output_period = NULL, output_kin = NULL,
                             birth_female = 1/2.04, list_output = FALSE){
 
+  # global vars
+  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+
   # check input
   if(is.null(p) | is.null(f)) stop("You need values on p and f.")
 
   # diff years
-  if(!any(as.integer(colnames(p)) == as.integer(colnames(f)))) stop("Data should be from same years.")
+  if(!any(as.integer(colnames(p)) == as.integer(colnames(f)))) stop("Make sure that p and f are matrices and have the same column names.")
 
   # data should be from same interval years
   years_data <- as.integer(colnames(p))
-  if(var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
+  if(var(diff(years_data))!=0) stop("The years given as column names in the p and f matrices must be equally spaced.")
 
   # utils
   age          <- 0:(nrow(p)-1)
@@ -104,6 +107,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     purrr::map(~ .[selected_kin_position])
 
   # long format
+  cat("Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
@@ -123,7 +127,6 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],] %>%
       data.table::dcast(year + kin + age_kin + age_focal + cohort ~ alive, value.var = "count")
     }) %>% data.table::rbindlist()
-  pb$tick()
 
   # results as list?
   if(list_output) {
@@ -193,10 +196,17 @@ timevarying_kin<- function(Ut, ft, pit, ages, pkin){
   return(kin_list)
 }
 
-#' defince apc combination to return
+#' APC combination to return
 
-#' @description defince apc to return.
-#'
+#' @description define APC combination to return in `kin` and `kin2sex`.
+#' @details Because returning all period and cohort data from a huge time-series would be hard memory consuming,
+#' this function is an auxiliary one to deal with selection from inputs `output_cohort` and `output_period`.
+#' @param output_cohort integer. A vector with selected calendar years.
+#' @param output_period integer. A vector with selected cohort years.
+#' @param age integer. A vector with ages from the kinship network to be filtered.
+#' @param years_data integer. A vector with years from the time-varying kinship network to be filtered.
+#' @return data.frame with years and ages to filter in `kin` and `kin_2sex` functions.
+#' @export
 output_period_cohort_combination <- function(output_cohort = NULL, output_period = NULL, age = NULL, years_data = NULL){
 
   # no specific
@@ -212,10 +222,11 @@ output_period_cohort_combination <- function(output_cohort = NULL, output_period
                                               unlist(use.names = F))
   }else{selected_cohorts_year_age <- c()}
 
-  # period year combination
+  # period combination
   if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
   }else{selected_years_age <- c()}
 
   # end
   return(dplyr::bind_rows(selected_years_age,selected_cohorts_year_age) %>% dplyr::distinct())
 }
+
