@@ -34,14 +34,12 @@
 #' }
 #' @export
 #' @examples
-#' \dontrun{
 #' # Kin expected matrilineal count for a Swedish female based on 2015 rates.
 #' swe_surv_2015 <- swe_px[,"2015"]
 #' swe_asfr_2015 <- swe_asfr[,"2015"]
 #' # Run kinship models
 #' swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015)
-#' head(swe_2015)
-#'}
+#' head(swe_2015$kin_summary)
 
 kin <- function(p = NULL, f = NULL,
                 time_invariant = TRUE,

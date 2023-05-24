@@ -1,5 +1,5 @@
 Package: DemoKin
-Title: Estimate population kin counts
+Title: Estimate Population Kin Distribution  
 Description: Estimate population kin counts and its distribution by type, age and sex.
     The package implements one-sex and two-sex framework for studying living-death availability,
     with time varying rates or not, and multi-stage model.

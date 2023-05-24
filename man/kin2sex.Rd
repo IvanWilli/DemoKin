@@ -77,14 +77,12 @@ refers to either mothers or fathers, and column \code{sex_kin} determine the sex
 See Caswell (2022) for details on formulas.
 }
 \examples{
-\dontrun{
 # Kin expected count by relative sex for a French female based on 2012 rates.
 fra_fert_f <- fra_asfr_sex[,"ff"]
 fra_fert_m <- fra_asfr_sex[,"fm"]
 fra_surv_f <- fra_surv_sex[,"pf"]
 fra_surv_m <- fra_surv_sex[,"pm"]
 fra_2012 <- kin2sex(fra_surv_f, fra_surv_m, fra_fert_f, fra_fert_m)
-head(fra_2012)
-}
+head(fra_2012$kin_summary)
 
 }

@@ -23,7 +23,13 @@ theoretical development by Goodman, Keyfitz and Pullum (1974).
 
 ## Installation
 
-You can install the development version from GitHub with:
+You can install the CRAN version:
+
+``` r
+install.packages("DemoKin")
+```
+
+Or the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")
@@ -67,7 +73,7 @@ names(kin_total) <- c("kin", "count")
 plot_diagram(kin_total, rounding = 2)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 Relatives are identified by a unique code:
 
@@ -127,19 +133,17 @@ request. We look forward to hearing from you!
 
 Caswell, H. 2019. The formal demography of kinship: A matrix
 formulation. Demographic Research 41:679–712.
-<doi:10.4054/DemRes.2019.41.24>.
 
 Caswell, H. 2020. The formal demography of kinship II: Multistate
 models, parity, and sibship. Demographic Research 42: 1097-1144.
-<doi:10.4054/DemRes.2020.42.38>.
 
 Caswell, Hal and Xi Song. 2021. “The Formal Demography of Kinship. III.
 Kinship Dynamics with Time-Varying Demographic Rates.” Demographic
-Research 45: 517–46. <doi:10.4054/DemRes.2021.45.16>.
+Research 45: 517–46.
 
 Caswell, H. (2022). The formal demography of kinship IV: Two-sex models
 and their approximations. Demographic Research, 47, 359–396.
 
 Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation
 and the frequency of various kinship relationships. Theoretical
-Population Biology 5(1):1–27. <doi:10.1016/0040-5809(74)90049-5>.
+Population Biology 5(1):1–27.

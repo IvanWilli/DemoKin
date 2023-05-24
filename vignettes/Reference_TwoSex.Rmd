@@ -10,12 +10,12 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include=FALSE}
+```{r, eval = F, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(devtools); load_all()
 ```
 
-Human males generally live longer and reproduce later than females. 
+Human males generally live shorter and reproduce later than females. 
 These sex-specific processes affect kinship dynamics in a number of ways. 
 For example, the degree to which an average member of the population, call her Focal, has a living grandparent is affected by differential mortality affecting the parental generation at older ages. 
 We may also be interested in considering how kinship structures vary by Focal's sex: a male Focal may have a different number of grandchildren than a female Focal given differences in fertility by sex. 
