@@ -171,6 +171,9 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
   # kin_full as data.frame
   kin_full <- purrr::map2(kin_list, names(kin_list),
                           function(x,y){
+                            # reassign deaths to Focal experienced age
+                            x[(ages*s+1):(ages*s*2),1:(ages-1)] <- x[(ages*s+1):(ages*s*2),2:ages]
+                            x[(ages*s+1):(ages*s*2),ages] <- 0
                             out <- as.data.frame(x)
                             colnames(out) <- age
                             out %>%
@@ -183,9 +186,6 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                               tidyr::pivot_wider(names_from = alive, values_from = count)
                           }) %>%
     purrr::reduce(rbind)
-
-  # reassign dead to proper focal age
-  kin_full <- dead_age_reasign(kin_full)
 
   # results as list?
   if(list_output) {

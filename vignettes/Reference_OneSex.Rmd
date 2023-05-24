@@ -270,6 +270,8 @@ demokin_svk1980_caswell2020 %>%
   facet_wrap(~kin, nrow = 2)
 ```
 
+This function `kin_multi_stage` can be generalized to any kind of state (be sure to set parameter `parity = FALSE`, de default).
+
 ## References
 
 Caswell, H. (2019). The formal demography of kinhip: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.

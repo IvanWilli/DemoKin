@@ -107,10 +107,13 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     purrr::map(~ .[selected_kin_position])
 
   # long format
-  cat("Preparing output...")
+  message("Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
+      # reassign deaths to Focal experienced age
+      x[(ages+1):(ages*2),1:(ages-1)] <- x[(ages+1):(ages*2),2:ages]
+      x[(ages+1):(ages*2),ages] <- 0
       x <- as.data.frame(x)
       x$year <- Y
       x$kin <- y
@@ -127,9 +130,6 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],] %>%
       data.table::dcast(year + kin + age_kin + age_focal + cohort ~ alive, value.var = "count")
     }) %>% data.table::rbindlist()
-
-  # reassign dead to proper focal age
-  kin <- dead_age_reasign(kin)
 
   # results as list?
   if(list_output) {

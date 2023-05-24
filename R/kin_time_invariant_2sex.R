@@ -135,6 +135,9 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   # as data.frame
   kin <- purrr::map2(kin_list, names(kin_list),
                      function(x,y){
+                       # reassign deaths to Focal experienced age
+                       x[(agess+1):(agess*2),1:(ages-1)] <- x[(agess+1):(agess*2),2:ages]
+                       x[(agess+1):(agess*2),ages] <- 0
                        out <- as.data.frame(x)
                        colnames(out) <- age
                        out %>%
@@ -148,9 +151,6 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                      }
   ) %>%
     purrr::reduce(rbind)
-
-  # reassign dead to proper focal age
-  kin <- dead_age_reasign(kin)
 
   # results as list?
   if(list_output) {
