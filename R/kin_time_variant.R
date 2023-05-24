@@ -128,6 +128,9 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
       data.table::dcast(year + kin + age_kin + age_focal + cohort ~ alive, value.var = "count")
     }) %>% data.table::rbindlist()
 
+  # reassign dead to proper focal age
+  kin <- dead_age_reasign(kin)
+
   # results as list?
   if(list_output) {
     out <- kin_list

@@ -184,6 +184,9 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                           }) %>%
     purrr::reduce(rbind)
 
+  # reassign dead to proper focal age
+  kin_full <- dead_age_reasign(kin_full)
+
   # results as list?
   if(list_output) {
     out <- kin_list
@@ -193,31 +196,4 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
 
   # end
   return(out)
-}
-
-# function to create lists for the parity case given a set of coniditonal rates and survival probabilities with stages in columns and ages in rows
-make_mulstistate_parity_matrices <- function(f_parity, p_parity, birth_female=.5){
-  ages <- nrow(f_parity)
-  stages <- ncol(f_parity) + 1
-  F_list <- U_list <- D_list <- H_list <- list()
-  for(x in 1:ages){
-    cond_probs <- as.numeric(f_parity[x,]/(1+f_parity[x,]/2))
-    U_age <- matrix(0,stages,stages)
-    diag(U_age) <-  c(1 - cond_probs, 1)
-    U_age[row(U_age)-1==col(U_age)] <- cond_probs
-    U_list[[x]] <- U_age
-    F_age <- matrix(0,stages,stages)
-    F_age[1,] <- c(cond_probs,cond_probs[stages-1])*birth_female
-    F_list[[x]] <- F_age
-  }
-  p_parity$px_last <- p_parity[,stages-1]
-  for(s in 1:stages){
-    H_age <- D_age <- matrix(0,ages,ages)
-    H_age[1,] <- 1
-    D_age[row(D_age)-1==col(D_age)] <- p_parity[-ages,s]
-    D_age[stages, stages] <- p_parity[ages,s]
-    H_list[[s]] <- H_age
-    D_list[[s]] <- D_age
-  }
-  return(list(U = U_list, F. = F_list, H = H_list, D = D_list))
 }

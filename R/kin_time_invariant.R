@@ -107,6 +107,8 @@ kin_time_invariant <- function(p = NULL, f = NULL,
                ) %>%
               purrr::reduce(rbind)
 
+  # reassign dead to proper focal age
+  kin <- dead_age_reasign(kin)
 
   # results as list?
   if(list_output) {

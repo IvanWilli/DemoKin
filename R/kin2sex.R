@@ -107,7 +107,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead)
 
   # re-group if grouped type is asked
-  if(length(output_kin_asked)!=length(output_kin)){
+  if(!is.null(output_kin_asked) & length(output_kin_asked)!=length(output_kin)){
     if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
     if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
     if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"

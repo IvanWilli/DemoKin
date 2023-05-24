@@ -170,6 +170,9 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     X <- data.table::dcast(X, year + kin + sex_kin + age_kin + age_focal + cohort ~ alive, value.var = "count", fun.aggregate = sum)
   }) %>% data.table::rbindlist()
 
+  # reassign dead to proper focal age
+  kin <- dead_age_reasign(kin)
+
   # results as list?
   if(list_output) {
     out <- kin_list

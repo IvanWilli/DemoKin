@@ -101,7 +101,7 @@ kin <- function(p = NULL, f = NULL,
   }
 
   # re-group if grouped type is asked
-  if(length(output_kin_asked)!=length(output_kin)){
+  if(!is.null(output_kin_asked) & length(output_kin_asked)!=length(output_kin)){
     if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
     if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
     if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
@@ -147,4 +147,20 @@ kin <- function(p = NULL, f = NULL,
   # return
   kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
   return(kin_out)
+}
+
+
+#' Reassign kin dead to proper Focal age
+#' @description Reassign death to proper Focal risk age
+#' @details Matrix methods set dead experience in the next age where risk happened. This function return dead experienced in x from x+1.
+#' @param kin table. A kin output in table format from function `kin_time_invariant`, `kin_time_variant`, `kin_time_invariant_2sex`, `kin_time_invariant_2sex`, `kin_multi_stage`.
+#' @export
+dead_age_reasign <- function(kin){
+  kin <- data.table::as.data.table(kin)
+  kin_dt <- kin[, -which(names(kin) == "living"), with = FALSE]
+  kin_dt$age_focal <- kin_dt$age_focal - 1
+  kin_dt <- kin_dt[kin_dt$age_focal >= 0, ]
+  kin <- merge(kin_dt, kin[, -which(names(kin) == "dead"), with = FALSE], all.y = TRUE)
+  kin$dead[is.na(kin$dead)] <- 0
+  return(kin)
 }
