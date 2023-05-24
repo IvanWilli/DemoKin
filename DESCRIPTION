@@ -3,7 +3,7 @@ Title: Estimate Population Kin Distribution
 Description: Estimate population kin counts and its distribution by type, age and sex.
     The package implements one-sex and two-sex framework for studying living-death availability,
     with time varying rates or not, and multi-stage model.
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(
     person("Iván", "Williams", email = "act.ivanwilliams@gmail.com", role = "cre"),
     person("Diego", "Alburez-Gutierrez", email = "alburezgutierrez@demogr.mpg.de", role = "aut"),
