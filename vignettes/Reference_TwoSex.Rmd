@@ -1,5 +1,6 @@
 ---
 title: "Two-sex kinship model"
+bibliography: references.bib
 output: 
   html_document:
     toc: true
@@ -21,7 +22,7 @@ For example, the degree to which an average member of the population, call her F
 We may also be interested in considering how kinship structures vary by Focal's sex: a male Focal may have a different number of grandchildren than a female Focal given differences in fertility by sex. 
 Documenting these differences matters since women often face greater expectations to provide support and informal care to relatives.
 As they live longer, they may find themselves at greater risk of being having no living kin.
-The function `kin2sex` implements two-sex kinship models as introduced by Caswell (2022). 
+The function `kin2sex` implements two-sex kinship models as introduced by Caswell [-@caswell_formal_2022]. 
 This vignette show how to run two-sex models and highlights some of the advantages of this model over one-sex models in populations with time-invariant and time-variant rates.
 
 ```{r, message=FALSE, warning=FALSE}
@@ -200,11 +201,11 @@ kin_out_time_variant$kin_summary %>%
 
 ### 4. Approximations
 
-Caswell (2022) introduced two approaches for approximating two-sex kinship structures for cases when male demographic rates are not available. 
+Caswell [-@caswell_formal_2022] introduced two approaches for approximating two-sex kinship structures for cases when male demographic rates are not available. 
 The first is the *androgynous* approximation, which assumes equal fertility and survival for males and females.
 The second is the use of *GKP factors* apply to each type of relative (e.g., multiplying mothers by two to obtain the number of mothers and fathers). 
 
-Here, we present a visual evaluation of the accuracy of these approximations by comparing to 'true' two-sex models using the French data included with `DemoKin` for time-invariant models (Caswell, 2022). 
+Here, we present a visual evaluation of the accuracy of these approximations by comparing to 'true' two-sex models using the French data included with `DemoKin` for time-invariant models [@caswell_formal_2022]. 
 We start by considering the androgynous approximation.
 We compare expected kin counts by age and find high levels of consistency for all kin types, except for grandfathers and great-grandfathers:
 
@@ -268,5 +269,3 @@ bind_rows(
 ```
 
 ## References
-
-Caswell, H. (2022). The formal demography of kinship IV: Two-sex models and their approximations. Demographic Research, 47, 359–396. 

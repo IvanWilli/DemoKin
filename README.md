@@ -32,14 +32,15 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Usage
 
-Consider an average Swedish woman called ‘Focal’. For this exercise, we
+Consider an average Swedish woman called ‘Focal.’ For this exercise, we
 assume a female closed population in which everyone experiences the
 Swedish 2015 mortality and fertility rates at each age throughout their
-life (the ‘time-invariant’ assumption in Caswell (2019)).
+life; i.e., the ‘time-invariant’ assumption in Caswell (2019).
 
 We then ask:
 
-> How many living relatives does Focal have at each age?
+> What is the expected number of relatives of Focal over her life
+> course?
 
 Let’s explore this using the Swedish data already included with
 `DemoKin`.
@@ -52,7 +53,7 @@ swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
 *p* is the survival probability by age from a life table and *f* are the
-age specific fertility raties by age (see `?kin` for details).
+age specific fertility ratios by age (see `?kin` for details).
 
 Now, we can visualize the implied kin counts (i.e., the average number
 of living kin) of Focal at age 35 using a network or ‘Keyfitz’ kinship
@@ -94,11 +95,11 @@ Relatives are identified by a unique code:
 
 ## Vignette
 
-For more details, including an extension to time varying-populations
-rates, deceased kin, and multi-state models in a one-sex framework, see
-`vignette("Reference_OneSex", package = "DemoKin")`. For the case of
-two-sex see `vignette("Reference_TwoSex", package = "DemoKin")`. If the
-vignette does not load, you may need to install the package as
+For more details, including an extension to time-variant rates, deceased
+kin, and multi-state models in a one-sex framework, see
+`vignette("Reference_OneSex", package = "DemoKin")`. For two-sex models,
+see `vignette("Reference_TwoSex", package = "DemoKin")`. If the vignette
+does not load, you may need to install the package as
 `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
@@ -125,19 +126,48 @@ request. We look forward to hearing from you!
 
 ## References
 
-Caswell, H. 2019. The formal demography of kinship: A matrix
-formulation. Demographic Research 41:679–712.
+<div id="refs" class="references csl-bib-body hanging-indent">
 
-Caswell, H. 2020. The formal demography of kinship II: Multistate
-models, parity, and sibship. Demographic Research 42: 1097-1144.
+<div id="ref-caswell_formal_2019" class="csl-entry">
 
-Caswell, Hal and Xi Song. 2021. “The Formal Demography of Kinship. III.
-Kinship Dynamics with Time-Varying Demographic Rates.” Demographic
-Research 45: 517–46.
+Caswell, Hal. 2019. “The Formal Demography of Kinship: A Matrix
+Formulation.” *Demographic Research* 41 (September): 679–712.
+<https://doi.org/10.4054/DemRes.2019.41.24>.
 
-Caswell, H. (2022). The formal demography of kinship IV: Two-sex models
-and their approximations. Demographic Research, 47, 359–396.
+</div>
 
-Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation
-and the frequency of various kinship relationships. Theoretical
-Population Biology 5(1):1–27.
+<div id="ref-caswell_formal_2020" class="csl-entry">
+
+———. 2020. “The Formal Demography of Kinship II: Multistate Models,
+Parity, and Sibship.” *Demographic Research* 42 (June): 1097–1146.
+<https://doi.org/10.4054/DemRes.2020.42.38>.
+
+</div>
+
+<div id="ref-caswell_formal_2022" class="csl-entry">
+
+———. 2022. “The Formal Demography of Kinship IV: Two-Sex Models and
+Their Approximations.” *Demographic Research* 47 (September): 359–96.
+<https://doi.org/10.4054/DemRes.2022.47.13>.
+
+</div>
+
+<div id="ref-caswell_formal_2021" class="csl-entry">
+
+Caswell, Hal, and Xi Song. 2021. “The Formal Demography of Kinship III:
+Kinship Dynamics with Time-Varying Demographic Rates.” *Demographic
+Research* 45 (August): 517–46.
+<https://doi.org/10.4054/DemRes.2021.45.16>.
+
+</div>
+
+<div id="ref-goodman_family_1974" class="csl-entry">
+
+Goodman, Leo A, Nathan Keyfitz, and Thomas W. Pullum. 1974. “Family
+Formation and the Frequency of Various Kinship Relationships.”
+*Theoretical Population Biology*, 27.
+<https://doi.org/10.1016/0040-5809(74)90049-5>.
+
+</div>
+
+</div>

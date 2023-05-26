@@ -1,5 +1,6 @@
 ---
 title: "Expected kin counts by type of relative in a one-sex framework"
+bibliography: references.bib
 output: 
   html_document:
     toc: true
@@ -20,7 +21,7 @@ Here, we'll show how `DemoKin` can be used to compute the number and age distrib
 
 ## 1. Kin counts with time-invariant rates
 
-First, we compute kin counts in a **time-invariant** framework. We assume that Focal and all of her relatives experience the 2015 mortality and fertility rates throughout their entire lives (Caswell, 2019). The `DemoKin` package includes data from Sweden as an example: age-by-year matrices of survival probabilities (*swe_px*), survival ratios (*swe_Sx*), fertility rates (*swe_asfr*), and population numbers (*swe_pop*). You can see the data contained in `DemoKin` with `data(package="DemoKin")`. This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/) (see `?DemoKin::get_HMDHFD`). 
+First, we compute kin counts in a **time-invariant** framework. We assume that Focal and all of her relatives experience the 2015 mortality and fertility rates throughout their entire lives [@caswell_formal_2019]. The `DemoKin` package includes data from Sweden as an example: age-by-year matrices of survival probabilities (*swe_px*), survival ratios (*swe_Sx*), fertility rates (*swe_asfr*), and population numbers (*swe_pop*). You can see the data contained in `DemoKin` with `data(package="DemoKin")`. This data comes from the [Human Mortality Database](https://www.mortality.org/) and [Human Fertility Database](https://www.humanfertility.org/) (see `?DemoKin::get_HMDHFD`). 
 
 In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of survival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
 
@@ -79,7 +80,7 @@ swe_2015[["kin_summary"]] %>%
   facet_wrap(~kin)
 ```
 
-Here, each relative type is identified by a unique code. Note that `DemoKin` uses different codes than Caswell (2019); the equivalence between the two set of codes is given in the following table:
+Here, each relative type is identified by a unique code. Note that `DemoKin` uses different codes than Caswell [-@caswell_formal_2019]; the equivalence between the two set of codes is given in the following table:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
 demokin_codes %>% 
@@ -100,8 +101,7 @@ swe_2015[["kin_full"]] %>%
 ```
 
 The one-sex model implemented in `DemoKin` assumes that the given fertility input applies to both sexes. 
-<!-- , so in case this is only for one you need to set `birth_female = 1` in a convenient way.  -->
-Note that, if using survival rates ($S_x$) instead of probabilities ($p_x$), fertility vectors should account for female person-year exposure, using: $(\frac{f_x+f_{x+1}S_x}{2})\frac{L_0}{l_0}$ instead of only $fx$ (see Preston et.al, 2002).
+Note that, if using survival rates ($S_x$) instead of probabilities ($p_x$), fertility vectors should account for female person-year exposure, using: $(\frac{f_x+f_{x+1}S_x}{2})\frac{L_0}{l_0}$ instead of only $fx$; see Preston et.al [-@preston_demography:_2001]).
 
 The `kin` function also includes a summary output with the count of living kin, mean and standard deviation of kin age, by type of kin, for each Focal's age:
 
@@ -126,7 +126,7 @@ swe_2015[["kin_summary"]] %>%
 ## 2. Kin counts with time-variant rates
 
 The demography of Sweden is, in reality, changing every year. This means that Focal and her relatives will have experienced changing mortality and fertility rates over time.
-We account for this, by using the time-variant models introduced by Caswell and Song (2021). 
+We account for this, by using the time-variant models introduced by Caswell and Song [-@caswell_formal_2021]. 
 Let's take a look at the resulting kin counts for a Focal born in 1960, limiting the output to the relative types given in the argument `output_kin`:
 
 ```{r, fig.height=6, fig.width=8}
@@ -179,7 +179,7 @@ swe_time_varying$kin_summary %>%
 
 ## 4. Prevalences
 
-Given the distribution of kin by age, we can compute the expected portion of living kin in some stage given a set of prevalences by age (e.g., a disease, employment, etc.). This is known as the Sullivan Method in the life-table literature. A matrix formulation for same results can be found in Caswell (2019), which can also be extended to a time-variant framework. 
+Given the distribution of kin by age, we can compute the expected portion of living kin in some stage given a set of prevalences by age (e.g., a disease, employment, etc.). This is known as the Sullivan Method in the life-table literature. A matrix formulation for same results can be found in Caswell [-@caswell_formal_2019], which can also be extended to a time-variant framework. 
 
 ```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
 # let´s create some prevalence by age
@@ -208,7 +208,7 @@ swe_2015$kin_full %>%
 
 `DemoKin` allows the computation of kin structures in a multi-state framework, classifying individuals jointly by age and some other feature (e.g., stages of a disease). For this, we need mortality and fertility data for each possible stage and probabilities of changing state by age.
 
-Let's consider the example of Slovakia given by Caswell (2021), where stages are parity states. 
+Let's consider the example of Slovakia given by Caswell [-@caswell_formal_2021], where stages are parity states. 
 `DemoKin` includes the data to replicate this analysis for the year 1980:
 
 - The data.frame `svk_fxs` is the fertility rate by age (rows) for each parity stage (columns). The first stage represents $parity=0$; the second stage, $parity=1$; and so on, until finally the sixth stage represents $parity\geq5$.
@@ -216,7 +216,7 @@ Let's consider the example of Slovakia given by Caswell (2021), where stages are
 - The data.frame `svk_pxs` has the same structure and represents survival probabilities. 
 - The list `svk_Uxs` has the same number of elements and ages (in this case 110, where $omega$ is 109). For each age, it contains a column-stochastic transition matrix with dimension for the state space. The entries are transition probabilities conditional on survival. 
 
-Following Caswell (2020), we can obtain the joint age-parity kin structure:
+Following Caswell [-@caswell_formal_2020], we can obtain the joint age-parity kin structure:
 
 ```{r}
 # use birth_female=1 because fertility is for female only
@@ -230,7 +230,7 @@ demokin_svk1980_caswell2020 <-
     parity = TRUE)
 ```
 
-Note that the function ask for risks already in a certain matrix format. As an example, consider the age-parity distribution of aunts, when Focal is 20 and 60 yo (this is equivalent to Figure 4 in Caswell [2021]). 
+Note that the function ask for risks already in a certain matrix format. As an example, consider the age-parity distribution of aunts, when Focal is 20 and 60 yo (this is equivalent to Figure 4 in Caswell [-@caswell_formal_2021]). 
 
 ```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
 demokin_svk1980_caswell2020 %>% 
@@ -248,7 +248,7 @@ demokin_svk1980_caswell2020 %>%
   facet_wrap(~age_focal, nrow = 2)
 ```
 
-We can also see the portion of living daughters and mothers at different parity stages over Focal's lie-course (this is equivalent to Figure 9 and 10 in Caswell [2021]). 
+We can also see the portion of living daughters and mothers at different parity stages over Focal's life-course (this is equivalent to Figure 9 and 10 in Caswell [-@caswell_formal_2021]). 
 
 ```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
 demokin_svk1980_caswell2020 %>% 
@@ -268,11 +268,3 @@ demokin_svk1980_caswell2020 %>%
 This function `kin_multi_stage` can be generalized to any kind of state (be sure to set parameter `parity = FALSE`, de default).
 
 ## References
-
-Caswell, H. (2019). The formal demography of kinhip: A matrix formulation. Demographic Research 41:679–712. doi:10.4054/DemRes.2019.41.24.
-
-Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research, 42, 1097–1146.
-
-Caswell, H., & Song, X. (2021). The formal demography of kinhip III: kinhip dynamics with time-varying demographic rates. Demographic Research, 45, 517–546.
-
-Preston, S., Heuveline, P., & Guillot, M. (2000). Demography: Measuring and Modeling Population Processes. Wiley.

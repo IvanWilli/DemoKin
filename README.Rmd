@@ -1,5 +1,6 @@
 ---
 output: github_document
+bibliography: vignettes\\references.bib
 ---
 
 ```{r, include = FALSE}
@@ -21,7 +22,7 @@ library(knitr)
 ::: {.column width="60%"}
 
 
-`DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. The package is an R-language implementation of Caswell (2019, 2020, 2022), and Caswell and Song (2021). It draws on previous theoretical development by Goodman, Keyfitz and Pullum (1974).
+`DemoKin` uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. The package is an R-language implementation of Caswell [-@caswell_formal_2019; -@caswell_formal_2020; -@caswell_formal_2022], and Caswell and Song [-@caswell_formal_2021]. It draws on previous theoretical development by Goodman, Keyfitz and Pullum [-@goodman_family_1974].
 
 :::
 ::: {.column width="40%"}
@@ -47,11 +48,11 @@ devtools::install_github("IvanWilli/DemoKin")
 
 ## Usage
 
-Consider an average Swedish woman called 'Focal'. For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life (the 'time-invariant' assumption in Caswell (2019)). 
+Consider an average Swedish woman called 'Focal.' For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life; i.e., the 'time-invariant' assumption in Caswell [-@caswell_formal_2019]. 
 
 We then ask:
 
-> How many living relatives does Focal have at each age?
+> What is the expected number of relatives of Focal over her life course?
 
 Let's explore this using the Swedish data already included with `DemoKin`.
 
@@ -62,7 +63,7 @@ swe_asfr_2015 <- swe_asfr[,"2015"]
 swe_2015 <- kin(p = swe_surv_2015, f = swe_asfr_2015, time_invariant = TRUE)
 ```
 
-*p* is the survival probability by age from a life table and *f* are the age specific fertility raties by age (see `?kin` for details). 
+*p* is the survival probability by age from a life table and *f* are the age specific fertility ratios by age (see `?kin` for details). 
 
 Now, we can visualize the implied kin counts (i.e., the average number of living kin) of Focal at age 35 using a network or 'Keyfitz' kinship diagram with the function `plot_diagram`:
 
@@ -83,7 +84,7 @@ kable(DemoKin::demokin_codes[,c(1,3)])
 
 ## Vignette
 
-For more details, including an extension to time varying-populations rates, deceased kin, and multi-state models in a one-sex framework, see `vignette("Reference_OneSex", package = "DemoKin")`. For the case of two-sex see `vignette("Reference_TwoSex", package = "DemoKin")`.
+For more details, including an extension to time-variant rates, deceased kin, and multi-state models in a one-sex framework, see `vignette("Reference_OneSex", package = "DemoKin")`. For two-sex models, see `vignette("Reference_TwoSex", package = "DemoKin")`.
 If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation
@@ -101,13 +102,3 @@ If you're interested in contributing, please get in touch, create an issue, or s
 We look forward to hearing from you!
 
 ## References
-
-Caswell, H. 2019. The formal demography of kinship: A matrix formulation. Demographic Research 41:679–712.
-
-Caswell, H. 2020. The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research 42: 1097-1144.
-
-Caswell, Hal and Xi Song. 2021. “The Formal Demography of Kinship. III. Kinship Dynamics with Time-Varying Demographic Rates.” Demographic Research 45: 517–46.
-
-Caswell, H. (2022). The formal demography of kinship IV: Two-sex models and their approximations. Demographic Research, 47, 359–396. 
-
-Goodman, L.A., Keyfitz, N., and Pullum, T.W. (1974). Family formation and the frequency of various kinship relationships. Theoretical Population Biology 5(1):1–27.
