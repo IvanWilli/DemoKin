@@ -22,13 +22,13 @@ kin(
 \item{p}{numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class
 in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
-\item{f}{numeric. Same as p but for fertility rates.}
+\item{f}{numeric. Same as \code{p} but for fertility rates.}
 
 \item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Default \code{TRUE}.}
 
-\item{pi}{numeric. Same as U but for childbearing distribution (sum to 1). Optional.}
+\item{pi}{numeric. Same as \code{U} but for childbearing distribution (sum to 1). Optional.}
 
-\item{n}{numeric. Same as p but for population distribution (counts or \verb{\%}). Optional.}
+\item{n}{numeric. Only for \code{time_invariant = FALSE}. Same as \code{p} but for population distribution (counts or \verb{\%}). Optional.}
 
 \item{output_cohort}{integer. Vector of year cohorts for returning results. Should be within input data years range.}
 

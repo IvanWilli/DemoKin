@@ -17,6 +17,9 @@ timevarying_kin(Ut, ft, pit, ages, pkin)
 
 \item{pkin}{numeric. A list with kin count distribution in previous year.}
 }
+\value{
+A list of 14 types of kin matrices (kin age by Focal age) projected one time interval.
+}
 \description{
 one time projection kin. internal function.
 }

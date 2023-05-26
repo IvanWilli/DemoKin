@@ -21,6 +21,9 @@ timevarying_kin_2sex(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
 
 \item{pkin}{numeric. A list with kin count distribution in previous year.}
 }
+\value{
+A list of 14 types of kin matrices (kin age by Focal age, blocked for two sex) projected one time interval.
+}
 \description{
 one time projection kin. internal function.
 }

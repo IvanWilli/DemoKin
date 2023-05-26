@@ -11,6 +11,9 @@ rename_kin(df, sex = "f")
 
 \item{sex}{character. "f" for female, "m" for male or "2sex" for both sex naming.}
 }
+\value{
+Add a column with kin labels in the input data frame.
+}
 \description{
 Add kin labels depending the sex
 }

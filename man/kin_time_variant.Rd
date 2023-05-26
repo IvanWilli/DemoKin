@@ -36,7 +36,7 @@ kin_time_variant(
 \item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
 }
 \value{
-A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
+A data frame of population kinship structure, with Focal's cohort, focal´s age, period year, type of relatives
 (for example \code{d} is daughter, \code{oa} is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If \code{list_output = TRUE} then this is a list.
 }
 \description{

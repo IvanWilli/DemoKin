@@ -26,9 +26,9 @@ kin2sex(
 
 \item{pm}{numeric. A vector (atomic) or  matrix with male probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).}
 
-\item{ff}{numeric. Same as pf but for fertility rates.}
+\item{ff}{numeric. Same as \code{pf} but for fertility rates.}
 
-\item{fm}{numeric. Same as pm but for fertility rates.}
+\item{fm}{numeric. Same as \code{pm} but for fertility rates.}
 
 \item{time_invariant}{logical. Constant assumption for a given \code{year} rates. Default \code{TRUE}.}
 
@@ -40,9 +40,9 @@ kin2sex(
 
 \item{pim}{numeric. For using some specific age distribution of childbearing for fathers (same length as ages). Default \code{NULL}.}
 
-\item{nf}{numeric. Same as pf but for population distribution (counts or \verb{\%}). Optional.}
+\item{nf}{numeric. Only for \code{time_invariant = FALSE}. Same as \code{pf} but for population distribution (counts or \verb{\%}). Optional.}
 
-\item{nm}{numeric. Same as pm but for population distribution (counts or \verb{\%}). Optional.}
+\item{nm}{numeric. Only for \code{time_invariant = FALSE}. Same as \code{pm} but for population distribution (counts or \verb{\%}). Optional.}
 
 \item{output_cohort}{integer. Vector of year cohorts for returning results. Should be within input data years range.}
 

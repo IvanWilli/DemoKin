@@ -5,10 +5,10 @@
 #' @details See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
 #' @param p numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class
 #' in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
-#' @param f numeric. Same as p but for fertility rates.
+#' @param f numeric. Same as `p` but for fertility rates.
 #' @param time_invariant logical. Constant assumption for a given `year` rates. Default `TRUE`.
-#' @param n numeric. Same as p but for population distribution (counts or `%`). Optional.
-#' @param pi numeric. Same as U but for childbearing distribution (sum to 1). Optional.
+#' @param n numeric. Only for `time_invariant = FALSE`. Same as `p` but for population distribution (counts or `%`). Optional.
+#' @param pi numeric. Same as `U` but for childbearing distribution (sum to 1). Optional.
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
@@ -86,7 +86,7 @@ kin <- function(p = NULL, f = NULL,
         p <- p[,as.character(output_period)]
         f <- f[,as.character(output_period)]
       }
-      kin_full <- kin_time_invariant(p = p, f = f,
+      kin_full <- kin_time_invariant(p = p, f = f, pi = pi,
                                      output_kin = output_kin, birth_female = birth_female) %>%
                               dplyr::mutate(cohort = NA, year = NA)
   }else{
