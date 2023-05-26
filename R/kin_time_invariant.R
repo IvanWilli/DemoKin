@@ -19,6 +19,9 @@ kin_time_invariant <- function(p = NULL, f = NULL,
                         output_kin = NULL,
                         list_output = FALSE){
 
+  # global vars
+  .<-alive<-age_kin<-alive<-age_focal<-count<-NULL
+
   # make matrix transition from vectors
   age = 0:(length(p)-1)
   ages = length(age)

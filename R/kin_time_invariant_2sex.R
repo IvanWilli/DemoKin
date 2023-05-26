@@ -28,7 +28,7 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                                     list_output = FALSE){
 
   # global vars
-  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+  .<-sex_kin<-alive<-count<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
 
   # same input length
   if(!all(length(pf)==length(pm), length(pf)==length(ff), length(pf)==length(fm))) stop("Lengths of p's and f's should be the same")

@@ -12,7 +12,7 @@
 #' @param birth_female numeric. Female portion at birth.
 #' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 
-#' @return A data frame of population kinship structure, with focal's cohort, focal´s age, period year, type of relatives
+#' @return A data frame of population kinship structure, with Focal's cohort, focal´s age, period year, type of relatives
 #' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and age of (living or time deceased) relatives. If `list_output = TRUE` then this is a list.
 #' @export
 
@@ -21,7 +21,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
                             birth_female = 1/2.04, list_output = FALSE){
 
   # global vars
-  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+  .<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
 
   # check input
   if(is.null(p) | is.null(f)) stop("You need values on p and f.")
@@ -31,7 +31,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
 
   # data should be from same interval years
   years_data <- as.integer(colnames(p))
-  if(var(diff(years_data))!=0) stop("The years given as column names in the p and f matrices must be equally spaced.")
+  if(stats::var(diff(years_data))!=0) stop("The years given as column names in the p and f matrices must be equally spaced.")
 
   # utils
   age          <- 0:(nrow(p)-1)
@@ -151,7 +151,8 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
 #' @param pit numeric. A matrix with distribution of childbearing.
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
-#
+#' @return A list of 14 types of kin matrices (kin age by Focal age) projected one time interval.
+#' @export
 timevarying_kin<- function(Ut, ft, pit, ages, pkin){
 
   # frequently used zero vector for initial condition

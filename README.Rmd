@@ -33,13 +33,12 @@ library(knitr)
 
 ## Installation
 
+``` {r, eval=FALSE, include = F}
 You can install the CRAN version:
-
-``` {r, eval=FALSE}
 install.packages("DemoKin")
 ```
 
-Or the development version from GitHub with:
+You can install the development version from GitHub with:
 
 ``` {r, eval=FALSE}
 # install.packages("devtools")

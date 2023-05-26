@@ -82,8 +82,6 @@ swe_2015[["kin_summary"]] %>%
 Here, each relative type is identified by a unique code. Note that `DemoKin` uses different codes than Caswell (2019); the equivalence between the two set of codes is given in the following table:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
-library(knitr)
-
 demokin_codes %>% 
   kable
 ```
@@ -118,10 +116,10 @@ swe_2015[["kin_summary"]] %>%
 Finally, we can visualize the estimated kin counts by type of kin using a network diagram. Following with the age 35:
 
 ```{r, fig.height=6, fig.width=8, dpi=900, message=FALSE, warning=FALSE}
-  swe_2015[["kin_summary"]] %>% 
-    filter(age_focal == 35) %>% 
-    select(kin, count = count_living) %>% 
-    plot_diagram(rounding = 2)
+swe_2015[["kin_summary"]] %>% 
+  filter(age_focal == 35) %>% 
+  select(kin, count = count_living) %>% 
+  plot_diagram(rounding = 2)
 ```
 
 
@@ -190,9 +188,6 @@ swe_2015_prevalence <-
     age_kin = unique(swe_2015$kin_full$age_kin),
     prev = .005 * exp(.05 * age_kin)
     )
-
-# plot(swe_2015_prevalence)
-
 # join to kin count estimates and plot
 swe_2015$kin_full %>% 
   left_join(swe_2015_prevalence) %>% 

@@ -23,13 +23,7 @@ theoretical development by Goodman, Keyfitz and Pullum (1974).
 
 ## Installation
 
-You can install the CRAN version:
-
-``` r
-install.packages("DemoKin")
-```
-
-Or the development version from GitHub with:
+You can install the development version from GitHub with:
 
 ``` r
 # install.packages("devtools")

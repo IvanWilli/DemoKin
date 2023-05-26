@@ -31,14 +31,14 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
                                    list_output = FALSE){
 
   # global vars
-  living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+  .<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
 
   # same input length
   if(!all(dim(pf) == dim(pm), dim(pf) == dim(ff), dim(pf) == dim(fm))) stop("Dimension of P's and F's should be the same")
 
   # data should be from same interval years
   years_data <- as.integer(colnames(pf))
-  if(var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
+  if(stats::var(diff(years_data))!=0) stop("Data should be for same interval length years. Fill the gaps and run again")
 
   # utils
   age          <- 0:(nrow(pf)-1)
@@ -193,7 +193,8 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
-#
+#' @return A list of 14 types of kin matrices (kin age by Focal age, blocked for two sex) projected one time interval.
+#' @export
 timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
 
   agess <- ages*2

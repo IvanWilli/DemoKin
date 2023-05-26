@@ -14,13 +14,15 @@
 #' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and specific stage. If `list_output = TRUE` then this is a list with elements as kin types.
 #' @export
-#'
 
 kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                             birth_female = 1/2.04,
                             output_kin = NULL,
                             parity = FALSE,
                             list_output = FALSE){
+
+  # global vars
+  .<-age_kin<-stage_kin<-alive<-age_focal<-count<-NULL
 
   # mandatory U as a list
   if(!is.list(U)) stop("U must be a list with age length of elements, and stage transitiotn matrix for each one.")
