@@ -152,14 +152,21 @@ swe_surv_m_matrix <- swe_px ^ 1.5 # artificial perturbation for this example
 swe_fert_f_matrix <- swe_asfr
 swe_fert_m_matrix <- rbind(matrix(0, 5, years),  
             swe_asfr[-((ages-4):ages),]) * 1.05 # artificial perturbation for this example
-
-par(mfrow=c(1,2))
-plot(swe_surv_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Survival probability")
-lines(swe_surv_m_matrix[,"1900"], col=2)
-plot(swe_fert_f_matrix[,"1900"], t="l", xlab = "Age", ylab = "Fertility rate")
-lines(swe_fert_m_matrix[,"1900"], col=2)
-options(mfrow = NULL)
 ```
+
+This is how it looks for year 1900:
+```{r}
+bind_rows(
+  data.frame(age = 0:100, sex = "Female", component = "Fertility rate", value = swe_fert_f_matrix[,"1900"]),
+  data.frame(age = 0:100, sex = "Male", component = "Fertility rate", value = swe_fert_m_matrix[,"1900"]),
+  data.frame(age = 0:100, sex = "Female", component = "Survival probability", value = swe_surv_f_matrix[,"1900"]),
+  data.frame(age = 0:100, sex = "Male", component = "Survival probability", value = swe_surv_m_matrix[,"1900"])) %>% 
+  ggplot(aes(age, value, col = sex)) +
+  geom_line() +
+  theme_bw() +
+  facet_wrap(~component, scales = "free")
+```
+
 
 We now run the time-variant two-sex models (note the `time_invariant = FALSE` argument):
 
