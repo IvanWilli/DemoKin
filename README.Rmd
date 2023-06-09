@@ -34,12 +34,13 @@ library(knitr)
 
 ## Installation
 
-``` {r, eval=FALSE, include = F}
-You can install the CRAN version:
+Download the stable version [from CRAN](https://cran.r-project.org/web/packages/DemoKin/):
+
+``` {r, eval=FALSE, include = T}
 install.packages("DemoKin")
 ```
 
-You can install the development version from GitHub with:
+Or you can install the development version from GitHub:
 
 ``` {r, eval=FALSE}
 # install.packages("devtools")
@@ -79,12 +80,13 @@ plot_diagram(kin_total, rounding = 2)
 Relatives are identified by a unique code:
 
 ```{r, fig.height=6, fig.width=8, echo=FALSE}
-kable(DemoKin::demokin_codes[,c(1,3)])
+# kable(DemoKin::demokin_codes[,c("DemoKin", "Labels_2sex")])
+kable(DemoKin::demokin_codes[,-c(2)])
 ```
 
 ## Vignette
 
-For more details, including an extension to time-variant rates, deceased kin, and multi-state models in a one-sex framework, see `vignette("Reference_OneSex", package = "DemoKin")`. For two-sex models, see `vignette("Reference_TwoSex", package = "DemoKin")`.
+For more details, including an extension to time-variant rates, deceased kin, and multi-state models in a one-sex framework, see the [Reference_OneSex](https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_OneSex.html) vignette; also accessible from DemoKin: `vignette("Reference_OneSex", package = "DemoKin")`. For two-sex models, see the [Reference_TwoSex](https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_TwoSex.html) vignette; also accessible from DemoKin: `vignette("Reference_TwoSex", package = "DemoKin")`.
 If the vignette does not load, you may need to install the package as `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
 ## Citation

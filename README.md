@@ -23,7 +23,14 @@ theoretical development by Goodman, Keyfitz and Pullum (1974).
 
 ## Installation
 
-You can install the development version from GitHub with:
+Download the stable version [from
+CRAN](https://cran.r-project.org/web/packages/DemoKin/):
+
+``` r
+install.packages("DemoKin")
+```
+
+Or you can install the development version from GitHub:
 
 ``` r
 # install.packages("devtools")
@@ -72,33 +79,38 @@ plot_diagram(kin_total, rounding = 2)
 
 Relatives are identified by a unique code:
 
-| DemoKin | Labels_female               |
-|:--------|:----------------------------|
-| coa     | Cousins from older aunts    |
-| cya     | Cousins from younger aunts  |
-| c       | Cousins                     |
-| d       | Daughters                   |
-| gd      | Grand-daughters             |
-| ggd     | Great-grand-daughters       |
-| ggm     | Great-grandmothers          |
-| gm      | Grandmothers                |
-| m       | Mother                      |
-| nos     | Nieces from older sisters   |
-| nys     | Nieces from younger sisters |
-| n       | Nieces                      |
-| oa      | Aunts older than mother     |
-| ya      | Aunts younger than mother   |
-| a       | Aunts                       |
-| os      | Older sisters               |
-| ys      | Younger sisters             |
-| s       | Sisters                     |
+| DemoKin | Labels_female               | Labels_male                   | Labels_2sex                       |
+|:--------|:----------------------------|:------------------------------|:----------------------------------|
+| coa     | Cousins from older aunts    | Cousins from older uncles     | Cousins from older aunts/uncles   |
+| cya     | Cousins from younger aunts  | Cousins from younger uncles   | Cousins from younger aunts/uncles |
+| c       | Cousins                     | Cousins                       | Cousins                           |
+| d       | Daughters                   | Brothers                      | Siblings                          |
+| gd      | Grand-daughters             | Grand-sons                    | Grand-childrens                   |
+| ggd     | Great-grand-daughters       | Great-grand-sons              | Great-grand-childrens             |
+| ggm     | Great-grandmothers          | Great-grandfathers            | Great-grandfparents               |
+| gm      | Grandmothers                | Grandfathers                  | Grandparents                      |
+| m       | Mother                      | Father                        | Parents                           |
+| nos     | Nieces from older sisters   | Nephews from older brothers   | Niblings from older siblings      |
+| nys     | Nieces from younger sisters | Nephews from younger brothers | Niblings from younger siblings    |
+| n       | Nieces                      | Nephews                       | Niblings                          |
+| oa      | Aunts older than mother     | Uncles older than fathers     | Aunts/Uncles older than parents   |
+| ya      | Aunts younger than mother   | Uncles younger than father    | Aunts/Uncles younger than parents |
+| a       | Aunts                       | Uncles                        | Aunts/Uncles                      |
+| os      | Older sisters               | Older brothers                | Older siblings                    |
+| ys      | Younger sisters             | Younger brothers              | Younger siblings                  |
+| s       | Sisters                     | Brothers                      | Siblings                          |
 
 ## Vignette
 
 For more details, including an extension to time-variant rates, deceased
-kin, and multi-state models in a one-sex framework, see
+kin, and multi-state models in a one-sex framework, see the
+[Reference_OneSex](https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_OneSex.html)
+vignette; also accessible from DemoKin:
 `vignette("Reference_OneSex", package = "DemoKin")`. For two-sex models,
-see `vignette("Reference_TwoSex", package = "DemoKin")`. If the vignette
+see the
+[Reference_TwoSex](https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_TwoSex.html)
+vignette; also accessible from DemoKin:
+`vignette("Reference_TwoSex", package = "DemoKin")`. If the vignette
 does not load, you may need to install the package as
 `devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)`.
 
