@@ -21,19 +21,25 @@
 
 ## BEN: ========================================================================
 # Function building:
-library(DemoKin)
-library(tidyr)
-library(dplyr)
-
-# Input of model
-ff <- fra_asfr_sex[,"ff"]
-fm <- fra_asfr_sex[,"fm"]
-pf <- fra_surv_sex[,"pf"]
-pm <- fra_surv_sex[,"pm"]
-
-# Create a fictitious hazard matrix with three causes of death.
-# Assume that each cause consists of 1/3 of all death in all age groups.
-Hf <- Hm <- matrix(1, nrow = 3, ncol = length(ff))
+# library(DemoKin)
+# library(tidyr)
+# library(dplyr)
+# library(here)
+#
+# # Input of model
+# ff <- fra_asfr_sex[,"ff"]
+# fm <- fra_asfr_sex[,"fm"]
+# pf <- fra_surv_sex[,"pf"]
+# pm <- fra_surv_sex[,"pm"]
+# birth_female = 1/2.04
+# pif <- pim <- NULL
+# sex_focal = "f"
+# output_kin = NULL
+# list_output = FALSE
+#
+# # Create a fictitious hazard matrix with three causes of death.
+# # Assume that each cause consists of 1/3 of all death in all age groups.
+# Hf <- Hm <- matrix(1, nrow = 3, ncol = length(ff))
 
 ## =============================================================================
 
@@ -42,14 +48,19 @@ Hf <- Hm <- matrix(1, nrow = 3, ncol = length(ff))
 #      Assume that input of cause-specific mortality will be in terms of
 #      matrices of cause-specific hazards for the two sexes (causes * ages).
 #      Alternative: a matrix (causes * ages) containing the ratio mxi/mx.
-kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
-                                    ff = NULL, fm = NULL,
-                                    Hf = NULL, Hm = NULL,
-                                    sex_focal = "f",
-                                    birth_female = 1/2.04,
-                                    pif = NULL, pim = NULL,
-                                    output_kin = NULL,
-                                    list_output = FALSE){
+kin_time_invariant_2sex_cod <- function(pf = NULL,
+                                        pm = NULL,
+                                        ff = NULL,
+                                        fm = NULL,
+                                        Hf = NULL,
+                                        Hm = NULL,
+                                        sex_focal = "f",
+                                        birth_female = 1 / 2.04,
+                                        pif = NULL,
+                                        pim = NULL,
+                                        output_kin = NULL,
+                                        list_output = FALSE) {
+
 
   # global vars
   .<-sex_kin<-alive<-count<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
@@ -65,7 +76,15 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   age = 0:(length(pf)-1)
   ages = length(age)
   agess = ages * 2
-  Uf = Um = Ff = Fm = Gt = zeros = matrix(0, nrow=ages, ncol=ages)
+  Uf = Um = Ff = Fm = Gt = matrix(0, nrow=ages, ncol=ages)
+
+  # BEN: The zero matrix was deleted from line above and has
+  #      to be made specific according to living/dead kin
+  #      part of the block matrix Ut.
+  causes <- nrow(Hf) # number of causes of death
+  zeros_l <- matrix(0, nrow = ages, ncol = (causes*ages)) # zero matrix for living kin part
+  zeros_d = matrix(0, nrow = (causes*ages), ncol = (causes*ages)) # zero matrix for death kin part
+
   Uf[row(Uf)-1 == col(Uf)] <- pf[-ages]
 
   # BEN: What is the purpose of the following line? By default it is zero due to
@@ -79,24 +98,30 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   #      Hence, M = H D(h_tilde)^{-1} D(q)
   #      where h_tilde are the summed hazards for each age, and
   #      q = 1 - p
-  alpha <- nrow(Hf) # number of causes of death
-  sum_hf <- t(rep(1, alpha)) %*% Hf # h_tilde female
-  sum_hm <- t(rep(1, alpha)) %*% Hm # h_tilde male
+  sum_hf <- t(rep(1, causes)) %*% Hf # h_tilde female
+  sum_hm <- t(rep(1, causes)) %*% Hm # h_tilde male
   Mf <- Hf %*% solve(diag(c(sum_hf))) %*% diag(1-pf)
   Mm <- Hm %*% solve(diag(c(sum_hm))) %*% diag(1-pm)
   # Mm <- diag(1-pm)
   # Mf <- diag(1-pf)
-  zeros_l <- matrix(0, nrow = ages, ncol = alpha) # zero matrix for living kin part
-  zeros_d = matrix(0, nrow = alpha, ncol = alpha) # zero matrix for death kin part
+
+  # BEN: In order to classify kin death by both cause and age at death,
+  #      we need a mortality matrices M_hat of dimension
+  #      ((causes*ages) * ages). See eq.12 in Caswell et al. (2024).
+  # Store columns of M as a list of vectors
+  Mf.cols <- lapply(1:ncol(Mf), function(j) return(Mf[,j]))
+  Mm.cols <- lapply(1:ncol(Mm), function(j) return(Mm[,j]))
+  # Create M_hat using the vectors as elements of the block diagonal
   Ut <- as.matrix(rbind(
     cbind(Matrix::bdiag(Uf, Um), Matrix::bdiag(zeros_l, zeros_l)),
-    cbind(Matrix::bdiag(Mf, Mm), Matrix::bdiag(zeros_d, zeros_d))))
+    cbind(Matrix::bdiag(Matrix::bdiag(Mf.cols), Matrix::bdiag(Mm.cols)), Matrix::bdiag(zeros_d, zeros_d))))
 
   Ff[1,] = ff
   Fm[1,] = fm
 
-  # BEN: CONTINUE WORK FROM HERE
-  Ft <- Ft_star <- matrix(0, agess*2, agess*2)
+  # BEN: Accounting for causes of death leads to have different dimensions
+  #      in Ft and Ft_star.
+  Ft <- Ft_star <- matrix(0, (agess + agess*causes), (agess + agess*causes))
   Ft[1:agess,1:agess] <- rbind(cbind(birth_female * Ff, birth_female * Fm),
                                cbind((1-birth_female) * Ff, (1-birth_female) * Fm))
 
@@ -116,7 +141,8 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   }
 
   # initial count matrix (kin ages in rows and focal age in column)
-  phi = d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0, agess*2, ages)
+  # BEN: Changed dimensions of lower part (dead kin) to account for death from causes.
+  phi = d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0, (agess + agess*causes), ages)
 
   # locate focal at age 0 depending sex
   sex_index <- ifelse(sex_focal == "f", 1, ages+1)
@@ -125,7 +151,10 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   # G matrix moves focal by age
   G <- matrix(0, nrow=ages, ncol=ages)
   G[row(G)-1 == col(G)] <- 1
-  Gt <- matrix(0, agess*2, agess*2)
+
+  # BEN: Changed dimensions
+  Gt <- matrix(0, (agess + agess*causes), (agess + agess*causes))
+
   Gt[1:(agess), 1:(agess)] <- as.matrix(Matrix::bdiag(G, G))
 
   # focal´s trip
@@ -182,16 +211,24 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   # as data.frame
   kin <- purrr::map2(kin_list, names(kin_list),
                      function(x,y){
+
+                       # BEN: Death take place in the same year and age!
+                       #      I adapted the code
+                       #      below such that it works with the new dimensions.
+
                        # reassign deaths to Focal experienced age
-                       x[(agess+1):(agess*2),1:(ages-1)] <- x[(agess+1):(agess*2),2:ages]
-                       x[(agess+1):(agess*2),ages] <- 0
+                       x[(agess+1):(agess + agess*causes),1:(ages-1)] <- x[(agess+1):(agess + agess*causes),2:ages]
+                       x[(agess+1):(agess + agess*causes),ages] <- 0
                        out <- as.data.frame(x)
                        colnames(out) <- age
                        out %>%
+                         # BEN: the matrices have different dimensions when
+                         #      we accounf for causes of death so what follows
+                         #      has been substantially changed.
                          dplyr::mutate(kin = y,
-                                       age_kin = rep(age,4),
-                                       sex_kin = rep(c(rep("f",ages), rep("m",ages)),2),
-                                       alive = c(rep("living",2*ages), rep("dead",2*ages))) %>%
+                                       age_kin = c(rep(age,2), rep(rep(age,each=causes),2)),
+                                       sex_kin = c(rep(c("f", "m"),each=ages), rep(c("f", "m"),each=ages*causes)),
+                                       alive = c(rep("living",2*ages), rep(paste0("deadcause",1:causes),2*ages))) %>%
                          tidyr::pivot_longer(c(-age_kin, -kin, -sex_kin, -alive), names_to = "age_focal", values_to = "count") %>%
                          dplyr::mutate(age_focal = as.integer(age_focal)) %>%
                          tidyr::pivot_wider(names_from = alive, values_from = count)
@@ -208,3 +245,33 @@ kindeath_cod_time_invariant_2sex <- function(pf = NULL, pm = NULL,
 
   return(out)
 }
+
+## BEN: ========================================================================
+
+# Checks
+
+# No dead parent at birth: deadcausei=0 when age_focal==0
+# ff # fertility starts at age 13
+# kin |> filter(kin == "m", age_focal ==0, age_kin >= 12)
+#
+# # pi when age_focal==0 and age_kin when fx>0:
+# kin |> filter(kin == "m", age_kin >= 13, age_focal ==0)
+# pif[14:101]
+#
+# # mother dying from cause i at age x when focal is age==1 comes from nber of
+# # living mother age x when focal is age==1 multiplied by (1-pf[x])*(1/3)
+# kin |> filter(kin == "m", age_kin == 14, age_focal ==1)
+# 0.000246 * ((1-pf[15])*(1/3)) # mother
+# 0.0000486 * ((1-pm[15])*(1/3)) # father
+#
+# # Store to compare with kin_time_invariant_2sex.R
+# saveRDS(
+#   kin,
+#   here(
+#     "checks",
+#     "output_time_invariant_2sex.rds"
+#   )
+# )
+
+
+## =============================================================================
