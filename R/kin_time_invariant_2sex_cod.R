@@ -1,13 +1,16 @@
 #' Estimate kin counts in a time invariant framework for two-sex model.
 
-#' @description Two-sex matrix framework for kin count estimates.This produces kin counts grouped by kin, age and sex of
+#' @description Two-sex matrix framework for kin count and death estimates.This produces kin counts grouped by kin, age and sex of
 #' each relatives at each Focal´s age. For example, male cousins from aunts and uncles from different sibling's parents
-#' are grouped in one male count of cousins.
+#' are grouped in one male count of cousins. This also produces kin deaths grouped by kin, age, sex of
+#' each relatives at each Focal´s age, and cause of death.
 #' @details See Caswell (2022) for details on formulas.
 #' @param pf numeric. A vector of survival probabilities for females with same length as ages.
+#' @param Hf numeric. A matrix with cause-specific hazards for females with rows as causes and columns as ages, being the name of each col the age.
 #' @param ff numeric. A vector of age-specific fertility rates for females with same length as ages.
 #' @param pm numeric. A vector of survival probabilities for males with same length as ages.
 #' @param fm numeric. A vector of age-specific fertility rates for males with same length as ages.
+#' @param Hm numeric. A matrix with cause-specific hazards for males with rows as causes and columns as ages, being the name of each col the age.
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param birth_female numeric. Female portion at birth.
 #' @param pif numeric. For using some specific non-stable age distribution of childbearing for mothers (same length as ages). Default `NULL`.

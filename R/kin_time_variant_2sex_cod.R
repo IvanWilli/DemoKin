@@ -2,12 +2,15 @@
 
 #' @description Two-sex matrix framework for kin count estimates with varying rates.
 #' This produces kin counts grouped by kin, age and sex of each relatives at each Focal´s age.
-#' For example, male cousins from aunts and uncles from different sibling's parents are grouped in one male count of cousins.
+#' For example, male cousins from aunts and uncles from different sibling's parents are grouped in one male count of cousins. This also produces kin deaths grouped by kin, age, sex of
+#' each relatives at each Focal´s age, and cause of death.
 #' @details See Caswell (2022) for details on formulas.
 #' @param pf numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param pm numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param ff numeric. Same as pf but for fertility rates.
 #' @param fm numeric. Same as pm but for fertility rates.
+#' @param Hf numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for females with rows as causes and columns as ages, being the name of each col the age.
+#' @param Hm numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for males with rows as causes and columns as ages, being the name of each col the age.
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param pif numeric. For using some specific age distribution of childbearing for mothers (same length as ages). Default `NULL`.
 #' @param pim numeric. For using some specific age distribution of childbearing for fathers (same length as ages). Default `NULL`.
