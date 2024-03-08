@@ -10,7 +10,7 @@ plot_diagram <-
   function (kin_total, rounding = 3) {
     rels <- c("ggd", "gd", "d", "Focal", "m", "gm", "ggm", "oa", "coa", "os", "nos", "ya", "cya", "ys", "nys")
     # check all types are in
-    if(!any(unique(kin_total$kin) %in% rels)) stop("You need all specific types. If some are missed or grouped, for example old and younger sisters in 's', this will fail.")
+    if(!any(unique(kin_total$kin) %in% rels) | any(c("s", "c", "a", "n") %in% unique(kin_total$kin))) stop("You need all specific types. If some are missed or grouped, for example old and younger sisters in 's', this will fail.")
     vertices <- data.frame(
       nodes = rels
       , x = c(1, 1, 1, 1, 1, 1, 1, 0, -1, 0, -1, 2, 3, 2, 3)

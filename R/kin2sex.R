@@ -18,7 +18,9 @@
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
+#' @param output_age_focal integer. Vector of ages to select (and make faster the run).
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
+#' @param summary_kin logical. Whether or not include `kin_summary` table (see output details). Default `TRUE`.
 #' @return A list with:
 #' \itemize{
 #'  \item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example `d` could be daughter or son depending `sex_kin`,
@@ -51,7 +53,8 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                  birth_female = 1/2.04,
                  pif = NULL, pim = NULL,
                  nf = NULL, nm = NULL,
-                 output_cohort = NULL, output_period = NULL, output_kin=NULL)
+                 output_cohort = NULL, output_period = NULL, output_kin=NULL,output_age_focal = NULL,
+                 summary_kin = TRUE)
   {
 
   # global vars
@@ -116,7 +119,10 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   }
 
   # summary
-  # select period/cohort
+  # select period/cohort/ge
+  if(!is.null(output_age_focal) & all(output_age_focal %in% 1:120)){
+    kin_full <- kin_full %>% dplyr::filter(age_focal %in% output_age_focal)
+  }
   if(!is.null(output_cohort)){
     agrupar <- "cohort"
   } else if(!is.null(output_period)){
@@ -127,28 +133,34 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   agrupar_no_age_focal <- c("kin", "sex_kin", agrupar)
   agrupar <- c("age_focal", "kin", "sex_kin", agrupar)
 
-  kin_summary <- dplyr::bind_rows(
-    as.data.frame(kin_full) %>%
-      dplyr::rename(total=living) %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-      dplyr::summarise(count_living = sum(total),
-                mean_age = sum(total*age_kin)/sum(total),
-                sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-      tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
-    as.data.frame(kin_full) %>%
-      dplyr::rename(total=dead) %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-      dplyr::summarise(count_dead = sum(total)) %>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
-      dplyr::mutate(count_cum_dead = cumsum(count_dead),
-                    mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
-      dplyr::ungroup() %>%
-      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
+  if(summary_kin){
+    kin_summary <- dplyr::bind_rows(
+      as.data.frame(kin_full) %>%
+        dplyr::rename(total=living) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+        dplyr::summarise(count_living = sum(total),
+                         mean_age = sum(total*age_kin)/sum(total),
+                         sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
+        tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
+      as.data.frame(kin_full) %>%
+        dplyr::rename(total=dead) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+        dplyr::summarise(count_dead = sum(total)) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
+        dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                      mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
+        dplyr::ungroup() %>%
+        tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
       dplyr::ungroup() %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
 
     # return
     kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
+  }else{
+    # return
+    kin_out <- kin_full
+  }
+
   return(kin_out)
 }

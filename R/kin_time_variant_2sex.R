@@ -123,6 +123,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
       pim1 <- Pim[,1]
       kin_all[[1]] <- kin_time_invariant_2sex(pf = p1f, pm = p1m,
                                               ff = f1f, fm = f1m,
+                                              sex_focal = sex_focal,
                                               pif = pif1, pim = pim1,
                                               birth_female = birth_female, list_output = TRUE)
     }
@@ -148,7 +149,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
     purrr::map(~ .[selected_kin_position])
   # long format
-  message("Preparing output...")
+  message(" Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
@@ -219,12 +220,14 @@ timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
   m[1:agess,1]   = pit
   gm[1:agess,1]  = pkin[["m"]][1:agess,] %*% (pif + pim)
   ggm[1:agess,1] = pkin[["gm"]][1:agess,] %*% (pif + pim)
-  os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pif
-  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pif
   oa[1:agess,1]  = pkin[["os"]][1:agess,] %*% (pif + pim)
   ya[1:agess,1]  = pkin[["ys"]][1:agess,] %*% (pif + pim)
   coa[1:agess,1] = pkin[["nos"]][1:agess,] %*% (pif + pim)
   cya[1:agess,1] = pkin[["nys"]][1:agess,] %*% (pif + pim)
+  # atribuible to focal sex
+  pios = if(sex_focal == "f") pif else pim
+  os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pios
+  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pios
 
   for (ix in 1:om){
     phi[,ix+1] = Gt %*% phi[, ix]

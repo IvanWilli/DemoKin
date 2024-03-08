@@ -12,10 +12,10 @@
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
+#' @param output_age_focal integer. Vector of ages to select (and make faster the run).
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring,
+#' @param summary_kin logical. Whether or not include `kin_summary` table (see output details). Default `TRUE`.
 #' this needs to be set as 1.
-#' @param stable logic. Deprecated. Use `time_invariant`.
-#' @param U logic. Deprecated. Use `p`.
 #' @return A list with:
 #' \itemize{
 #'  \item{kin_full}{ a data frame with year, cohort, Focal´s age, related ages and type of kin (for example `d` is daughter,
@@ -44,24 +44,13 @@
 kin <- function(p = NULL, f = NULL,
                 time_invariant = TRUE,
                 pi = NULL, n = NULL,
-                output_cohort = NULL, output_period = NULL, output_kin=NULL,
+                output_cohort = NULL, output_period = NULL, output_kin=NULL, output_age_focal = NULL,
                 birth_female = 1/2.04,
-                stable = lifecycle::deprecated(),
-                U = lifecycle::deprecated())
+                summary_kin = TRUE)
   {
 
   # global vars
   living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
-
-  # changed arguments
-  if (lifecycle::is_present(stable)) {
-    lifecycle::deprecate_warn("0.0.0.9000", "kin(stable)", details = "Used time_invariant")
-    time_invariant <- stable
-  }
-  if (lifecycle::is_present(U)) {
-    lifecycle::deprecate_warn("0.0.0.9000", "kin(stable)", details = "Used time_invariant")
-    p <- U
-  }
 
   # kin to return
   all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
@@ -109,7 +98,10 @@ kin <- function(p = NULL, f = NULL,
                        .by = c(kin, age_kin, age_focal, cohort, year))
   }
 
-  # select period/cohort
+  # select period/cohort/age
+  if(!is.null(output_age_focal) & all(output_age_focal %in% 1:120)){
+    kin_full <- kin_full %>% dplyr::filter(age_focal %in% output_age_focal)
+  }
   if(!is.null(output_cohort)){
     agrupar <- "cohort"
   } else if(!is.null(output_period)){
@@ -120,29 +112,35 @@ kin <- function(p = NULL, f = NULL,
   agrupar_no_age_focal <- c("kin", agrupar)
   agrupar <- c("age_focal", "kin", agrupar)
 
-  # get summary indicators based on group variables
-  kin_summary <- dplyr::bind_rows(
-    kin_full %>%
-      dplyr::rename(total=living) %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-      dplyr::summarise(count_living = sum(total),
-                mean_age = sum(total*age_kin)/sum(total),
-                sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-      tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
-    kin_full %>%
-      dplyr::rename(total=dead) %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-      dplyr::summarise(count_dead = sum(total)) %>%
-      dplyr::ungroup() %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
-      dplyr::mutate(count_cum_dead = cumsum(count_dead),
-                    mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
-      dplyr::ungroup() %>%
-      tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
+  # get summary indicators based on group variables. If it is asked
+  if(summary_kin){
+    kin_summary <- dplyr::bind_rows(
+      kin_full %>%
+        dplyr::rename(total=living) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+        dplyr::summarise(count_living = sum(total),
+                         mean_age = sum(total*age_kin)/sum(total),
+                         sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
+        tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
+      kin_full %>%
+        dplyr::rename(total=dead) %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+        dplyr::summarise(count_dead = sum(total)) %>%
+        dplyr::ungroup() %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
+        dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                      mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
+        dplyr::ungroup() %>%
+        tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
       dplyr::ungroup() %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
 
-  # return
-  kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
+    # return
+    kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
+  }else{
+    # return
+    kin_out <- kin_full
+  }
+
   return(kin_out)
 }

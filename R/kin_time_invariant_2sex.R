@@ -105,6 +105,8 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
     ggm[,i+1]  = Ut %*% ggm[,i]
   }
 
+  # atribuible to focal sex
+  pios = if(sex_focal == "f") pif else pim
   os[1:(agess),1]  = d[1:(agess),] %*% pif
   nos[1:(agess),1] = gd[1:(agess),] %*% pif
   for(i in 1:(ages-1)){
