@@ -13,9 +13,9 @@ kin(
   output_cohort = NULL,
   output_period = NULL,
   output_kin = NULL,
+  output_age_focal = NULL,
   birth_female = 1/2.04,
-  stable = lifecycle::deprecated(),
-  U = lifecycle::deprecated()
+  summary_kin = TRUE
 )
 }
 \arguments{
@@ -36,12 +36,12 @@ in a more general perspective) with rows as ages (and columns as years in case o
 
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
 
-\item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring,
+\item{output_age_focal}{integer. Vector of ages to select (and make faster the run).}
+
+\item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring,}
+
+\item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.
 this needs to be set as 1.}
-
-\item{stable}{logic. Deprecated. Use \code{time_invariant}.}
-
-\item{U}{logic. Deprecated. Use \code{p}.}
 }
 \value{
 A list with:

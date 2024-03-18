@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, eval = F, include=FALSE}
+```{r, eval = T, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(devtools); load_all()
 ```
@@ -274,5 +274,44 @@ bind_rows(
   theme_bw()+theme(axis.text.x = element_text(angle = 90), legend.position = "bottom")+
   facet_grid(col = vars(kin), row = vars(age_focal), scales = "free")
 ```
+
+### 2. Causes of death
+
+Now assume we have two causes of death, where the risk of the first one is half the other for females but 2/3 for males, in both cases for ages greater than 50. We need to set tow matrix with dimension 2 by 101 (number of causes by number of ages).
+
+```{r}
+Hf <- matrix(c( .5, 1), nrow = 2, ncol = length(fra_surv_f))
+Hm <- matrix(c(.33, 1), nrow = 2, ncol = length(fra_surv_f))
+Hf[,1:50] <- Hm[,1:50] <- 1
+```
+
+This is a generalization of Caswell [-@Caswell2023] approach. Originally the inputs in matrix $H$ are the hazard rates, but works like a relative risk factors realted to undelying death probability (see section 2.3 and formula 30 in section A.1). Now we run the time-invariant two-sex model by cause of death for France 2012, assuming our death count distribution based in the two competing causes:
+
+```{r}
+kin_out_cod_invariant <- kin2sex(
+                      pf = fra_surv_f,
+                      pm = fra_surv_m, 
+                      ff = fra_fert_f, 
+                      fm = fra_fert_m,
+                      Hf = Hf,
+                      Hm = Hm,
+                      time_invariant = TRUE)
+```
+
+The output in this case is always the `kin_full` type. Let´s see a plot with the death distribution by age and cause of Focal´s parents when Focal is 30 yo.
+
+```{r}
+kin_out_cod_invariant %>% 
+  filter(kin == "m", age_focal == 30) %>% 
+  summarise(deadcause1 = sum(deadcause1),
+            deadcause2 = sum(deadcause2), .by = c(age_kin, sex_kin)) %>%
+  pivot_longer(deadcause1:deadcause2) %>% 
+  ggplot(aes(age_kin, value, col = sex_kin, linetype = name)) +
+  geom_line() + 
+  labs(y = "Parent's death count") +
+  theme_bw()
+```
+
+Because all the death experience of Focal is for apretns older than 50, is clear the realtive difference between the causes for each sex. The sum of the counts by sex gives the same result than total deaths by sex at that age in the general case (section 2, without splitting death probabilities by cause). The number of possible causes to add is not limited, but consider that it get more time-consuming. If we are dealing with a time-variant case, then a list by sex ($Hf$ and $Hm$) must be provided, with $H$ matrix for each year as elements, in the same order than mortality and fertility components.
 
 ## References

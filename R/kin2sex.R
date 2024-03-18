@@ -13,6 +13,8 @@
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param pif numeric. For using some specific age distribution of childbearing for mothers (same length as ages). Default `NULL`.
 #' @param pim numeric. For using some specific age distribution of childbearing for fathers (same length as ages). Default `NULL`.
+#' @param Hf numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for females with rows as causes and columns as ages, being the name of each col the age.
+#' @param Hm numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for males with rows as causes and columns as ages, being the name of each col the age.
 #' @param nf numeric. Only for `time_invariant = FALSE`. Same as `pf` but for population distribution (counts or `%`). Optional.
 #' @param nm numeric. Only for `time_invariant = FALSE`. Same as `pm` but for population distribution (counts or `%`). Optional.
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
@@ -53,6 +55,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                  birth_female = 1/2.04,
                  pif = NULL, pim = NULL,
                  nf = NULL, nm = NULL,
+                 Hf = NULL, Hm = NULL,
                  output_cohort = NULL, output_period = NULL, output_kin=NULL,output_age_focal = NULL,
                  summary_kin = TRUE)
   {
@@ -76,6 +79,9 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
     output_kin <- match.arg(tolower(output_kin), all_possible_kin, several.ok = TRUE)
   }
 
+  # is cause of death specific or not
+  is_cod <- !is.null(Hf) & !is.null(Hm)
+
   # if time dependent or not
   if(time_invariant){
       if(!is.vector(pf)) {
@@ -85,27 +91,50 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
         ff <- ff[,as.character(output_period)]
         fm <- fm[,as.character(output_period)]
       }
-      kin_full <- kin_time_invariant_2sex(pf, pm, ff, fm,
-                                     sex_focal = sex_focal,
-                                     birth_female = birth_female,
-                                     pif = pif, pim = pim,
-                                     output_kin = output_kin) %>%
-                              dplyr::mutate(cohort = NA, year = NA)
+      if(is_cod){
+        kin_full <- kin_time_invariant_2sex_cod(pf, pm, ff, fm,
+                                            sex_focal = sex_focal,
+                                            birth_female = birth_female,
+                                            pif = pif, pim = pim,
+                                            Hf = Hf, Hm = Hm,
+                                            output_kin = output_kin) %>%
+          dplyr::mutate(cohort = NA, year = NA)
+      }else{
+        kin_full <- kin_time_invariant_2sex(pf, pm, ff, fm,
+                                            sex_focal = sex_focal,
+                                            birth_female = birth_female,
+                                            pif = pif, pim = pim,
+                                            output_kin = output_kin) %>%
+          dplyr::mutate(cohort = NA, year = NA)
+      }
+
   }else{
       if(!is.null(output_cohort) & !is.null(output_period)) stop("sorry, you can not select cohort and period. Choose one please")
+    if(is_cod){
+      kin_full <- kin_time_variant_2sex_cod(pf = pf, pm = pm,
+                                        ff = ff, fm = fm,
+                                        sex_focal = sex_focal,
+                                        birth_female = birth_female,
+                                        pif = pif, pim = pim,
+                                        nf = nf, nm = nm,
+                                        Hf = Hf, Hm = Hm,
+                                        output_cohort = output_cohort, output_period = output_period,
+                                        output_kin = output_kin)
+    }else{
       kin_full <- kin_time_variant_2sex(pf = pf, pm = pm,
-                                   ff = ff, fm = fm,
-                                   sex_focal = sex_focal,
-                                   birth_female = birth_female,
-                                   pif = pif, pim = pim,
-                                   nf = nf, nm = nm,
-                                   output_cohort = output_cohort, output_period = output_period,
-                                   output_kin = output_kin)
+                                        ff = ff, fm = fm,
+                                        sex_focal = sex_focal,
+                                        birth_female = birth_female,
+                                        pif = pif, pim = pim,
+                                        nf = nf, nm = nm,
+                                        output_cohort = output_cohort, output_period = output_period,
+                                        output_kin = output_kin)
+    }
       message(paste0("Assuming stable population before ", min(years_data), "."))
   }
 
   # reorder
-  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, dead)
+  kin_full <- kin_full %>% dplyr::select(year, cohort, age_focal, sex_kin, kin, age_kin, living, starts_with("dea"))
 
   # re-group if grouped type is asked
   if(!is.null(output_kin_asked) & length(output_kin_asked)!=length(output_kin)){
@@ -114,8 +143,9 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
     if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
     if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
     kin_full <- kin_full %>%
-      dplyr::summarise(living = sum(living), dead = sum(dead),
-                       .by = c(kin, age_kin, age_focal, sex_kin, cohort, year))
+      dplyr::group_by(kin, age_kin, age_focal, sex_kin, cohort, year) %>%
+      dplyr::summarise_at(vars(c("living", dplyr::starts_with("dea"))), funs(sum)) %>%
+      dplyr::ungroup()
   }
 
   # summary
@@ -133,7 +163,8 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   agrupar_no_age_focal <- c("kin", "sex_kin", agrupar)
   agrupar <- c("age_focal", "kin", "sex_kin", agrupar)
 
-  if(summary_kin){
+  # only return summary if is asked and is not cod
+  if(summary_kin & !is_cod){
     kin_summary <- dplyr::bind_rows(
       as.data.frame(kin_full) %>%
         dplyr::rename(total=living) %>%
@@ -154,11 +185,8 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
         tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
       dplyr::ungroup() %>%
       tidyr::pivot_wider(names_from = indicator, values_from = value)
-
-    # return
     kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
   }else{
-    # return
     kin_out <- kin_full
   }
 

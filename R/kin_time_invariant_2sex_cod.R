@@ -22,31 +22,6 @@
 #' (for example `d` is children, `oa` is older aunts/uncles, etc.), sex, alive and death. If `list_output = TRUE` then this is a list.
 #' @export
 
-## BEN: ========================================================================
-# Function building:
-# library(DemoKin)
-# library(tidyr)
-# library(dplyr)
-# library(here)
-#
-# # Input of model
-# ff <- fra_asfr_sex[,"ff"]
-# fm <- fra_asfr_sex[,"fm"]
-# pf <- fra_surv_sex[,"pf"]
-# pm <- fra_surv_sex[,"pm"]
-# birth_female = 1/2.04
-# pif <- pim <- NULL
-# sex_focal = "f"
-# output_kin = NULL
-# list_output = FALSE
-#
-# # Create a fictitious hazard matrix with three causes of death.
-# # Assume that each cause consists of 1/3 of all death in all age groups.
-# Hf <- Hm <- matrix(1, nrow = 3, ncol = length(ff))
-
-## =============================================================================
-
-
 # BEN: Added hazard matrices as inputs.
 #      Assume that input of cause-specific mortality will be in terms of
 #      matrices of cause-specific hazards for the two sexes (causes * ages).

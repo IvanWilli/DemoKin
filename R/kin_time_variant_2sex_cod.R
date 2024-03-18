@@ -24,52 +24,6 @@
 #' @return A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age and sex.
 #' @export
 
-
-## BEN: ========================================================================
-# Function building:
-# library(DemoKin)
-# library(tidyr)
-# library(dplyr)
-# library(here)
-#
-# # Input of model
-# years <- ncol(swe_px)
-# ages <- nrow(swe_px)
-# ff <- swe_asfr
-# fm <- rbind(matrix(0, 5, years),
-#             swe_asfr[-((ages-4):ages),]) * 1.05
-# pf <- swe_px
-# pm <- swe_px ^ 1.5
-#
-# sex_focal = "f"
-# time_invariant = FALSE
-# birth_female = .5
-# output_cohort = 1900 # like in the vignette
-# output_period = NULL
-# output_kin = NULL
-#
-#
-# pif <- pim <- NULL
-# nf <- nm <- NULL
-# list_output = FALSE
-#
-# # Create a fictitious hazard matrix with three causes of death, where each
-# # year is a list item (Hazard matrix needs to be (causes * ages) for the
-# # matrix algebra to work well with existing code).
-# H <- matrix(c(0.5, 1, 2), nrow = 3, ncol = nrow(pf))
-# Hf <- Hm <- sapply(colnames(pf), function(x) {
-#   return(H)
-#   },
-#   simplify = FALSE,
-#   USE.NAMES = TRUE
-#   )
-# # BEN: Load time invariant for COD
-# source("./R/kin_time_invariant_2sex_cod.R")
-
-
-## =============================================================================
-
-
 # BEN: Added hazard matrices as inputs.
 #      Assume that input of cause-specific mortality will be in terms of
 #      matrices of cause-specific hazards for the two sexes (causes * ages).

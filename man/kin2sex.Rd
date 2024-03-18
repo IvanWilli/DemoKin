@@ -16,9 +16,13 @@ kin2sex(
   pim = NULL,
   nf = NULL,
   nm = NULL,
+  Hf = NULL,
+  Hm = NULL,
   output_cohort = NULL,
   output_period = NULL,
-  output_kin = NULL
+  output_kin = NULL,
+  output_age_focal = NULL,
+  summary_kin = TRUE
 )
 }
 \arguments{
@@ -44,11 +48,19 @@ kin2sex(
 
 \item{nm}{numeric. Only for \code{time_invariant = FALSE}. Same as \code{pm} but for population distribution (counts or \verb{\%}). Optional.}
 
+\item{Hf}{numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for females with rows as causes and columns as ages, being the name of each col the age.}
+
+\item{Hm}{numeric. A list where each list element (being the name of each list element the year) contains a matrix with cause-specific hazards for males with rows as causes and columns as ages, being the name of each col the age.}
+
 \item{output_cohort}{integer. Vector of year cohorts for returning results. Should be within input data years range.}
 
 \item{output_period}{integer. Vector of period years for returning results. Should be within input data years range.}
 
 \item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
+
+\item{output_age_focal}{integer. Vector of ages to select (and make faster the run).}
+
+\item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.}
 }
 \value{
 A list with:
