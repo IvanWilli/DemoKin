@@ -277,7 +277,7 @@ bind_rows(
 
 ### 2. Causes of death
 
-Now assume we have two causes of death, where the risk of the first one is half the other for females but 2/3 for males, in both cases for ages greater than 50. We need to set tow matrix with dimension 2 by 101 (number of causes by number of ages).
+Now assume we have two causes of death (COD). For females, the risk of the first COD is half the risk of the second COD for ages greater than 50. For males, the risk of the first COD is 2/3 of the second COD for ages greater than 50. We operationalize this using two matrices with dimension 2 by 101 (number of causes by number of ages).
 
 ```{r}
 Hf <- matrix(c( .5, 1), nrow = 2, ncol = length(fra_surv_f))
@@ -285,7 +285,7 @@ Hm <- matrix(c(.33, 1), nrow = 2, ncol = length(fra_surv_f))
 Hf[,1:50] <- Hm[,1:50] <- 1
 ```
 
-This is a generalization of Caswell [-@Caswell2023] approach. Originally the inputs in matrix $H$ are the hazard rates, but works like a relative risk factors realted to undelying death probability (see section 2.3 and formula 30 in section A.1). Now we run the time-invariant two-sex model by cause of death for France 2012, assuming our death count distribution based in the two competing causes:
+This is a generalization of the approach outlined by Caswell [-@Caswell2023]. In the original formulation, the inputs in matrix $H$ are the hazard rates. Here, we treat them like a relative risk factor related to the underlying probability of dying. For more details, see section 2.3 and formula 30 in section A.1 of Caswell [-@Caswell2023]. Now we run the time-invariant two-sex model by COD for France 2012, assuming a death count distribution based on the two competing causes; note that the `kin2sex` function now takes the arguments `Hf` and `Hm` but the other arguments remain unchanged:
 
 ```{r}
 kin_out_cod_invariant <- kin2sex(
@@ -298,7 +298,13 @@ kin_out_cod_invariant <- kin2sex(
                       time_invariant = TRUE)
 ```
 
-The output in this case is always the `kin_full` type. Let´s see a plot with the death distribution by age and cause of Focal´s parents when Focal is 30 yo.
+The output of `kin2sex` is the the `kin_full` data frame that we have encountered before. The only differences is that `kin_full` now includes one column for each COD specified in the input. Therefore, the number of columns will vary depending on how many COD you are considering!
+
+```{r}
+head(kin_out_cod_invariant)
+```
+
+We can now plot the death distribution by age and COD of Focal's parents when Focal is 30 yo.
 
 ```{r}
 kin_out_cod_invariant %>% 
@@ -308,10 +314,12 @@ kin_out_cod_invariant %>%
   pivot_longer(deadcause1:deadcause2) %>% 
   ggplot(aes(age_kin, value, col = sex_kin, linetype = name)) +
   geom_line() + 
-  labs(y = "Parent's death count") +
+  labs(y = "Expected number of parental deaths") +
   theme_bw()
 ```
 
-Because all the death experience of Focal is for apretns older than 50, is clear the realtive difference between the causes for each sex. The sum of the counts by sex gives the same result than total deaths by sex at that age in the general case (section 2, without splitting death probabilities by cause). The number of possible causes to add is not limited, but consider that it get more time-consuming. If we are dealing with a time-variant case, then a list by sex ($Hf$ and $Hm$) must be provided, with $H$ matrix for each year as elements, in the same order than mortality and fertility components.
+In this simplified example, the parents of Focal only died after age 50. This helped highlight the relative difference between the COD for each sex. Note that the sum of the death counts by sex gives the same result as the total deaths by sex at that age in the less complex model (i.e., the one that does not consider COD, see section 2 of this guide). 
+
+You can add as many COD as you want, but keep in mind that this can be computationally intensive. For time-variant kinship models that consider COD, you must provide a list of matrices by sex ($Hf$ and $Hm$). The elements of this list should be $H$ matrices for each year (following the same order than the mortality and fertility components). 
 
 ## References
