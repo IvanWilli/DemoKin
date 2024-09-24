@@ -116,7 +116,7 @@ does not load, you may need to install the package as
 
 ## Citation
 
-Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell.
+Williams, Iván; Alburez-Gutierrez, Diego; and the DemoKin team.
 (2021) DemoKin: An R package to implement demographic matrix kinship
 models. URL: <https://github.com/IvanWilli/DemoKin>.
 
