@@ -19,7 +19,6 @@
 #' @param summary_kin logical. Results as a data frame of accumulated kin by age of Focal if FALSE, and kin by their age*stage distribution by age of Focal if TRUE.
 #' @param sex_Focal character. Female or Male as the user requests
 #' @param initial_stage_Focal Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)
-#' @param n_inc numeric. The age/time-increment used in the discretisation of the continuum.
 #' @param output_years vector. The times at which we wish to count kin: start year = output_years[1], and end year = output_years[length.]
 #'
 #' @return A data frame with focal´s age, related ages, stages, sexes, and types of kin for each time-period
@@ -39,7 +38,6 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               summary_kin = TRUE, # Set to FALSE if we want a full age*stage distribution of kin
                                               sex_Focal = "Female",
                                               initial_stage_Focal = NULL,
-                                              n_inc = NULL, ## n_inc is the age-class, time-class increment (e.g., 1year,5year,10year)
                                               output_years){
 
   no_years <- length(U_list_females)
@@ -269,7 +267,6 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                 output_years[1],
                                 na,
                                 ns,
-                                n_inc,
                                 output_kin)}
   else{
     kin_out <- create_full_dists_df(relative_data,
@@ -278,7 +275,6 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                     output_years[1],
                                     na,
                                     ns,
-                                    n_inc,
                                     output_kin)}
 
   return(kin_out)
@@ -698,7 +694,6 @@ all_kin_dy_TV <- function(Uf,
 #' @param start_year . First year of varying vital rates (e.g., if years = 1990:2000 then start_year = 1990)
 #' @param na numeric. Number of ages.
 #' @param ns numeric. Number of stages.
-#' @param n_inc numeric. The size of the age/time increment (if abridged). NULL corresponds to 1 year intervals.
 #' @param specific_kin character. names of kin we wish to analyse, e.g., list("os","ys"). If null returns all 14.
 #'
 #' @return A data frame which gives for each age of Focal at each year in the timescale, Focal's experienced number kin demarcated by stages (summed over all ages)
@@ -709,7 +704,6 @@ create_cumsum_df <- function(kin_matrix_lists,
                              start_year,
                              na,
                              ns,
-                             n_inc,
                              specific_kin){
   df_year_list <- list()
   for(j in years){
@@ -727,8 +721,8 @@ create_cumsum_df <- function(kin_matrix_lists,
       male_kin <- df[ (1+nr/2) : nr, 1:nc]
       female_kin$stage <- rep(seq(1, ns), na)
       male_kin$stage <- rep(seq(1, ns), na)
-      female_kin$age <- rep(seq(0, (na-1), n_inc), each = ns)
-      male_kin$age <- rep(seq(0, (na-1), n_inc), each = ns)
+      female_kin$age <- rep(seq(0, (na-1)), each = ns)
+      male_kin$age <- rep(seq(0, (na-1)), each = ns)
       female_kin$Sex <- "Female"
       male_kin$Sex <- "Male"
       both_kin <- rbind(female_kin, male_kin)
@@ -767,7 +761,6 @@ create_cumsum_df <- function(kin_matrix_lists,
 #' @param start_year . First year of varying vital rates (e.g., if years = 1990:2000 then start_year = 1990)
 #' @param na numeric. Number of ages.
 #' @param ns numeric. Number of stages.
-#' @param n_inc numeric. The size of the age/time increment (if abridged). NULL corresponds to 1 year intervals.
 #' @param specific_kin character. names of kin we wish to analyse, e.g., list("os","ys"). If null returns all 14.
 #'
 #' @return A data frame which gives for each age of Focal at each year in the timescale, the full age*stage dist of kin
@@ -778,7 +771,6 @@ create_full_dists_df <- function(kin_matrix_lists,
                                  start_year,
                                  na,
                                  ns,
-                                 n_inc,
                                  specific_kin){
   df_year_list <- list()
   for(j in years){
@@ -796,8 +788,8 @@ create_full_dists_df <- function(kin_matrix_lists,
       male_kin <- df[ (1+nr/2) : nr, 1:nc]
       female_kin$stage <- rep(seq(1, ns), na)
       male_kin$stage <- rep(seq(1, ns), na)
-      female_kin$age <- rep(seq(0, (na-1), n_inc), each = ns)
-      male_kin$age <- rep(seq(0, (na-1), n_inc), each = ns)
+      female_kin$age <- rep(seq(0, (na-1)), each = ns)
+      male_kin$age <- rep(seq(0, (na-1)), each = ns)
       female_kin$Sex <- "Female"
       male_kin$Sex <- "Male"
       both_kin <- rbind(female_kin, male_kin)

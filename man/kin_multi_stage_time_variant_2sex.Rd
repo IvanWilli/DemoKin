@@ -18,7 +18,6 @@ kin_multi_stage_time_variant_2sex(
   summary_kin = TRUE,
   sex_Focal = "Female",
   initial_stage_Focal = NULL,
-  n_inc = NULL,
   output_years
 )
 }
@@ -50,8 +49,6 @@ a list of stochastic matrices which describe age-specific male probabilities of 
 \item{sex_Focal}{character. Female or Male as the user requests}
 
 \item{initial_stage_Focal}{Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)}
-
-\item{n_inc}{numeric. The age/time-increment used in the discretisation of the continuum.}
 
 \item{output_years}{vector. The times at which we wish to count kin: start year = output_years\link{1}, and end year = output_years\link{length.}}
 }

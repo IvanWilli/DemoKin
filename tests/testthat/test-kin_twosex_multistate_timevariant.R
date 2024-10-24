@@ -33,7 +33,6 @@ test_that("same output in multi_stage (caswell 2020)", {
                                                   summary_kin = FALSE,
                                                   sex_Focal = "Female", ##  define Focal's sex at birth
                                                   initial_stage_Focal = 1, ## Define Focal's stage at birth
-                                                  n_inc = 1, # width of age class
                                                   seq(1990, (1990)))
 
 

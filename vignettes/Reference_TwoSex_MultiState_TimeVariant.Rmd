@@ -114,7 +114,6 @@ kin_out_1965_2005 <-
                                     summary_kin = TRUE,
                                     sex_Focal = "Female", ##  define Focal's sex at birth
                                     initial_stage_Focal = 1, ## Define Focal's stage at birth
-                                    n_inc = 1, # width of age class
                                     output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
   )
 ```
@@ -193,9 +192,8 @@ kin_out_1965_2005_full <-
                                     output_kin = FALSE,
                                     summary_kin = FALSE,
                                     sex_Focal = "Female", ##  define Focal's sex at birth
-initial_stage_Focal = 1, ## Define Focal's stage at birth
-n_inc = 1, # width of age class
-output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
+                                    initial_stage_Focal = 1, ## Define Focal's stage at birth
+                                    output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
 )
 ```
 ### 2.1. Visualizing kin ###
