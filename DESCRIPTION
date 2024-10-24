@@ -32,7 +32,8 @@ Imports:
     igraph,
     magrittr,
     data.table,
-    lifecycle
+    lifecycle,
+    tictoc
 URL: https://github.com/IvanWilli/DemoKin
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
