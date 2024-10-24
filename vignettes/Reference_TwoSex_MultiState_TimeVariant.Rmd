@@ -9,7 +9,13 @@ vignette: >
 %\VignetteEncoding{UTF-8}
 ---
 
-  Note that this is currently an R project and not package. To run code in this vignette we need to run/source all files in the folder ``Matrix Model''.
+
+```{r, eval = T, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(devtools); load_all()
+```
+
+
 
 ```{R}
 library(DemoKin)
@@ -61,8 +67,8 @@ To avoid further calculations these lists are constructed in another file and si
 
 F_mat_fem <- readr::read_rds(here::here("data","Female_parity_fert_list_UK.Rds"))
 F_mat_male <- readr::read_rds(here::here("data","Male_parity_fert_list_UK.Rds"))
-T_mat_fem <- readr::read_rds(here::here("data","Parity_transfers_by_age_UK.Rds"))
-T_mat_male <- readr::read_rds(here::here("data","Parity_transfers_by_age_UK.Rds"))
+T_mat_fem <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
+T_mat_male <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
 U_mat_fem <- readr::read_rds(here::here("data","Female_parity_mortality_list_UK.Rds"))
 U_mat_male <- readr::read_rds(here::here("data","Male_parity_mortality_list_UK.Rds"))
 H_mat <- readr::read_rds(here::here("data","Redistribution_by_parity_list_UK.Rds"))
