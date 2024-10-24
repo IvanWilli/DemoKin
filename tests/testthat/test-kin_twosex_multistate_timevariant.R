@@ -3,22 +3,20 @@
 
 
 
+
+
 test_that("same output in multi_stage (caswell 2020)", {
-  load("data/svk_Uxs.rda")
-  Tf <- unname(svk_Uxs)
-  Tm <- unname(svk_Uxs)
-  load("data/svk_fxs.rda")
-  Ff <- unname(svk_fxs)
-  Fm <- unname(svk_fxs)
+  Tf <- svk_Uxs
+  Tm <- svk_Uxs
+  Ff <- svk_fxs
+  Fm <- svk_fxs
   Ff <- (1/0.49)*Ff
   Fm <- (1/0.49)*Fm
-  load("data/svk_pxs.rda")
-  Uf <- unname(svk_pxs)
-  Um <- unname(svk_pxs)
-  load("data/svk_Hxs.rda")
-  H <- unname(svk_Hxs)
+  Uf <- svk_pxs
+  Um <- svk_pxs
+  H <- svk_Hxs
 
-  load("data/kin_svk1990_caswell2020.rda")
+
 
   joe_output <- kin_multi_stage_time_variant_2sex(list(Uf),
                                                   list(Um),
