@@ -13,15 +13,15 @@
 #' @param T_list_males list of lists with matrix entries: each outer list entry is period-specific, and composed of
 #'                     a list of stochastic matrices which describe age-specific male probabilities of transferring stage
 #' @param H_list list with matrix entries: redistribution of newborns across each stage to a specific age-class
-#' @param birth_female numeric. ratio of males to females in population
+#' @param birth_female numeric. birth ratio of females to males in population
 #' @param parity logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default `TRUE`.
 #' @param output_kin vector. A vector of particular kin one wishes to obtain results for, e.g., c("m","d","oa"). Default is all kin types.
-#' @param summary_kin logical. Results as a data frame of accumulated kin by age of Focal if FALSE, and kin by their age*stage distribution by age of Focal if TRUE.
-#' @param sex_Focal character. Female or Male as the user requests
+#' @param summary_kin logical. Results as a data frame of accumulated kin by age of Focal if TRUE, and kin by their age*stage distribution by age of Focal if FALSE.
+#' @param sex_Focal character. Female or Male as the user requests.
 #' @param initial_stage_Focal Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)
 #' @param output_years vector. The times at which we wish to count kin: start year = output_years[1], and end year = output_years[length.]
 #'
-#' @return A data frame with focal´s age, related ages, stages, sexes, and types of kin for each time-period
+#' @return A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.
 
 #' @export
 #'
@@ -34,9 +34,9 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               H_list = NULL,
                                               birth_female = 0.49, ## Sex ratio -- note is 1 - alpha
                                               parity = FALSE,
-                                              output_kin = FALSE,
+                                              output_kin = FALSE, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
                                               summary_kin = TRUE, # Set to FALSE if we want a full age*stage distribution of kin
-                                              sex_Focal = "Female",
+                                              sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
                                               output_years){
 

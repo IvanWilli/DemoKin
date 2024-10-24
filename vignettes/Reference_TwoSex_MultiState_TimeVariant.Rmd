@@ -15,6 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(devtools); load_all()
 ```
 
+In this vignette, we'll demonstrate how the function `kin_multi_stage_time_variant_2sex` computes stage-specific kinship networks encompassing both sexes for an average member of a population, the sex of whom is user specified, and who is subject to time-varying demographic rates. We call this individual Focal. We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
 
 
 ```{R}
@@ -28,17 +29,15 @@ options(dplyr.summarise.inform = FALSE) # hide if we don't want to see summarise
 
 ```
 
-In this vignette, we'll demonstrate how `Two_Sex_Time_Varying_MultiState_Kinship` can be used to compute parity-specific kinship networks for an average member of a population, the sex of whom is user specified, and who is subject to time-varying demographic rates. We call this individual Focal. We seek the number, age, and parity distribution of Focal's relatives for each age of Focal's life as a function of the year in which Focal is born.
+### Kin counts by parity  ###
 
-### Kin counts by parity in a two sex time variant demography ###
-
-In this example we use data for the UK ranging from 1965 - 2005, sourced from the [Human Mortality Database](https://www.mortality.org/) and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). Some simplifying assumptions we make due to data availability are as follows:
+In this example we use parity as an example stage. UK data ranging from 1965 - 2022 is sourced from the [Human Mortality Database](https://www.mortality.org/) and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). Some simplifying assumptions we make due to data availability are as follows:
 
 i) Fertility rates vary with time, are distinct among parity class, but the same over sexes (the so-called ``androgynous approximation'').
-ii) Mortality rates vary with time and are distinct across sex, but are the same over parity classes (no parity-specific mortality)
+ii) Mortality rates vary with time, are distinct across sex, but are the same over parity classes (no parity-specific mortality)
 iii) The age-specific probabilities of parity-progression vary with time, but are the same over sex (androgynous approximation again)
 
-In order to implement the model, the function `kin_multi_stage_TV_2_sex` expects the following 7 inputs, fed in as lists:
+In order to implement the model, the function `kin_multi_stage_time_variant_2sex` expects the following 7 inputs of vital rates, fed in as lists:
 
 1) LIST: Female age-and-parity specific survival probabilities over the timescale.
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
@@ -59,7 +58,7 @@ The outer list has length = the timescale. The inner list has length = number of
 
 7) LIST: Length = timescale, and each element is a matrix which assigns the offspring of individuals in some stage to the appropriate age class (age in rows and states in columns)
 
-To avoid further calculations these lists are constructed in another file and simply imported below (See ``Examples'' , ``Matrix_construction'' for details). The code below reads in the above function input lists.
+To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed in another file and simply imported below. The code below reads in the above function input lists.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -89,16 +88,25 @@ Outer list starting 1965 ending 2022
 T_mat_male == T_mat_fem.
 H_mat: list of matrices which redistributes newborns to age-class 1 and parity 0. No time-variation.
 
-We feed these inputs into the matrix model, along with other arguments:
+
+
+### 1. Accumulated number of kin Focal expects over the lifecourse under time-varying rates from 1965 to 2005 ###
+
+We feed the above inputs into the matrix model, along with other arguments:
 UK sex ratio --> birth_female = 0.49
 We are considering parity --> parity = TRUE
 We want all of Focal's kin network --> output_kin = FALSE
 Accumulated kin in this example --> summary_kin = TRUE
 Focal is female --> sex_Focal = "Female"
 Focal born into parity 0 --> initial_stage_Focal = 1
-timescale from 1965-1985 -- > seq(1965, 1965 + 40)
+timescale from 1965-1985 -- > output_years = seq(1965, 1965 + 40)
 
-### 1. For now lets simply consider the accumulated number of kin Focal expects over the lifecourse ###
+Accumulated kin are outputted by the argument `summary_kin` = TRUE. In such cases, for each age of Focal, we sum over all possible ages of kin yielding the marginal stage 
+distribution of kin. 
+
+Notice that the timescale argument `output_years` = seq(1965,2005) gives a sequence of 1965,1966,...,2004,2005 of length 41. The first sets of time-varying vital rates
+in our input lists are e.g., U_mat_fem[[1]] (corresponding to mortality in 1965), the 41-st entry is U_mat_fem[[(1+40)]] (mortality in 2005). We require consistency between
+the length of the list of vital rates and the timescale: U_mat_fem[[1:(1+40)]] = in length = seq(1965,2005)
 
 ```{r, message=FALSE, warning=FALSE}
 # Run kinship model for a female Focal over a timescale of no_years (we use 40 here)
@@ -126,7 +134,8 @@ kin_out_1965_2005 <-
 
 ### 1.1.1. Plotting kin for an average Focal at some fixed period in time ###
 
-For an example, let's say we really want to understand the age*parity distributions of the accumulated number of aunts and uncles older than Focal's mother and father, for each age of Focal, and for each period in time from 1965-1985. Some people will do....
+Let's suppose that we really want to understand the age*parity distributions of the accumulated number of aunts and uncles older than Focal's mother and father, for each age of Focal. Some people will do.... Here we look at snapshots in time of the years 1965,1975,1985,1995,2005 and plot the expected age-parity distribution of an average aged
+Focal. Implicit in the below plot is that we really plot Focal's born into different cohorts -- i.e., in the 2005 plot a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
 
 ```{r, fig.height=6, fig.width=8}
 kin_out_1965_2005 %>%
