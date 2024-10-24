@@ -93,8 +93,8 @@ We feed these inputs into the matrix model, along with other arguments:
 UK sex ratio --> birth_female = 0.49
 We are considering parity --> parity = TRUE
 We want all of Focal's kin network --> output_kin = FALSE
+Accumulated kin in this example --> summary_kin = TRUE
 Focal is female --> sex_Focal = "Female"
-Accumulated kin in this example --> summary_kin = FALSE
 Focal born into parity 0 --> initial_stage_Focal = 1
 timescale from 1965-1985 -- > seq(1965, 1965 + 40)
 
@@ -177,7 +177,7 @@ the RHS plot (1965 cohort) simply reflects the fact that Focal will not start re
 
 ### 2. Now lets consider the distributions of kin Focal expects over the lifecourse ###
 
-To obtain distributions of kin as output, we simply change the function argument: dist_output = TRUE
+To obtain distributions of kin as output, we simply change the function argument: summary_kin = FALSE
 
 ```{r, message=FALSE, warning=FALSE}
 rm(kin_out_1965_2005)
