@@ -301,9 +301,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
 #' @return a list of matrices. Each list entry represents a particular kin. Each kin is chacacterised by a matrix of dimension:
 #' nrow = 2* na * ns (2-sex age-stage structured) and ncol = na (Focal's age)
 #' yielding the age*stage distribution of kin for each age of Focal
-#'
-#'
-#'
+
 all_kin_dy <- function(Uf,
                        Um,
                        Ff,
@@ -510,7 +508,6 @@ all_kin_dy <- function(Uf,
 #' nrow = 2* na * ns (2-sex age-stage structured) and ncol = na (Focal's age)
 #' yielding the age*stage distribution of kin for each age of Focal
 #'
-#'
 all_kin_dy_TV <- function(Uf,
                           Um,
                           Ff,
@@ -706,7 +703,6 @@ all_kin_dy_TV <- function(Uf,
 #'
 #' @return A data frame which gives for each age of Focal at each year in the timescale, Focal's experienced number kin demarcated by stages (summed over all ages)
 #'
-
 create_cumsum_df <- function(kin_matrix_lists,
                              kin_names,
                              years,
