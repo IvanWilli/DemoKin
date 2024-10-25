@@ -40,7 +40,8 @@ options(dplyr.summarise.inform = FALSE) # hide if we don't want to see summarise
 ### Kin counts by parity  ###
 
 In this example we use parity as an example stage. UK data ranging from 1965 - 2022 is sourced from 
-the [Human Mortality Database](https://www.mortality.org/) and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). 
+the [Human Mortality Database](https://www.mortality.org/) 
+and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). 
 Some simplifying assumptions we make due to data availability are as follows:
 
 i) Fertility rates vary with time, are distinct among parity class, but the same over sexes (the so-called ``androgynous approximation'').
@@ -112,13 +113,13 @@ H_mat: list of matrices which redistributes newborns to age-class 1 and parity 0
 ### 1. Accumulated number of kin Focal expects over the lifecourse under time-varying rates from 1965 to 2005 ###
 
 We feed the above inputs into the matrix model, along with other arguments:
-UK sex ratio --> birth_female = 0.49
-We are considering parity --> parity = TRUE
-We want all of Focal's kin network --> output_kin = FALSE
-Accumulated kin in this example --> summary_kin = TRUE
-Focal is female --> sex_Focal = "Female"
-Focal born into parity 0 --> initial_stage_Focal = 1
-timescale from 1965-1985 -- > output_years = seq(1965, 1965 + 40)
+UK sex ratio --> `birth_female` = 0.49
+We are considering parity --> `parity` = TRUE
+We want all of Focal's kin network --> `output_kin` = FALSE
+Accumulated kin in this example --> `summary_kin` = TRUE
+Focal is female --> `sex_Focal` = "Female"
+Focal born into parity 0 --> `initial_stage_Focal` = 1
+timescale from 1965-1985 -- > `output_years` = seq(1965, 1965 + 40)
 
 Accumulated kin are outputted by the argument `summary_kin` = TRUE. In such cases, for each age of Focal, we sum over all possible ages of kin yielding the marginal stage 
 distribution of kin. 
@@ -153,8 +154,11 @@ kin_out_1965_2005 <-
 
 ### 1.1.1. Plotting kin for an average Focal at some fixed period in time ###
 
-Let's suppose that we really want to understand the age*parity distributions of the accumulated number of aunts and uncles older than Focal's mother and father, for each age of Focal. Some people will do.... Here we look at snapshots in time of the years 1965,1975,1985,1995,2005 and plot the expected age-parity distribution of an average aged
-Focal. Implicit in the below plot is that we really plot Focal's born into different cohorts -- i.e., in the 2005 plot a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
+Let's suppose that we really want to understand the age*parity distributions of the accumulated number 
+of aunts and uncles older than Focal's mother and father, for each age of Focal. Some people will do.... 
+Here we look at snapshots in time of the years 1965,1975,1985,1995,2005 and plot the expected age-parity distribution of an average aged
+Focal. Implicit in the below plot is that we really plot Focal's born into different cohorts -- i.e., in the 2005 
+plot a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
 
 ```{r, fig.height=6, fig.width=8}
 kin_out_1965_2005 %>%
@@ -184,8 +188,8 @@ kin_out_1965_2005 %>%
 ```
 ### 1.1.2. Plotting the kin of Focal as a function of Focal's cohort of birth ####
 
-Since we only ran the model for 40 years (between 1968-2005), there is very little scope to view kinship as cohort-specific. We can however compare cohorts for 40-year segments of Focal's life.
-Below, following from the above example, we once again consider offspring
+Since we only ran the model for 40 years (between 1965-2005), there is very little scope to view kinship as cohort-specific. 
+We can however compare cohorts for 40-year segments of Focal's life. Below, following from the above example, we once again consider offspring
 
 ```{r, fig.height = 6, fig.width = 8}
 kin_out_1965_2005 %>%
@@ -197,9 +201,14 @@ kin_out_1965_2005 %>%
   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
   ggplot2::ylab("Offspring")
 ```
-The LHS plot (1910 cohort) should be interpreted as follows: if Focal is born in 1910, between 1965-2005 he/she will be 55-95 years old. Focal will have already accumulated its maximal number of offspring, and their overall number will now be dropping as mortality risk begins. The offspring of Focal will be approximately 20-35, and began if not completed reproduction/parity progression.
+The LHS plot (1910 cohort) should be interpreted as follows: if Focal is born in 1910, between 1965-2005 he/she will be 55-95 years old. 
+Focal will have already accumulated its maximal number of offspring, and their overall number will now be dropping as mortality risk begins. 
+The offspring of Focal will be approximately 20-35, and began if not completed reproduction/parity progression.
 
-The middle plot (1925 cohort) shows Focal between ages 40 and 80. Again, Focal will have completed reproduction and can only lose offspring as he/she ages. However, Offspring at Focal of age 40 will be around 10-20 and still have high probability of being in partity 0. Whereas, Focal at age of 80 will have offspring aged around 50, who in turn will have completed reproduction as demonstrated by a well mixed parity-distribution at this age of Focal.
+The middle plot (1925 cohort) shows Focal between ages 40 and 80. Again, Focal will have completed reproduction and can only lose offspring as he/she ages. 
+However, Offspring at Focal of age 40 will be around 10-20 and still have high probability of being in parity 0. 
+Whereas, Focal at age of 80 will have offspring aged around 50, who in turn will have completed reproduction as demonstrated by 
+a well mixed parity-distribution at this age of Focal.
 
 the RHS plot (1965 cohort) simply reflects the fact that Focal will not start reproduction until around 15 years old.
 
@@ -234,7 +243,8 @@ kin_out_1965_2005_full <-
 Let us now visualize the distribution of relatives over Focal's lifecourse using the model output
 ### 2.1.1. Plotting kin distributions for an average Focal of fixed age, at some fixed period in time ###
 
-Below I plot the expected age*stage distribution of an average Focal's younger siblings over the years 1965, 1975, 1085, 1995, and 2005, given Focal is of age 50
+Below I plot the expected age*stage distribution of an average Focal's younger siblings over the 
+years 1965, 1975, 1085, 1995, and 2005, given Focal is of age 50
 
 ```{r, fig.height = 6, fig.width = 8}
 kin_out_1965_2005_full %>%
@@ -250,7 +260,8 @@ kin_out_1965_2005_full %>%
   ggplot2::ylab("Younger siblings") +
   ggplot2::ggtitle("Focal 50")
 ```
-As expected, the discontinuity reflects the fact that Focal's younger siblings cannot be of age >=50. Contrastingly, when we look at the age*stage distribution of older siblings, the discontinuity bounds kin to be of age >50, as plotted below
+As expected, the discontinuity reflects the fact that Focal's younger siblings cannot be of age >=50. 
+Contrastingly, when we look at the age*stage distribution of older siblings, the discontinuity bounds kin to be of age >50, as plotted below
 
 ```{r, fig.height = 6, fig.width = 8}
 kin_out_1965_2005_full %>%
