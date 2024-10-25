@@ -15,6 +15,8 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(devtools); load_all()
 ```
 
+Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model of kinship, there have been many extensions to the framework (many of which are documented within this package). Caswell [-@caswell_formal_2021] updated the original model to incorporate time-varying vital rates, Caswell [-@caswell_formal_2022] introduced two-sexes to the model, and Caswell [-@caswell_formal_2020] considered a multi-stage population of kin. Here, we provide an R function which combines the three aforementioned models. 
+
 In this vignette, we'll demonstrate how the function `kin_multi_stage_time_variant_2sex` computes stage-specific kinship networks encompassing both sexes for an average member of a population, the sex of whom is user specified, and who is subject to time-varying demographic rates. We call this individual Focal. We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
 
 
