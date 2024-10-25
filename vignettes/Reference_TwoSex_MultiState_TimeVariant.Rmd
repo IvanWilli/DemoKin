@@ -50,26 +50,26 @@ iii) The age-specific probabilities of parity-progression vary with time, but ar
 
 In order to implement the model, the function `kin_multi_stage_time_variant_2sex` expects the following 7 inputs of vital rates, fed in as lists:
 
-1) LIST: Female age-and-parity specific survival probabilities over the timescale.
+1) `U_list_females` A list of female age-and-parity specific survival probabilities over the timescale (in matrix forms).
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
 
-2) LIST: Male age-and-parity specific survival probabilities over the timescale.
+2) `U_list_males` A list of male age-and-parity specific survival probabilities over the timescale (in matrix forms).
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
 
-3) LIST: Female age-and-parity specific fertility rates over the timescale.
+3) `F_list_females` A list of female age-and-parity specific fertility rates over the timescale (in matrix forms).
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
 
-4) LIST: Male age-and-parity specific fertility rates over the timescale.
+4) `F_list_males` A list of male age-and-parity specific fertility rates over the timescale (in matrix forms).
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
 
-5) OUTER LIST with INNER LISTS: Female age-specific probabilities of moving up parity over the timescale.
+5) `T_list_females` A list of lists of female age-specific probabilities of moving up parity over the timescale (in matrix forms).
 The outer list has length = the timescale. The inner list has length = number of ages. 
 Each outer list entry is comprised of a list of matrices (stage*stage dimensional), each matrix describes age-specific probabilities of moving stage. 
 Thus for each year, we have a list of age-specific probabilities of moving from one stage to the next.
 
 6) Same as 5) but for males
 
-7) LIST: Length = timescale, and each element is a matrix which assigns the offspring of individuals in some stage to 
+7) `H_list` A list of length = timescale, in which each element is a matrix which assigns the offspring of individuals in some stage to 
 the appropriate age class (age in rows and states in columns)
 
 To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed 
@@ -77,15 +77,20 @@ in another file and simply imported below. The code below reads in the above fun
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 
-# Lets construct these lists as model inputs..............
-
-F_mat_fem <- readr::read_rds(here::here("data","Female_parity_fert_list_UK.Rds"))
-F_mat_male <- readr::read_rds(here::here("data","Male_parity_fert_list_UK.Rds"))
-T_mat_fem <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
-T_mat_male <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
-U_mat_fem <- readr::read_rds(here::here("data","Female_parity_mortality_list_UK.Rds"))
-U_mat_male <- readr::read_rds(here::here("data","Male_parity_mortality_list_UK.Rds"))
-H_mat <- readr::read_rds(here::here("data","Redistribution_by_parity_list_UK.Rds"))
+F_mat_fem <- Female_parity_fert_list_UK
+F_mat_male <- Male_parity_fert_list_UK
+T_mat_fem <- Parity_transfers_by_age_list_UK
+T_mat_male <- Parity_transfers_by_age_list_UK
+U_mat_fem <- Female_parity_mortality_list_UK
+U_mat_male <- Male_parity_mortality_list_UK
+H_mat <- Redistribution_by_parity_list_UK
+#F_mat_fem <- readr::read_rds(here::here("data","Female_parity_fert_list_UK.Rds"))
+#F_mat_male <- readr::read_rds(here::here("data","Male_parity_fert_list_UK.Rds"))
+#T_mat_fem <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
+#T_mat_male <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
+#U_mat_fem <- readr::read_rds(here::here("data","Female_parity_mortality_list_UK.Rds"))
+#U_mat_male <- readr::read_rds(here::here("data","Male_parity_mortality_list_UK.Rds"))
+#H_mat <- readr::read_rds(here::here("data","Redistribution_by_parity_list_UK.Rds"))
 
 ```
 
@@ -124,9 +129,13 @@ timescale from 1965-1985 -- > `output_years` = seq(1965, 1965 + 40)
 Accumulated kin are outputted by the argument `summary_kin` = TRUE. In such cases, for each age of Focal, we sum over all possible ages of kin yielding the marginal stage 
 distribution of kin. 
 
-Notice that the timescale argument `output_years` = seq(1965,2005) gives a sequence of 1965,1966,...,2004,2005 of length 41. The first sets of time-varying vital rates
-in our input lists are e.g., U_mat_fem[[1]] (corresponding to mortality in 1965), the 41-st entry is U_mat_fem[[(1+40)]] (mortality in 2005). We require consistency between
-the length of the list of vital rates and the timescale: U_mat_fem[[1:(1+40)]] = in length = seq(1965,2005)
+Notice that the timescale argument `output_years` = seq(1965,2005) gives a sequence of 1965, 1966, ..., 2004, 2005 of length 41. 
+The first sets of time-varying vital rates in our input lists are e.g., U_mat_fem[[1]] (corresponding to mortality in 1965), 
+the 41-st entry is U_mat_fem[[(1+40)]] (mortality in 2005). We require consistency between the length of the list of vital rates
+and the timescale: U_mat_fem[[1:(1+40)]] = in length = seq(1965,2005). Therefore we use the input lists of demographic rates
+
+`U_list_females` = U_mat_fem[1:(1+no_years)] which runs from U_mat_fem[[1]] = 1965 set of rates, up to U_mat_fem[[41]] = 2005 set of rates, 
+and so on...
 
 ```{r, message=FALSE, warning=FALSE}
 # Run kinship model for a female Focal over a timescale of no_years (we use 40 here)
@@ -134,13 +143,13 @@ no_years <- 40
 # and we start projecting kin in 1965
 # We decide here to count accumulated kin by age of Focal, and not distributions of kin
 kin_out_1965_2005 <-
-  kin_multi_stage_time_variant_2sex(U_mat_fem[1:(1+no_years)],
-                                    U_mat_male[1:(1+no_years)],
-                                    F_mat_fem[1:(1+no_years)],
-                                    F_mat_male[1:(1+no_years)],
-                                    T_mat_fem[1:(1+no_years)],
-                                    T_mat_fem[1:(1+no_years)],
-                                    H_mat[1:(1+no_years)],
+  kin_multi_stage_time_variant_2sex(U_list_females = U_mat_fem[1:(1+no_years)],
+                                    U_list_males = U_mat_male[1:(1+no_years)],
+                                    F_list_females = F_mat_fem[1:(1+no_years)],
+                                    F_list_males = F_mat_male[1:(1+no_years)],
+                                    T_list_females = T_mat_fem[1:(1+no_years)],
+                                    T_list_males = T_mat_fem[1:(1+no_years)],
+                                    H_list = H_mat[1:(1+no_years)],
                                     birth_female = 1 - 0.51, ## Sex ratio -- UK value
                                     parity = TRUE,
                                     output_kin = FALSE,
@@ -171,7 +180,8 @@ Some people will do....
 
 We restrict Focal's kinship network to aunts and uncles older than Focal's mother by `group` == "oa". We visualise the marginal
 parity distributions of kin: `stage_kin`, for each age of Focal `age_focal`, using different colour schemes. Implicit in the 
-below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
+below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, 
+while a 40 year old Focal was born in 1965.
 
 ```{r, fig.height=6, fig.width=8}
 kin_out_1965_2005 %>%
