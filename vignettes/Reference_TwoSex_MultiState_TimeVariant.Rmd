@@ -9,15 +9,22 @@ vignette: >
 %\VignetteEncoding{UTF-8}
 ---
 
-
 ```{r, eval = T, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(devtools); load_all()
 ```
 
-Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model of kinship, there have been many extensions to the framework (many of which are documented within this package). Caswell [-@caswell_formal_2021] updated the original model to incorporate time-varying vital rates, Caswell [-@caswell_formal_2022] introduced two-sexes to the model, and Caswell [-@caswell_formal_2020] considered a multi-stage population of kin. Here, we provide an R function which combines the three aforementioned models. 
+Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model 
+of kinship, there have been many extensions to the framework (many of which are documented within this package). 
+Caswell [-@caswell_formal_2021] updated the original model to incorporate time-varying vital rates, 
+Caswell [-@caswell_formal_2022] introduced two-sexes to the model, 
+and Caswell [-@caswell_formal_2020] considered a multi-stage population of kin. 
+Here, we provide an R function which combines the three aforementioned models. 
 
-In this vignette, we'll demonstrate how the function `kin_multi_stage_time_variant_2sex` computes stage-specific kinship networks encompassing both sexes for an average member of a population, the sex of whom is user specified, and who is subject to time-varying demographic rates. We call this individual Focal. We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
+In this vignette, we'll demonstrate how the function `kin_multi_stage_time_variant_2sex` computes stage-specific kinship networks 
+encompassing both sexes for an average member of a population, the sex of whom is user specified, 
+and who is subject to time-varying demographic rates. We call this individual Focal. 
+We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
 
 
 ```{R}
@@ -30,10 +37,11 @@ library(tictoc)
 options(dplyr.summarise.inform = FALSE) # hide if we don't want to see summarise output (but also #lose #progress bar)
 
 ```
-
 ### Kin counts by parity  ###
 
-In this example we use parity as an example stage. UK data ranging from 1965 - 2022 is sourced from the [Human Mortality Database](https://www.mortality.org/) and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). Some simplifying assumptions we make due to data availability are as follows:
+In this example we use parity as an example stage. UK data ranging from 1965 - 2022 is sourced from 
+the [Human Mortality Database](https://www.mortality.org/) and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). 
+Some simplifying assumptions we make due to data availability are as follows:
 
 i) Fertility rates vary with time, are distinct among parity class, but the same over sexes (the so-called ``androgynous approximation'').
 ii) Mortality rates vary with time, are distinct across sex, but are the same over parity classes (no parity-specific mortality)
@@ -54,13 +62,17 @@ This input list has length = the timescale, and each entry represents the rates 
 This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
 
 5) OUTER LIST with INNER LISTS: Female age-specific probabilities of moving up parity over the timescale.
-The outer list has length = the timescale. The inner list has length = number of ages. Each outer list entry is comprised of a list of matrices (stage*stage dimensional), each matrix describes age-specific probabilities of moving stage. Thus for each year, we have a list of age-specific probabilities of moving from one stage to the next.
+The outer list has length = the timescale. The inner list has length = number of ages. 
+Each outer list entry is comprised of a list of matrices (stage*stage dimensional), each matrix describes age-specific probabilities of moving stage. 
+Thus for each year, we have a list of age-specific probabilities of moving from one stage to the next.
 
 6) Same as 5) but for males
 
-7) LIST: Length = timescale, and each element is a matrix which assigns the offspring of individuals in some stage to the appropriate age class (age in rows and states in columns)
+7) LIST: Length = timescale, and each element is a matrix which assigns the offspring of individuals in some stage to 
+the appropriate age class (age in rows and states in columns)
 
-To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed in another file and simply imported below. The code below reads in the above function input lists.
+To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed 
+in another file and simply imported below. The code below reads in the above function input lists.
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -80,17 +92,22 @@ Recap: above are lists of period-specific demographic rates, in particular compr
 
 U_mat_fem: list of age by stage matrices, entries give female probability of survival.
 List starting 1965 ending 2022.
+
 U_mat_male: list of age by stage matrices, entries give female probability of survival.
 List starting 1965 ending 2022.
+
 F_mat_fem: list of age by stage matrices, entries give female fert,
 List starting 1965 ending 2022.
+
 F_mat_male == F_mat_fem.
-T_mat_fem: list of lists of matrices: Each outer list entry is a list of matrices where each matrix gives age-specific probabilities a female moves up parity (inner list has length of number of age-classes).
+
+T_mat_fem: list of lists of matrices: Each outer list entry is a list of matrices where each matrix gives age-specific probabilities 
+a female moves up parity (inner list has length of number of age-classes).
 Outer list starting 1965 ending 2022
+
 T_mat_male == T_mat_fem.
+
 H_mat: list of matrices which redistributes newborns to age-class 1 and parity 0. No time-variation.
-
-
 
 ### 1. Accumulated number of kin Focal expects over the lifecourse under time-varying rates from 1965 to 2005 ###
 
