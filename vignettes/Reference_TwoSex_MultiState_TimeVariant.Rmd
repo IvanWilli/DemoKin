@@ -248,9 +248,17 @@ kin_out_1965_2005_full <-
                                     output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
 )
 ```
-### 2.1. Visualizing kin ###
+### 2.1. Visualizing the output ###
 
-Let us now visualize the distribution of relatives over Focal's lifecourse using the model output
+```{r, message=FALSE, warning=FALSE}
+
+head(kin_out_1965_2005_full)
+```
+
+Notice the additional column `age_kin`. Rather than grouping kin by stage and summing over all ages,
+the output here (in data frame form) gives an expected number of kin for each age*stage combination, for each age of Focal.
+
+
 ### 2.1.1. Plotting kin distributions for an average Focal of fixed age, at some fixed period in time ###
 
 Below I plot the expected age*stage distribution of an average Focal's younger siblings over the 
@@ -270,8 +278,8 @@ kin_out_1965_2005_full %>%
   ggplot2::ylab("Younger siblings") +
   ggplot2::ggtitle("Focal 50")
 ```
-As expected, the discontinuity reflects the fact that Focal's younger siblings cannot be of age >=50. 
-Contrastingly, when we look at the age*stage distribution of older siblings, the discontinuity bounds kin to be of age >50, as plotted below
+
+The discontinuity above reflects the fact that Focal's younger siblings cannot be of age >=50. Contrastingly, when we look at the age*stage distribution of older siblings, the discontinuity bounds kin to be of age >50, as plotted below
 
 ```{r, fig.height = 6, fig.width = 8}
 kin_out_1965_2005_full %>%
@@ -287,6 +295,7 @@ kin_out_1965_2005_full %>%
   ggplot2::ylab("Older siblings") +
   ggplot2::ggtitle("Focal 50")
 ```
+
 With a simple bit of playing with the output data frame, we can plot the age*stage distribution of the combined siblings of Focal
 
 ```{r, fig.height = 6, fig.width = 8}
