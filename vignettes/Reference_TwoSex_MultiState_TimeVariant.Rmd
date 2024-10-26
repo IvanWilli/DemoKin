@@ -77,14 +77,15 @@ in another file and simply imported below. The code below reads in the above fun
 
 ```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 
+## files loaded as "rda" extensions (from "data/)
 
-F_mat_fem <- readr::read_rds(here::here("data","Female_parity_fert_list_UK.Rds"))
-F_mat_male <- readr::read_rds(here::here("data","Male_parity_fert_list_UK.Rds"))
-T_mat_fem <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
-T_mat_male <- readr::read_rds(here::here("data","Parity_transfers_by_age_list_UK.Rds"))
-U_mat_fem <- readr::read_rds(here::here("data","Female_parity_mortality_list_UK.Rds"))
-U_mat_male <- readr::read_rds(here::here("data","Male_parity_mortality_list_UK.Rds"))
-H_mat <- readr::read_rds(here::here("data","Redistribution_by_parity_list_UK.Rds"))
+F_mat_fem <- Female_parity_fert_list_UK
+F_mat_male <- Male_parity_fert_list_UK
+T_mat_fem <- Parity_transfers_by_age_list_UK
+T_mat_male <- Parity_transfers_by_age_list_UK
+U_mat_fem <- Female_parity_mortality_list_UK
+U_mat_male <- Male_parity_mortality_list_UK
+H_mat <- Redistribution_by_parity_list_UK
 
 ```
 
