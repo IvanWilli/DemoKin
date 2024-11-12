@@ -1,0 +1,323 @@
+---
+  title: "Expected kin counts by type of relative in a two-sex multi-state time-varying framework"
+output:
+  html_document:
+  toc: true
+toc_depth: 1
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
+---
+
+```{r, eval = T, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(devtools); load_all()
+```
+
+Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model 
+of kinship, there have been many extensions to the framework (many of which are documented within this package). 
+Caswell [-@caswell_formal_2021] updated the original model to incorporate time-varying vital rates, 
+Caswell [-@caswell_formal_2022] introduced two-sexes to the model, 
+and Caswell [-@caswell_formal_2020] considered a multi-stage population of kin. 
+Here, we provide an R function which combines the three aforementioned models. 
+
+In this vignette, we'll demonstrate how the function `kin_multi_stage_time_variant_2sex` computes stage-specific kinship networks 
+encompassing both sexes for an average member of a population, the sex of whom is user specified, 
+and who is subject to time-varying demographic rates. We call this individual Focal. 
+We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
+
+
+```{R}
+library(DemoKin)
+library(Matrix)
+library(tictoc)
+`%>%` <- magrittr::`%>%`
+
+
+options(dplyr.summarise.inform = FALSE) # hide if we don't want to see summarise output (but also #lose #progress bar)
+
+```
+### Kin counts by parity  ###
+
+In this example we use parity as an example stage. UK data ranging from 1965 - 2022 is sourced from 
+the [Human Mortality Database](https://www.mortality.org/) 
+and [Office for National Statistics](https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates/adhocs/1887fertilityratesbyparityenglandandwales1934to2022/). 
+Some simplifying assumptions we make due to data availability are as follows:
+
+i) Fertility rates vary with time, are distinct among parity class, but the same over sexes (the so-called ``androgynous approximation'').
+ii) Mortality rates vary with time, are distinct across sex, but are the same over parity classes (no parity-specific mortality)
+iii) The age-specific probabilities of parity-progression vary with time, but are the same over sex (androgynous approximation again)
+
+In order to implement the model, the function `kin_multi_stage_time_variant_2sex` expects the following 7 inputs of vital rates, fed in as lists:
+
+1) `U_list_females` A list of female age-and-parity specific survival probabilities over the timescale (in matrix forms).
+This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
+
+2) `U_list_males` A list of male age-and-parity specific survival probabilities over the timescale (in matrix forms).
+This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
+
+3) `F_list_females` A list of female age-and-parity specific fertility rates over the timescale (in matrix forms).
+This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
+
+4) `F_list_males` A list of male age-and-parity specific fertility rates over the timescale (in matrix forms).
+This input list has length = the timescale, and each entry represents the rates of a specific period in matrix form: stage columns, age rows.
+
+5) `T_list_females` A list of lists of female age-specific probabilities of moving up parity over the timescale (in matrix forms).
+The outer list has length = the timescale. The inner list has length = number of ages. 
+Each outer list entry is comprised of a list of matrices (stage*stage dimensional), each matrix describes age-specific probabilities of moving stage. 
+Thus for each year, we have a list of age-specific probabilities of moving from one stage to the next.
+
+6) Same as 5) but for males
+
+7) `H_list` A list of length = timescale, in which each element is a matrix which assigns the offspring of individuals in some stage to 
+the appropriate age class (age in rows and states in columns)
+
+To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed 
+in another file and simply imported below. The code below reads in the above function input lists.
+
+```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+## files loaded as "rda" extensions (from "data/)
+
+F_mat_fem <- Female_parity_fert_list_UK
+F_mat_male <- Male_parity_fert_list_UK
+T_mat_fem <- Parity_transfers_by_age_list_UK
+T_mat_male <- Parity_transfers_by_age_list_UK
+U_mat_fem <- Female_parity_mortality_list_UK
+U_mat_male <- Male_parity_mortality_list_UK
+H_mat <- Redistribution_by_parity_list_UK
+
+```
+
+Recap: above are lists of period-specific demographic rates, in particular comprising:
+
+U_mat_fem: list of age by stage matrices, entries give female probability of survival.
+List starting 1965 ending 2022.
+
+U_mat_male: list of age by stage matrices, entries give female probability of survival.
+List starting 1965 ending 2022.
+
+F_mat_fem: list of age by stage matrices, entries give female fert,
+List starting 1965 ending 2022.
+
+F_mat_male == F_mat_fem.
+
+T_mat_fem: list of lists of matrices: Each outer list entry is a list of matrices where each matrix gives age-specific probabilities 
+a female moves up parity (inner list has length of number of age-classes).
+Outer list starting 1965 ending 2022
+
+T_mat_male == T_mat_fem.
+
+H_mat: list of matrices which redistributes newborns to age-class 1 and parity 0. No time-variation.
+
+### 1. Accumulated number of kin Focal expects over the lifecourse under time-varying rates from 1965 to 2005 ###
+
+We feed the above inputs into the matrix model, along with other arguments:
+UK sex ratio --> `birth_female` = 0.49
+We are considering parity --> `parity` = TRUE
+We want all of Focal's kin network --> `output_kin` = FALSE
+Accumulated kin in this example --> `summary_kin` = TRUE
+Focal is female --> `sex_Focal` = "Female"
+Focal born into parity 0 --> `initial_stage_Focal` = 1
+timescale from 1965-1985 -- > `output_years` = seq(1965, 1965 + 40)
+
+Accumulated kin are outputted by the argument `summary_kin` = TRUE. In such cases, for each age of Focal, we sum over all possible ages of kin yielding the marginal stage 
+distribution of kin. 
+
+Notice that the timescale argument `output_years` = seq(1965,2005) gives a sequence of 1965, 1966, ..., 2004, 2005 of length 41. 
+The first sets of time-varying vital rates in our input lists are e.g., U_mat_fem[[1]] (corresponding to mortality in 1965), 
+the 41-st entry is U_mat_fem[[(1+40)]] (mortality in 2005). We require consistency between the length of the list of vital rates
+and the timescale: U_mat_fem[[1:(1+40)]] = in length = seq(1965,2005). Therefore we use the input lists of demographic rates
+
+`U_list_females` = U_mat_fem[1:(1+no_years)] which runs from U_mat_fem[[1]] = 1965 set of rates, up to U_mat_fem[[41]] = 2005 set of rates, 
+and so on...
+
+```{r, message=FALSE, warning=FALSE}
+# Run kinship model for a female Focal over a timescale of no_years (we use 40 here)
+no_years <- 40
+# and we start projecting kin in 1965
+# We decide here to count accumulated kin by age of Focal, and not distributions of kin
+kin_out_1965_2005 <-
+  kin_multi_stage_time_variant_2sex(U_list_females = U_mat_fem[1:(1+no_years)],
+                                    U_list_males = U_mat_male[1:(1+no_years)],
+                                    F_list_females = F_mat_fem[1:(1+no_years)],
+                                    F_list_males = F_mat_male[1:(1+no_years)],
+                                    T_list_females = T_mat_fem[1:(1+no_years)],
+                                    T_list_males = T_mat_fem[1:(1+no_years)],
+                                    H_list = H_mat[1:(1+no_years)],
+                                    birth_female = 1 - 0.51, ## Sex ratio -- UK value
+                                    parity = TRUE,
+                                    output_kin = FALSE,
+                                    summary_kin = TRUE,
+                                    sex_Focal = "Female", ##  define Focal's sex at birth
+                                    initial_stage_Focal = 1, ## Define Focal's stage at birth
+                                    output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
+  )
+```
+### 1.1. Visualizing the output ###
+
+```{r, message=FALSE, warning=FALSE}
+
+head(kin_out_1965_2005)
+```
+
+Notice the structure of the output data. We have columns `age_focal` and `kin_stage` because we sum over all ages of kin, 
+and produce the marginal stage distribution given age of Focal. We have a column corresponding to sex of kin `sex_kin`,
+a column showing which `year` we are considering, and a column headed `group` which selects the kin type.
+Finally, we have columns showing Focal's cohort of birth `cohort` (e.g., year - age of Focal), and an as.factor() equivalent.
+
+
+### 1.1.1. Plotting kin for an average Focal at some fixed period in time ###
+
+Let's suppose that we really want to understand the age*parity distributions of the accumulated number 
+of aunts and uncles older than Focal's mother and father, for each age of Focal, over years 1965, 1975, 1985, 1995, 2005. 
+Some people will do.... 
+
+We restrict Focal's kinship network to aunts and uncles older than Focal's mother by `group` == "oa". We visualise the marginal
+parity distributions of kin: `stage_kin`, for each age of Focal `age_focal`, using different colour schemes. Implicit in the 
+below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, 
+while a 40 year old Focal was born in 1965.
+
+```{r, fig.height=6, fig.width=8}
+kin_out_1965_2005 %>%
+  dplyr::filter(group == "oa",
+                year %in% c(1965, 1975, 1985, 1995, 2005)) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ year) +
+  ggplot2::scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("Older aunts and uncles")
+```
+We could also consider any other kin in Focal's network, for instance, offspring using `group` == "d"
+
+```{r, fig.height=6, fig.width=8}
+kin_out_1965_2005 %>%
+  dplyr::filter(group == "d",
+                year %in% c(1965, 1975, 1985, 1995, 2005)) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ year) +
+  ggplot2::scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("Offspring")
+```
+### 1.1.2. Plotting the kin of Focal as a function of Focal's cohort of birth ####
+
+Since we only ran the model for 40 years (between 1965-2005), there is very little scope to view kinship as cohort-specific. 
+We can however compare cohorts for 40-year segments of Focal's life. Below, following from the above example, we once again consider offspring and only show Focals born of `cohort` 1910, 1925, or 1965:
+
+```{r, fig.height = 6, fig.width = 8}
+kin_out_1965_2005 %>%
+  dplyr::filter(group == "d", cohort %in% c(1910,1925,1965) ) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ cohort)  +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("Offspring")
+```
+The LHS plot (1910 cohort) should be interpreted as follows: if Focal is born in 1910, between 1965-2005 he/she will be 55-95 years old. Focal will have already accumulated its maximal number of offspring, and their overall number will now be dropping as mortality risk begins. The offspring of Focal will be approximately 20-35, and began if not completed reproduction/parity progression.
+
+The middle plot (1925 cohort) shows Focal between ages 40 and 80. Again, Focal will have completed reproduction and can only lose offspring as he/she ages. However, Offspring at Focal of age 40 will be around 10-20 and still have high probability of being in parity 0. Whereas, Focal at age of 80 will have offspring aged around 50, who in turn will have completed reproduction as demonstrated by 
+a well mixed parity-distribution at this age of Focal.
+
+the RHS plot (1965 cohort) simply reflects the fact that Focal will not start reproduction until around 15 years old.
+
+### 2. Now lets consider the distributions of kin Focal expects over the lifecourse ###
+
+To obtain distributions of kin as output, we simply change the function argument: `summary_kin` = FALSE
+
+```{r, message=FALSE, warning=FALSE}
+rm(kin_out_1965_2005)
+gc()
+no_years <- 40
+
+kin_out_1965_2005_full <-
+  kin_multi_stage_time_variant_2sex(U_mat_fem[1:(1+no_years)],
+                                    U_mat_male[1:(1+no_years)],
+                                    F_mat_fem[1:(1+no_years)],
+                                    F_mat_male[1:(1+no_years)],
+                                    T_mat_fem[1:(1+no_years)],
+                                    T_mat_fem[1:(1+no_years)],
+                                    H_mat[1:(1+no_years)],
+                                    birth_female = 1 - 0.51, ## Sex ratio -- UK value
+                                    parity = TRUE,
+                                    output_kin = FALSE,
+                                    summary_kin = FALSE,
+                                    sex_Focal = "Female", ##  define Focal's sex at birth
+                                    initial_stage_Focal = 1, ## Define Focal's stage at birth
+                                    output_years = seq(1965, (1965 + no_years)) ## the sequence of years we run the function over
+)
+```
+### 2.1. Visualizing the output ###
+
+```{r, message=FALSE, warning=FALSE}
+
+head(kin_out_1965_2005_full)
+```
+
+Notice the additional column `age_kin`. Rather than grouping kin by stage and summing over all ages,
+the output here (in data frame form) gives an expected number of kin for each age*stage combination, for each age of Focal.
+
+
+### 2.1.1. Plotting kin distributions for an average Focal of fixed age, at some fixed period in time ###
+
+Lets's consider Focal is aged 50 `age_focal` == 50, and examine kin younger siblings; `group` == "ys".
+Restricting ourselves to the years 1965, 1975, 1985, 1995, 2005, we can plot the expected age*stage distribution
+of these kin over the considered periods, as shown below:
+
+```{r, fig.height = 6, fig.width = 8}
+kin_out_1965_2005_full %>%
+  dplyr::filter(group == "ys",
+                year %in% c(1965, 1975, 1985, 1995, 2005),
+                age_focal == 50) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ year) +
+  ggplot2::scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("Younger siblings") +
+  ggplot2::ggtitle("Focal 50")
+```
+
+Notice the discontinuity along the x-abissca at 50. This reflects the fact that Focal's younger siblings 
+cannot are of age <50. Contrastingly, when we look at the age*stage distribution of older siblings, we observe another
+discontinuity which bounds kin to be of age >50, as plotted below:
+
+```{r, fig.height = 6, fig.width = 8}
+kin_out_1965_2005_full %>%
+  dplyr::filter(group == "os",
+                year %in% c(1965, 1975, 1985, 1995, 2005),
+                age_focal == 50) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ year) +
+  ggplot2::scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("Older siblings") +
+  ggplot2::ggtitle("Focal 50")
+```
+
+With a simple bit of playing with the output data frame, we can plot the age*stage distribution of the combined siblings of Focal
+
+```{r, fig.height = 6, fig.width = 8}
+kin_out_1965_2005_full %>%
+  dplyr::filter((group == "ys" | group == "os"),
+                year %in% c(1965, 1975, 1985, 1995, 2005),
+                age_focal == 50) %>%
+  tidyr::pivot_wider(names_from = group, values_from = count) %>%
+  dplyr::mutate(count = `ys` + `os`) %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot2::geom_bar(position = "stack", stat = "identity") +
+  ggplot2::facet_grid(sex_kin ~ year) +
+  ggplot2::scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
+  ggplot2::theme_bw() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5)) +
+  ggplot2::ylab("All siblings") +
+  ggplot2::ggtitle("Focal 50")
+```
