@@ -1,12 +1,12 @@
 ---
-  title: "Expected kin counts by type of relative in a two-sex multi-state time-varying framework"
+title: "Expected kin counts by type of relative in a two-sex multi-state time-varying framework"
 output:
   html_document:
-  toc: true
-toc_depth: 1
+    toc: true
+    toc_depth: 1
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, eval = T, include=FALSE}
@@ -27,8 +27,8 @@ and who is subject to time-varying demographic rates. We call this individual Fo
 We seek the number of, age, and stage distribution of Focal's relatives, for each age of Focal's life, and as a function of the year in which Focal is born.
 
 
-```{R}
-library(DemoKin)
+```{r}
+# library(DemoKin)
 library(Matrix)
 library(tictoc)
 `%>%` <- magrittr::`%>%`
@@ -75,7 +75,7 @@ the appropriate age class (age in rows and states in columns)
 To avoid the need for tedious calculations to put data into such format in this vignette, these lists are constructed 
 in another file and simply imported below. The code below reads in the above function input lists.
 
-```{r eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+```{r eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
 
 ## files loaded as "rda" extensions (from "data/)
 

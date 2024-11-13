@@ -38,22 +38,22 @@ a list of stochastic matrices which describe age-specific male probabilities of 
 
 \item{H_list}{list with matrix entries: redistribution of newborns across each stage to a specific age-class}
 
-\item{birth_female}{numeric. ratio of males to females in population}
+\item{birth_female}{numeric. birth ratio of females to males in population}
 
 \item{parity}{logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default \code{TRUE}.}
 
 \item{output_kin}{vector. A vector of particular kin one wishes to obtain results for, e.g., c("m","d","oa"). Default is all kin types.}
 
-\item{summary_kin}{logical. Results as a data frame of accumulated kin by age of Focal if FALSE, and kin by their age*stage distribution by age of Focal if TRUE.}
+\item{summary_kin}{logical. Results as a data frame of accumulated kin by age of Focal if TRUE, and kin by their age*stage distribution by age of Focal if FALSE.}
 
-\item{sex_Focal}{character. Female or Male as the user requests}
+\item{sex_Focal}{character. Female or Male as the user requests.}
 
 \item{initial_stage_Focal}{Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)}
 
 \item{output_years}{vector. The times at which we wish to count kin: start year = output_years\link{1}, and end year = output_years\link{length.}}
 }
 \value{
-A data frame with focal´s age, related ages, stages, sexes, and types of kin for each time-period
+A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.
 }
 \description{
 Implementation of combined formal demographic models: Caswell II,III,IV.
