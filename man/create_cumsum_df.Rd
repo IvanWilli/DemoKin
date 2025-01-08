@@ -11,7 +11,7 @@ create_cumsum_df(
   start_year,
   na,
   ns,
-  specific_kin
+  specific_kin = NULL
 )
 }
 \arguments{

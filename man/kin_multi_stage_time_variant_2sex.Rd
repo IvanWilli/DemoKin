@@ -14,7 +14,7 @@ kin_multi_stage_time_variant_2sex(
   H_list = NULL,
   birth_female = 0.49,
   parity = FALSE,
-  output_kin = FALSE,
+  output_kin = NULL,
   summary_kin = TRUE,
   sex_Focal = "Female",
   initial_stage_Focal = NULL,

@@ -1,4 +1,6 @@
 
+<!-- bibliography: vignettes\\references.bib -->
+
 # DemoKin
 
 <div class="columns">
@@ -8,8 +10,10 @@
 `DemoKin` uses matrix demographic methods to compute expected (average)
 kin counts from demographic rates under a range of scenarios and
 assumptions. The package is an R-language implementation of Caswell
-(2019, 2020, 2022), and Caswell and Song (2021). It draws on previous
-theoretical development by Goodman, Keyfitz and Pullum (1974).
+\[-@caswell_formal_2019; -@caswell_formal_2020; -@caswell_formal_2022\],
+and Caswell and Song \[-@caswell_formal_2021\]. It draws on previous
+theoretical development by Goodman, Keyfitz and Pullum
+\[-@goodman_family_1974\].
 
 </div>
 
@@ -42,7 +46,8 @@ devtools::install_github("IvanWilli/DemoKin")
 Consider an average Swedish woman called ‘Focal.’ For this exercise, we
 assume a female closed population in which everyone experiences the
 Swedish 2015 mortality and fertility rates at each age throughout their
-life; i.e., the ‘time-invariant’ assumption in Caswell (2019).
+life; i.e., the ‘time-invariant’ assumption in Caswell
+\[-@caswell_formal_2019\].
 
 We then ask:
 
@@ -84,7 +89,7 @@ Relatives are identified by a unique code:
 | coa     | Cousins from older aunts    | Cousins from older uncles     | Cousins from older aunts/uncles   |
 | cya     | Cousins from younger aunts  | Cousins from younger uncles   | Cousins from younger aunts/uncles |
 | c       | Cousins                     | Cousins                       | Cousins                           |
-| d       | Daughters                   | Brothers                      | Siblings                          |
+| d       | Daughters                   | Sons                          | Children                          |
 | gd      | Grand-daughters             | Grand-sons                    | Grand-childrens                   |
 | ggd     | Great-grand-daughters       | Great-grand-sons              | Great-grand-childrens             |
 | ggm     | Great-grandmothers          | Great-grandfathers            | Great-grandfparents               |
@@ -116,9 +121,9 @@ does not load, you may need to install the package as
 
 ## Citation
 
-Williams, Iván; Alburez-Gutierrez, Diego; and the DemoKin team.
-(2021) DemoKin: An R package to implement demographic matrix kinship
-models. URL: <https://github.com/IvanWilli/DemoKin>.
+Williams, Iván; Alburez-Gutierrez, Diego; and the DemoKin team. (2021)
+DemoKin: An R package to implement demographic matrix kinship models.
+URL: <https://github.com/IvanWilli/DemoKin>.
 
 ## Acknowledgments
 
@@ -136,50 +141,4 @@ Commons. Sha Jiang provided useful comments for improving the package.
 contributing, please get in touch, create an issue, or submit a pull
 request. We look forward to hearing from you!
 
-## References
-
-<div id="refs" class="references csl-bib-body hanging-indent">
-
-<div id="ref-caswell_formal_2019" class="csl-entry">
-
-Caswell, Hal. 2019. “The Formal Demography of Kinship: A Matrix
-Formulation.” *Demographic Research* 41 (September): 679–712.
-<https://doi.org/10.4054/DemRes.2019.41.24>.
-
-</div>
-
-<div id="ref-caswell_formal_2020" class="csl-entry">
-
-———. 2020. “The Formal Demography of Kinship II: Multistate Models,
-Parity, and Sibship.” *Demographic Research* 42 (June): 1097–1146.
-<https://doi.org/10.4054/DemRes.2020.42.38>.
-
-</div>
-
-<div id="ref-caswell_formal_2022" class="csl-entry">
-
-———. 2022. “The Formal Demography of Kinship IV: Two-Sex Models and
-Their Approximations.” *Demographic Research* 47 (September): 359–96.
-<https://doi.org/10.4054/DemRes.2022.47.13>.
-
-</div>
-
-<div id="ref-caswell_formal_2021" class="csl-entry">
-
-Caswell, Hal, and Xi Song. 2021. “The Formal Demography of Kinship III:
-Kinship Dynamics with Time-Varying Demographic Rates.” *Demographic
-Research* 45 (August): 517–46.
-<https://doi.org/10.4054/DemRes.2021.45.16>.
-
-</div>
-
-<div id="ref-goodman_family_1974" class="csl-entry">
-
-Goodman, Leo A, Nathan Keyfitz, and Thomas W. Pullum. 1974. “Family
-Formation and the Frequency of Various Kinship Relationships.”
-*Theoretical Population Biology*, 27.
-<https://doi.org/10.1016/0040-5809(74)90049-5>.
-
-</div>
-
-</div>
+<!-- ## References -->

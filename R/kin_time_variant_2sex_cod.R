@@ -141,32 +141,20 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
     Ft_star[1:agess,1:ages] <- rbind(birth_female * Fft, (1-birth_female) * Fft)
     Fl[[as.character(years_data[t])]] <- Ft
     Fl_star[[as.character(years_data[t])]] <- Ft_star
-    # parents age distribution under stable assumption in case no input
-    if(no_Pim | no_Pif){
-      A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
+    A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
+
+    # stable assumption at start
+    if (t==1){
+      p1f <- pf[,1]; p1m <- pm[,1]
+      f1f <- ff[,1]; f1m <- fm[,1]
+      # time boundary for pi
       A_decomp = eigen(A)
       lambda = as.double(A_decomp$values[1])
       w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
       wf = w[1:ages]
       wm = w[(ages+1):(2*ages)]
-      Pif[,t] = wf * ff[,t] / sum(wf * ff[,t])
-      Pim[,t] = wm * fm[,t] / sum(wm * fm[,t])
-    }
-
-    # project
-    Ut <- as.matrix(Ul[[t]])
-    Ft <- as.matrix(Fl[[t]])
-    Ft_star <- as.matrix(Fl_star[[t]])
-    pitf <- Pif[,t]
-    pitm <- Pim[,t]
-    pit <- c(pitf, pitm)
-    if (t==1){
-      p1f <- pf[,1]
-      p1m <- pm[,1]
-      f1f <- ff[,1]
-      f1m <- fm[,1]
-      pif1 <- Pif[,1]
-      pim1 <- Pim[,1]
+      pif1 = wf * ff[,t] / sum(wf * ff[,t])
+      pim1 = wm * fm[,t] / sum(wm * fm[,t])
 
       # BEN: Add Hf and Hm
       H1f <- Hf[[1]]
@@ -177,9 +165,22 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
                                                   ff = f1f, fm = f1m,
                                                   pif = pif1, pim = pim1,
                                                   Hf = H1f, Hm = H1m,
-                                              birth_female = birth_female, list_output = TRUE)
+                                                  birth_female = birth_female, list_output = TRUE)
     }
-    kin_all[[t+1]] <- timevarying_kin_2sex_cod(Ut=Ut, Ft=Ft, Ft_star=Ft_star, pit=pit, sex_focal, ages, pkin=kin_all[[t]])
+
+    # project pi
+    if(no_Pim | no_Pif){
+      w <- A %*% w
+      wf <- w[1:ages]
+      wm <- w[(ages+1):(2*ages)]
+      Pif[,t] <- wf * ff[,t] / sum(wf * ff[,t])
+      Pim[,t] <- wm * fm[,t] / sum(wm * fm[,t])
+    }
+    pit <- c(Pif[,t], Pim[,t])
+
+    # kin for next year
+    kin_all[[t+1]] <- timevarying_kin_2sex_cod(Ut=Ut, Ft=Ft, Ft_star=Ft_star, causes,
+                                               pit=pit, sex_focal, ages, pkin=kin_all[[t]])
     pb$tick()
   }
 
@@ -242,21 +243,22 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
 #' @param Ut numeric. A matrix of survival probabilities (or ratios).
 #' @param Ft numeric. A matrix of age-specific fertility rates.
 #' @param Ft_star numeric. Ft but for female fertility.
+#' @param causes integer. Number of causes of death included.
 #' @param pit numeric. A matrix with distribution of childbearing.
 #' @param sex_focal character. "f" for female or "m" for male.
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
 #' @return A list of 14 types of kin matrices (kin age by Focal age, blocked for two sex) projected one time interval.
 #' @export
-timevarying_kin_2sex_cod<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
+timevarying_kin_2sex_cod<- function(Ut, Ft, Ft_star, causes, pit, sex_focal, ages, pkin){
 
   agess <- ages*2
   om <- ages-1
   pif <- pit[1:ages]
   pim <- pit[(ages+1):agess]
 
-  # BEN : Add the number of CoD
-  causes <- nrow(Hf[[1]])
+  # BEN : Add the number of CoD - IW: already as argument (Hf is not an argument)
+  # causes <- nrow(Hf[[1]])
 
   # BEN: Changed dimensions of lower part (dead kin) to account for death from causes.
   phi = d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0, (agess + agess*causes), ages)
@@ -284,12 +286,14 @@ timevarying_kin_2sex_cod<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
   m[1:agess,1]   = pit
   gm[1:agess,1]  = pkin[["m"]][1:agess,] %*% (pif + pim)
   ggm[1:agess,1] = pkin[["gm"]][1:agess,] %*% (pif + pim)
-  os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pif
-  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pif
   oa[1:agess,1]  = pkin[["os"]][1:agess,] %*% (pif + pim)
   ya[1:agess,1]  = pkin[["ys"]][1:agess,] %*% (pif + pim)
   coa[1:agess,1] = pkin[["nos"]][1:agess,] %*% (pif + pim)
   cya[1:agess,1] = pkin[["nys"]][1:agess,] %*% (pif + pim)
+  # atribuible to focal sex
+  pios <- if(sex_focal == "f") pif else pim
+  os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pios
+  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pios
 
   for (ix in 1:om){
     phi[,ix+1] = Gt %*% phi[, ix]

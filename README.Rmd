@@ -1,7 +1,8 @@
 ---
 output: github_document
-bibliography: vignettes\\references.bib
 ---
+
+<!-- bibliography: vignettes\\references.bib -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -91,7 +92,7 @@ If the vignette does not load, you may need to install the package as `devtools:
 
 ## Citation
 
-Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell. (2021) DemoKin: An R package to implement demographic matrix kinship models. URL: https://github.com/IvanWilli/DemoKin.
+Williams, Iván; Alburez-Gutierrez, Diego; and the DemoKin team. (2021) DemoKin: An R package to implement demographic matrix kinship models. URL: https://github.com/IvanWilli/DemoKin.
 
 ## Acknowledgments
 
@@ -103,4 +104,4 @@ Williams, Iván; Alburez-Gutierrez, Diego; Song, Xi; and Hal Caswell. (2021) Dem
 If you're interested in contributing, please get in touch, create an issue, or submit a pull request.
 We look forward to hearing from you!
 
-## References
+<!-- ## References -->

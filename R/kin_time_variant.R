@@ -40,51 +40,52 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
-  # age distribution at childborn
-  pi_N_null_flag <- FALSE
+  # consider input data for age distribution at child born, or flag it
+  no_Pi <- FALSE
   if(is.null(pi)){
     if(is.null(n)){
       # create pi and fill it during the loop
-      message("Stable assumption was made for calculating pi on each year because no input data.")
-      pi_N_null_flag <- TRUE
+      no_Pi <- TRUE
       pi <- matrix(0, nrow=ages, ncol=n_years_data)
     }else{
-      pi_N_null_flag <- FALSE
+      no_Pi <- FALSE
       pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,length(years_data)))
     }
   }
 
-  # loop over years (more performance here)
+  # loop over years
   kin_all <- list()
   pb <- progress::progress_bar$new(
     format = "Running over input years [:bar] :percent",
     total = n_years_data + 1, clear = FALSE, width = 50)
   for (t in 1:n_years_data){
-    # build matrix
-    Ut = Mt = matrix(0, nrow=ages, ncol=ages)
+    # build set of matrix
+    Ut <- Mt <- matrix(0, nrow=ages, ncol=ages)
     Ut[row(Ut)-1 == col(Ut)] <- p[-ages,t]
-    Ut[ages, ages] = p[ages,t]
-    diag(Mt) = 1 - p[,t]
-    Ut = rbind(cbind(Ut,zeros),cbind(Mt,zeros))
-    ft = matrix(0, nrow=ages*2, ncol=ages*2)
-    ft[1,1:ages] = f[,t] * birth_female
-    if(pi_N_null_flag){
-      A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
-      A_decomp = eigen(A)
-      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-      pit <- pi[,t] <- w*A[1,]/sum(w*A[1,])
-    }else{
-      pit <- pi[,t]
-    }
-    # proj
+    Ut[ages, ages] <- p[ages,t]
+    diag(Mt) <- 1 - p[,t]
+    Ut <- rbind(cbind(Ut,zeros),cbind(Mt,zeros))
+    ft <- matrix(0, nrow=ages*2, ncol=ages*2)
+    ft[1,1:ages] <- f[,t] * birth_female
+    A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
+    # stable assumption at start
     if (t==1){
       p1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
-      f1 <- ft[1,][1:ages]
+      f1 <- ft[1,][1:ages]/birth_female
+      A_decomp <- eigen(A)
+      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+      pit <- w*A[1,]/sum(w*A[1,])
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_time_invariant(p = p1, f = f1/birth_female, pi = pi1, birth_female = birth_female,
+      kin_all[[1]] <- kin_time_invariant(p = p1, f = f1, pi = pi1, birth_female = birth_female,
                                          list_output = TRUE)
     }
-    kin_all[[t+1]] <- timevarying_kin(Ut=Ut,ft=ft,pit=pit,ages,pkin=kin_all[[t]])
+    # project pi
+    if(no_Pi){
+      w <- A %*% w
+      pi[,t] <- w*A[1,]/sum(w*A[1,])
+    }
+    # kin for next year
+    kin_all[[t+1]] <- timevarying_kin(Ut = Ut, ft = ft, pit = pi[,t], ages, pkin = kin_all[[t]])
     pb$tick()
   }
 
@@ -93,7 +94,6 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
 
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
-
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
   if(is.null(output_kin)){
     selected_kin_position <- 1:length(possible_kin)
@@ -138,6 +138,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     out <- kin
   }
 
+  # end
   return(out)
 }
 
@@ -156,27 +157,27 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
 timevarying_kin<- function(Ut, ft, pit, ages, pkin){
 
   # frequently used zero vector for initial condition
-  zvec=rep(0,ages*2);
-  I = matrix(0, ages * 2, ages * 2)
-  diag(I[1:ages,1:ages]) = 1
-  om=ages-1;
-  d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya = matrix(0,ages*2,ages)
+  zvec <- rep(0,ages*2);
+  I <- matrix(0, ages * 2, ages * 2)
+  diag(I[1:ages,1:ages]) <- 1
+  om <- ages-1;
+  d = gd = ggd = m = gm = ggm = os = ys = nos = nys = oa = ya = coa = cya <- matrix(0,ages*2,ages)
   kin_list <- list(d=d,gd=gd,ggd=ggd,m=m,gm=gm,ggm=ggm,os=os,ys=ys,
                     nos=nos,nys=nys,oa=oa,ya=ya,coa=coa,cya=cya)
 
   # initial distribution
-  d[,1]=gd[,1]=ggd[,1]=ys[,1]=nys[,1]=zvec
-  m[1:ages,1]  = pit[1:ages]
-  gm[1:ages,1] = pkin[["m"]][1:ages,] %*% pit[1:ages]
-  ggm[1:ages,1]= pkin[["gm"]][1:ages,] %*% pit[1:ages]
-  os[1:ages,1] = pkin[["d"]][1:ages,] %*% pit[1:ages]
+  d[,1] = gd[,1] = ggd[,1] = ys[,1] = nys[,1] = zvec
+  m[1:ages,1]   = pit[1:ages]
+  gm[1:ages,1]  = pkin[["m"]][1:ages,] %*% pit[1:ages]
+  ggm[1:ages,1] = pkin[["gm"]][1:ages,] %*% pit[1:ages]
+  os[1:ages,1]  = pkin[["d"]][1:ages,] %*% pit[1:ages]
   nos[1:ages,1] = pkin[["gd"]][1:ages,] %*% pit[1:ages]
-  oa[1:ages,1] = pkin[["os"]][1:ages,] %*% pit[1:ages]
-  ya[1:ages,1] = pkin[["ys"]][1:ages,] %*% pit[1:ages]
-  coa[1:ages,1]= pkin[["nos"]][1:ages,] %*% pit[1:ages]
-  cya[1:ages,1]= pkin[["nys"]][1:ages,] %*% pit[1:ages]
+  oa[1:ages,1]  = pkin[["os"]][1:ages,] %*% pit[1:ages]
+  ya[1:ages,1]  = pkin[["ys"]][1:ages,] %*% pit[1:ages]
+  coa[1:ages,1] = pkin[["nos"]][1:ages,] %*% pit[1:ages]
+  cya[1:ages,1] = pkin[["nys"]][1:ages,] %*% pit[1:ages]
 
-  # vers1
+  # focal´s trip
   for(ix in 1:om){
     d[,ix+1]   = Ut %*% pkin[["d"]][,ix]   + ft %*% I[,ix]
     gd[,ix+1]  = Ut %*% pkin[["gd"]][,ix]  + ft %*% pkin[["d"]][,ix]

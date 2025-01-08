@@ -34,8 +34,8 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               H_list = NULL,
                                               birth_female = 0.49, ## Sex ratio -- note is 1 - alpha
                                               parity = FALSE,
-                                              output_kin = FALSE, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
-                                              summary_kin = TRUE, # Set to FALSE if we want a full age*stage distribution of kin
+                                              output_kin = NULL, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
+                                              summary_kin = TRUE, # Set to FALSE if we want only a full age*stage distribution of kin
                                               sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
                                               output_years){
@@ -45,7 +45,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   ns <- ncol(U_list_females[[1]])
 
   # Ensure inputs are lists of matrices and that the timescale same length
-  if(length(U_list_females)!=length(output_years)){stop("Timescale inconsistancy")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
+  # if(length(U_list_females)!=length(output_years)){stop("Timescale inconsistancy")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
   if(!is.list(U_list_females) | !is.list(U_list_males)){stop("U's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(F_list_females) | !is.list(F_list_males)){stop("F's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(T_list_females) | !is.list(T_list_males)){stop("T's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
@@ -78,7 +78,6 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     total = no_years + 1, clear = FALSE, width = 60)
   tictoc::tic()
   for(year in 1:no_years){
-    pb$tick()
     T_data_f <- T_list_females[[year]] ## For each year we have na number of Transfer matrices
     T_data_m <- T_list_males[[year]]   ## which give probabilities of age-dep movement from stage to stage
     T_f_list <- list()
@@ -238,6 +237,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     younger_cousin_array[[(1+length(younger_cousin_array))]] <- kin_out[["cya"]]
     older_cousin_array[[(1+length(older_cousin_array))]] <- kin_out[["coa"]]
     changing_pop_struct[[(1+length(changing_pop_struct))]] <- kin_out[["ps"]]
+    pb$tick()
   }
   tictoc::toc()
   ## create a list of output kin -- each element a time-period specific list of matrices
@@ -260,23 +260,25 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
 
   relative_names <- names(relative_data)
   ## create a nice data frame output
+  kin_full <- create_full_dists_df(relative_data,
+                                   relative_names,
+                                   output_years,
+                                   output_years[1],
+                                   na,
+                                   ns,
+                                   output_kin)
   if(summary_kin){
-    kin_out <- create_cumsum_df(relative_data,
+    kin_summary <- create_cumsum_df(relative_data,
                                 relative_names,
-                                output_years[1]:output_years[length(output_years)],
+                                output_years,
                                 output_years[1],
                                 na,
                                 ns,
-                                output_kin)}
+                                output_kin)
+    kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)}
   else{
-    kin_out <- create_full_dists_df(relative_data,
-                                    relative_names,
-                                    output_years[1]:output_years[length(output_years)],
-                                    output_years[1],
-                                    na,
-                                    ns,
-                                    output_kin)}
-
+    kin_out <- kin_full
+  }
   return(kin_out)
 }
 
@@ -704,7 +706,7 @@ create_cumsum_df <- function(kin_matrix_lists,
                              start_year,
                              na,
                              ns,
-                             specific_kin){
+                             specific_kin = NULL){
   df_year_list <- list()
   for(j in years){
     ii <- as.numeric(j) - start_year + 1
@@ -746,7 +748,7 @@ create_cumsum_df <- function(kin_matrix_lists,
   df_year_list <- do.call("rbind", df_year_list)
   df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
                                                  cohort_factor = as.factor(cohort))
-  if(specific_kin != FALSE){
+  if(!is.null(specific_kin)){
     df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
   }
   return(df_year_list)
@@ -771,7 +773,7 @@ create_full_dists_df <- function(kin_matrix_lists,
                                  start_year,
                                  na,
                                  ns,
-                                 specific_kin){
+                                 specific_kin = NULL){
   df_year_list <- list()
   for(j in years){
     ii <- as.numeric(j) - start_year + 1
@@ -811,7 +813,7 @@ create_full_dists_df <- function(kin_matrix_lists,
   df_year_list <- do.call("rbind", df_year_list)
   df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
                                                  cohort_factor = as.factor(cohort))
-  if(specific_kin != FALSE){
+  if(!is.null(specific_kin)){
     df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
   }
   return(df_year_list)

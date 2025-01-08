@@ -4,7 +4,7 @@
 \alias{timevarying_kin_2sex_cod}
 \title{one time projection kin}
 \usage{
-timevarying_kin_2sex_cod(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
+timevarying_kin_2sex_cod(Ut, Ft, Ft_star, causes, pit, sex_focal, ages, pkin)
 }
 \arguments{
 \item{Ut}{numeric. A matrix of survival probabilities (or ratios).}
@@ -12,6 +12,8 @@ timevarying_kin_2sex_cod(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin)
 \item{Ft}{numeric. A matrix of age-specific fertility rates.}
 
 \item{Ft_star}{numeric. Ft but for female fertility.}
+
+\item{causes}{integer. Number of causes of death included.}
 
 \item{pit}{numeric. A matrix with distribution of childbearing.}
 
