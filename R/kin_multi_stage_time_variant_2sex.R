@@ -262,25 +262,27 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
 
   relative_names <- names(relative_data)
   ## create a nice data frame output
+  kin_full <- create_full_dists_df(relative_data,
+                                   relative_names,
+                                   output_years,
+                                   output_years[1],
+                                   na,
+                                   ns,
+                                   output_kin,
+                                   age_increment)
   if(summary_kin){
-    kin_out <- create_cumsum_df(relative_data,
-                                relative_names,
-                                output_years,
-                                output_years[1],
-                                na,
-                                ns,
-                                output_kin,
-                                age_increment)}
-  else{
-    kin_out <- create_full_dists_df(relative_data,
+    kin_summary <- create_cumsum_df(relative_data,
                                     relative_names,
                                     output_years,
                                     output_years[1],
                                     na,
                                     ns,
                                     output_kin,
-                                    age_increment)}
-
+                                    age_increment)
+    kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)}
+  else{
+    kin_out <- kin_full
+  }
   return(kin_out)
 }
 
