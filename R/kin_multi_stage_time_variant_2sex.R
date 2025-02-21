@@ -34,7 +34,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               H_list = NULL,
                                               birth_female = 0.49, ## Sex ratio -- note is 1 - alpha
                                               parity = FALSE,
-                                              output_kin = FALSE, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
+                                              output_kin = NULL, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
                                               summary_kin = TRUE, # Set to FALSE if we want a full age*stage distribution of kin
                                               sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
@@ -757,7 +757,7 @@ create_cumsum_df <- function(kin_matrix_lists,
   df_year_list <- do.call("rbind", df_year_list)
   df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
                                                  cohort_factor = as.factor(cohort))
-  if(specific_kin != FALSE){
+  if(!is.null(specific_kin)){
     df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
   }
   return(df_year_list)
@@ -828,7 +828,7 @@ create_full_dists_df <- function(kin_matrix_lists,
   df_year_list <- do.call("rbind", df_year_list)
   df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
                                                  cohort_factor = as.factor(cohort))
-  if(specific_kin != FALSE){
+  if(!is.null(specific_kin)){
     df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
   }
   return(df_year_list)
