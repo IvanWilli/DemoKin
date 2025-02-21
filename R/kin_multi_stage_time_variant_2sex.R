@@ -20,7 +20,10 @@
 #' @param sex_Focal character. Female or Male as the user requests.
 #' @param initial_stage_Focal Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)
 #' @param output_years vector. The times at which we wish to count kin: start year = output_years[1], and end year = output_years[length.]
-#'
+#' @param model_years. The full timescale on which we run the matrix model. From these periods we extract the ``output_years''.
+#'                     Note that if we use abridged life-tables: e.g., 1960,1965,1970 to run the model, by default age_increment = 5
+#' @param age_year_consistent logical. Null sets age-bridge to be equal to year
+#' @param age_increment. numeric. If age_year_consisent FALSE set own age-gap
 #' @return A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.
 
 #' @export
@@ -39,15 +42,17 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
                                               output_years,
+                                              model_years,
                                               age_year_consitent = TRUE,
                                               age_increment = NULL){
 
-  no_years <- length(U_list_females)
+  no_years <- (-1+length(U_list_females))
   na <- nrow(U_list_females[[1]])
   ns <- ncol(U_list_females[[1]])
-  if(age_year_consitent){age_increment <- as.numeric(output_years[2]-output_years[1])}
+  if(age_year_consitent){age_increment <- as.numeric(model_years[2]-model_years[1])}
   # Ensure inputs are lists of matrices and that the timescale same length
-  if(length(U_list_females) < (length(output_years))){stop("Proposed timescale longer than demographic timescale")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
+  if(length(U_list_females) != (length(model_years))){stop("Proposed timescale longer than demographic timescale")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
+  if(output_years[length(output_years)] > model_years[length(model_years)]){stop("Output years longer than model run")}
   if(!is.list(U_list_females) | !is.list(U_list_males)){stop("U's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(F_list_females) | !is.list(F_list_males)){stop("F's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(T_list_females) | !is.list(T_list_males)){stop("T's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
@@ -80,6 +85,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     total = no_years + 1, clear = FALSE, width = 60)
   tictoc::tic()
   for(year in 1:no_years){
+
     pb$tick()
     T_data_f <- T_list_females[[year]] ## For each year we have na number of Transfer matrices
     T_data_m <- T_list_males[[year]]   ## which give probabilities of age-dep movement from stage to stage
@@ -265,7 +271,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   kin_full <- create_full_dists_df(relative_data,
                                    relative_names,
                                    output_years,
-                                   output_years[1],
+                                   model_years,
                                    na,
                                    ns,
                                    output_kin,
@@ -274,7 +280,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     kin_summary <- create_cumsum_df(relative_data,
                                     relative_names,
                                     output_years,
-                                    output_years[1],
+                                    model_years,
                                     na,
                                     ns,
                                     output_kin,
@@ -707,16 +713,19 @@ all_kin_dy_TV <- function(Uf,
 create_cumsum_df <- function(kin_matrix_lists,
                              kin_names,
                              years,
-                             start_year,
+                             model_years,
                              na,
                              ns,
                              specific_kin = NULL,
                              increment = NULL){
   if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
+
+  matrix_model_time <- model_years
+
   age_inc <- increment
   df_year_list <- list()
   for(j in years){
-    ii <- which(years == j)
+    ii <- which(matrix_model_time == j)
     df_list <- list()
     for(i in 1 : length(kin_names)){
       kin_member <- kin_names[[i]]
@@ -779,17 +788,20 @@ create_cumsum_df <- function(kin_matrix_lists,
 create_full_dists_df <- function(kin_matrix_lists,
                                  kin_names,
                                  years,
-                                 start_year,
+                                 model_years,
                                  na,
                                  ns,
                                  specific_kin = NULL,
                                  increment = NULL){
   if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
+
+  matrix_model_time <- model_years
+
   age_inc <- increment
   df_year_list <- list()
   for(j in years){
     df_list <- list()
-    ii <- which(years == j)
+    ii <- which(matrix_model_time == j)
     for(i in 1 : length(kin_names)){
       kin_member <- kin_names[[i]]
       kin_data <- kin_matrix_lists[[i]]

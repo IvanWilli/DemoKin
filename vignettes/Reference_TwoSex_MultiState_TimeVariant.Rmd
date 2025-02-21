@@ -129,7 +129,7 @@ and so on...
 
 ```{r, message=FALSE, warning=FALSE}
 # Run kinship model for a female Focal over a timescale of no_years (we use 40 here)
-no_years <- 6
+no_years <- 40
 # and we start projecting kin in 1965
 # We decide here to count accumulated kin by age of Focal, and not distributions of kin
 kin_out_1965_2005 <-
@@ -147,8 +147,9 @@ kin_out_1965_2005 <-
                                     sex_Focal = "Female", ##  define Focal's sex at birth
                                     initial_stage_Focal = 1, ## Define Focal's stage at birth
                                     output_years = c(1965, 1975, 1985, 1995, 2005), ## the sequence of years we run the function over
-                                    age_year_consitent = FALSE, ## we use 5-year age classes
-                                    age_increment = 1
+                                    model_years <- seq(1965, 2005),
+                                    age_year_consitent = TRUE, ## we use 5-year age classes
+                                    age_increment = NULL
 )
 
 ```
