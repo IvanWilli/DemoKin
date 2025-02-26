@@ -30,12 +30,12 @@ test_that("same output in multi_stage (caswell 2020)", {
                                                   list(Tm),
                                                   list(H),
                                                   birth_female = 0.49, ## svk_fxs already divided
-                                                  output_kin = FALSE,
+                                                  output_kin = NULL,
                                                   parity = TRUE,
                                                   summary_kin = FALSE,
                                                   sex_Focal = "Female", ##  define Focal's sex at birth
                                                   initial_stage_Focal = 1, ## Define Focal's stage at birth
-                                                  seq(1990, (1990)))
+                                                  output_years = seq(1990, (1990)))
 
 
   ## Younger sisters

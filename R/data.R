@@ -1,5 +1,43 @@
-#' Female swedish survival ratios from 1900 to 2015
-#'
+#' UK female fertility from 1965 to 2022
+#' @docType data
+#' @format
+#'   list of age by stage matrices, entries give female fert. List starting 1965 ending 2022.
+#' @source
+#'   HFD and ONS
+"Female_parity_fert_list_UK"
+
+#' UK female parity transitions from 1965 to 2022
+#' @docType data
+#' @format
+#'   list of age by stage matrices, entries give female parity transitions. List starting 1965 ending 2022.
+#' @source
+#'   HFD and ONS
+"Parity_transfers_by_age_list_UK"
+
+#' UK female parity mortality from 1965 to 2022
+#' @docType data
+#' @format
+#'   list of age by stage matrices, entries give female parity mortality List starting 1965 ending 2022.
+#' @source
+#'   HFD and ONS
+"Female_parity_mortality_list_UK"
+
+#' UK male parity mortality from 1965 to 2022
+#' @docType data
+#' @format
+#'   list of age by stage matrices, entries give male parity mortality List starting 1965 ending 2022.
+#' @source
+#'   HFD and ONS
+"Male_parity_mortality_list_UK"
+
+#' UK parity assign parity at birth
+#' @docType data
+#' @format
+#'   list of matrices which redistributes newborns to age-class 1 and parity 0. No time-variation.
+#' @source
+#'   None
+"Redistribution_by_parity_list_UK"
+
 #' Female swedish survival ratios from 1900 to 2015
 #' @docType data
 #' @format

@@ -1,12 +1,12 @@
 ---
-  title: "Expected kin counts by type of relative in a two-sex multi-state time-varying framework"
+title: "Expected kin counts by type of relative in a two-sex multi-state time-varying framework"
 output:
   html_document:
-  toc: true
-toc_depth: 1
+    toc: true
+    toc_depth: 1
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, eval = T, include=FALSE}
@@ -115,10 +115,12 @@ We feed the above inputs into the matrix model, along with other arguments:
 -   Focal born into parity 0 --> `initial_stage_Focal` = 1
 -   timescale as ouptut -- > `output_years` = c(1965, 1975, 1985, 1995, 2005)
 
+
 Accumulated kin are outputted by the argument `summary_kin` = TRUE. In such cases, for each age of Focal, we sum over all possible ages of kin yielding the marginal stage
 distribution of kin.
 
 The first sets of time-varying vital rates in our input lists are e.g., U_mat_fem[[1]] (corresponding to mortality in 1965),
+
 the 41-st entry is U_mat_fem[[(1+40)]] (mortality in 2005). We require consistency between the length of the list of vital rates
 and the timescale: U_mat_fem[[1:(1+40)]] = in length = seq(1965,2005). Therefore we use the input lists of demographic rates
 
@@ -150,6 +152,7 @@ kin_out_1965_2005 <-
                                     model_years <- seq(1965, 2005), ## the sequence of years we model
                                     age_year_consitent = TRUE, ## 
                                     age_increment = NULL
+
 )
 
 ```
@@ -257,6 +260,7 @@ kin_out_1965_2005$kin_full %>%
   ggplot2::ylab("Younger siblings") +
   ggplot2::ggtitle("Focal 50")
 ```
+
 
 Notice the discontinuity along the x-abscissa at 50. This reflects the fact that Focal's younger siblings
 cannot are of age <50. Contrastingly, when we look at the age*stage distribution of older siblings, we observe another

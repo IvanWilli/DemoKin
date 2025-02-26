@@ -51,8 +51,10 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   ns <- ncol(U_list_females[[1]])
   if(age_year_consitent){age_increment <- as.numeric(model_years[2]-model_years[1])}
   # Ensure inputs are lists of matrices and that the timescale same length
+
   if(length(U_list_females) != (length(model_years))){stop("Proposed timescale longer than demographic timescale")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
   if(output_years[length(output_years)] > model_years[length(model_years)]){stop("Output years longer than model run")}
+
   if(!is.list(U_list_females) | !is.list(U_list_males)){stop("U's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(F_list_females) | !is.list(F_list_males)){stop("F's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(T_list_females) | !is.list(T_list_males)){stop("T's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
@@ -85,8 +87,8 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     total = no_years + 1, clear = FALSE, width = 60)
   tictoc::tic()
   for(year in 1:no_years){
-
     pb$tick()
+
     T_data_f <- T_list_females[[year]] ## For each year we have na number of Transfer matrices
     T_data_m <- T_list_males[[year]]   ## which give probabilities of age-dep movement from stage to stage
     T_f_list <- list()
@@ -246,6 +248,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     younger_cousin_array[[(1+length(younger_cousin_array))]] <- kin_out[["cya"]]
     older_cousin_array[[(1+length(older_cousin_array))]] <- kin_out[["coa"]]
     changing_pop_struct[[(1+length(changing_pop_struct))]] <- kin_out[["ps"]]
+    pb$tick()
   }
   tictoc::toc()
   ## create a list of output kin -- each element a time-period specific list of matrices
@@ -721,8 +724,8 @@ create_cumsum_df <- function(kin_matrix_lists,
   if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
 
   matrix_model_time <- model_years
-
   age_inc <- increment
+
   df_year_list <- list()
   for(j in years){
     ii <- which(matrix_model_time == j)
@@ -796,8 +799,8 @@ create_full_dists_df <- function(kin_matrix_lists,
   if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
 
   matrix_model_time <- model_years
-
   age_inc <- increment
+
   df_year_list <- list()
   for(j in years){
     df_list <- list()

@@ -48,9 +48,8 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
-  # age distribution at child born
+  # consider input data for age distribution at child born, or flag it to fill it
   Pif <- pif; no_Pif <- FALSE
-  Pim <- pim; no_Pim <- FALSE
   if(is.null(pif)){
     if(!is.null(nf)){
       Pif <- t(t(nf * ff)/colSums(nf * ff))
@@ -59,6 +58,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
       no_Pif <- TRUE
     }
   }
+  Pim <- pim; no_Pim <- FALSE
   if(is.null(pim)){
     if(!is.null(nm)){
       Pim <- t(t(nm * fm)/colSums(nm * fm))
@@ -69,65 +69,70 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   }
 
   # get lists of matrix
-  Ul = Fl = Fl_star = list()
+  Ul <- Fl <- Fl_star <- list()
   kin_all <- list()
   pb <- progress::progress_bar$new(
     format = "Running over input years [:bar] :percent",
     total = n_years_data + 1, clear = FALSE, width = 60)
   for(t in 1:n_years_data){
     # t = 1
-    Uf = Um = Fft = Fmt = Mm = Mf = Gt = zeros = matrix(0, nrow=ages, ncol=ages)
+    Uf = Um = Fft = Fmt = Mm = Mf = Gt = zeros <- matrix(0, nrow=ages, ncol=ages)
     Uf[row(Uf)-1 == col(Uf)] <- pf[-ages,t]
     Uf[ages, ages] = pf[ages,t]
     Um[row(Um)-1 == col(Um)] <- pm[-ages,t]
-    Um[ages, ages] = pm[ages,t]
+    Um[ages, ages] <- pm[ages,t]
     Mm <- diag(1-pm[,t])
     Mf <- diag(1-pf[,t])
     Ut <- as.matrix(rbind(
       cbind(Matrix::bdiag(Uf, Um), Matrix::bdiag(zeros, zeros)),
       cbind(Matrix::bdiag(Mf, Mm), Matrix::bdiag(zeros, zeros))))
     Ul[[as.character(years_data[t])]] <- Ut
-    Fft[1,] = ff[,t]
-    Fmt[1,] = fm[,t]
+    Fft[1,] <- ff[,t]
+    Fmt[1,] <- fm[,t]
     Ft <- Ft_star <- matrix(0, agess*2, agess*2)
     Ft[1:agess,1:agess] <- rbind(cbind(birth_female * Fft, birth_female * Fmt),
                                  cbind((1-birth_female) * Fft, (1-birth_female) * Fmt))
     Ft_star[1:agess,1:ages] <- rbind(birth_female * Fft, (1-birth_female) * Fft)
     Fl[[as.character(years_data[t])]] <- Ft
     Fl_star[[as.character(years_data[t])]] <- Ft_star
-    # parents age distribution under stable assumption in case no input
-    if(no_Pim | no_Pif){
-      A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
-      A_decomp = eigen(A)
-      lambda = as.double(A_decomp$values[1])
-      w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-      wf = w[1:ages]
-      wm = w[(ages+1):(2*ages)]
-      Pif[,t] = wf * ff[,t] / sum(wf * ff[,t])
-      Pim[,t] = wm * fm[,t] / sum(wm * fm[,t])
-    }
+    A <- Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
 
     # project
     Ut <- as.matrix(Ul[[t]])
     Ft <- as.matrix(Fl[[t]])
     Ft_star <- as.matrix(Fl_star[[t]])
-    pitf <- Pif[,t]
-    pitm <- Pim[,t]
-    pit <- c(pitf, pitm)
+
+    # stable assumption at start
     if (t==1){
-      p1f <- pf[,1]
-      p1m <- pm[,1]
-      f1f <- ff[,1]
-      f1m <- fm[,1]
-      pif1 <- Pif[,1]
-      pim1 <- Pim[,1]
+      p1f <- pf[,1]; p1m <- pm[,1]
+      f1f <- ff[,1]; f1m <- fm[,1]
+      # time boundary for pi
+      A_decomp <- eigen(A)
+      lambda <- as.double(A_decomp$values[1])
+      w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+      wf <- w[1:ages]
+      wm <- w[(ages+1):(2*ages)]
+      pif1 <- wf * ff[,t] / sum(wf * ff[,t])
+      pim1 <- wm * fm[,t] / sum(wm * fm[,t])
       kin_all[[1]] <- kin_time_invariant_2sex(pf = p1f, pm = p1m,
                                               ff = f1f, fm = f1m,
                                               sex_focal = sex_focal,
                                               pif = pif1, pim = pim1,
                                               birth_female = birth_female, list_output = TRUE)
     }
-    kin_all[[t+1]] <- timevarying_kin_2sex(Ut=Ut, Ft=Ft, Ft_star=Ft_star, pit=pit, sex_focal, ages, pkin=kin_all[[t]])
+    # project pi
+    if(no_Pim | no_Pif){
+      w <- A %*% w
+      wf <- w[1:ages]
+      wm <- w[(ages+1):(2*ages)]
+      Pif[,t] <- wf * ff[,t] / sum(wf * ff[,t])
+      Pim[,t] <- wm * fm[,t] / sum(wm * fm[,t])
+    }
+    pit <- c(Pif[,t], Pim[,t])
+
+    # kin for next year
+    kin_all[[t+1]] <- timevarying_kin_2sex(Ut = Ut, Ft = Ft, Ft_star = Ft_star,
+                                           pit = pit, sex_focal, ages, pkin = kin_all[[t]])
     pb$tick()
   }
 
