@@ -20,7 +20,10 @@
 #' @param sex_Focal character. Female or Male as the user requests.
 #' @param initial_stage_Focal Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)
 #' @param output_years vector. The times at which we wish to count kin: start year = output_years[1], and end year = output_years[length.]
-#'
+#' @param model_years. The full timescale on which we run the matrix model. From these periods we extract the ``output_years''.
+#'                     Note that if we use abridged life-tables: e.g., 1960,1965,1970 to run the model, by default age_increment = 5
+#' @param age_year_consistent logical. Null sets age-bridge to be equal to year
+#' @param age_increment. numeric. If age_year_consisent FALSE set own age-gap
 #' @return A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.
 
 #' @export
@@ -35,17 +38,23 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               birth_female = 0.49, ## Sex ratio -- note is 1 - alpha
                                               parity = FALSE,
                                               output_kin = NULL, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
-                                              summary_kin = TRUE, # Set to FALSE if we want only a full age*stage distribution of kin
+                                              summary_kin = TRUE, # Set to FALSE if we want a full age*stage distribution of kin
                                               sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
-                                              output_years){
+                                              output_years,
+                                              model_years,
+                                              age_year_consitent = TRUE,
+                                              age_increment = NULL){
 
-  no_years <- length(U_list_females)
+  no_years <- (-1+length(U_list_females))
   na <- nrow(U_list_females[[1]])
   ns <- ncol(U_list_females[[1]])
-
+  if(age_year_consitent){age_increment <- as.numeric(model_years[2]-model_years[1])}
   # Ensure inputs are lists of matrices and that the timescale same length
-  # if(length(U_list_females)!=length(output_years)){stop("Timescale inconsistancy")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
+
+  if(length(U_list_females) != (length(model_years))){stop("Proposed timescale longer than demographic timescale")} ## this is due to my struggles with counting! ( e.g., seq(10, 20, 1) != list(1 : 10) )
+  if(output_years[length(output_years)] > model_years[length(model_years)]){stop("Output years longer than model run")}
+
   if(!is.list(U_list_females) | !is.list(U_list_males)){stop("U's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(F_list_females) | !is.list(F_list_males)){stop("F's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(T_list_females) | !is.list(T_list_males)){stop("T's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
@@ -78,6 +87,8 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     total = no_years + 1, clear = FALSE, width = 60)
   tictoc::tic()
   for(year in 1:no_years){
+    pb$tick()
+
     T_data_f <- T_list_females[[year]] ## For each year we have na number of Transfer matrices
     T_data_m <- T_list_males[[year]]   ## which give probabilities of age-dep movement from stage to stage
     T_f_list <- list()
@@ -263,18 +274,20 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   kin_full <- create_full_dists_df(relative_data,
                                    relative_names,
                                    output_years,
-                                   output_years[1],
+                                   model_years,
                                    na,
                                    ns,
-                                   output_kin)
+                                   output_kin,
+                                   age_increment)
   if(summary_kin){
     kin_summary <- create_cumsum_df(relative_data,
-                                relative_names,
-                                output_years,
-                                output_years[1],
-                                na,
-                                ns,
-                                output_kin)
+                                    relative_names,
+                                    output_years,
+                                    model_years,
+                                    na,
+                                    ns,
+                                    output_kin,
+                                    age_increment)
     kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)}
   else{
     kin_out <- kin_full
@@ -703,28 +716,36 @@ all_kin_dy_TV <- function(Uf,
 create_cumsum_df <- function(kin_matrix_lists,
                              kin_names,
                              years,
-                             start_year,
+                             model_years,
                              na,
                              ns,
-                             specific_kin = NULL){
+                             specific_kin = NULL,
+                             increment = NULL){
+  if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
+
+  matrix_model_time <- model_years
+  age_inc <- increment
+
   df_year_list <- list()
   for(j in years){
-    ii <- as.numeric(j) - start_year + 1
+    ii <- which(matrix_model_time == j)
     df_list <- list()
     for(i in 1 : length(kin_names)){
       kin_member <- kin_names[[i]]
       kin_data <- kin_matrix_lists[[i]]
       kin_data <- kin_data[[ii]]
       df <- as.data.frame(as.matrix(kin_data))
-      dims <- dim( kin_data)
+      dims <- dim( kin_data )
       nr <- dims[1]
       nc <- dims[2]
       female_kin <- df[1:(nr/2), 1:nc]
       male_kin <- df[ (1+nr/2) : nr, 1:nc]
+      colnames(female_kin) <- seq( 0 , age_inc*(na-1) , by = age_inc )
+      colnames(male_kin) <- seq( 0 , age_inc*(na-1) , by = age_inc )
       female_kin$stage <- rep(seq(1, ns), na)
       male_kin$stage <- rep(seq(1, ns), na)
-      female_kin$age <- rep(seq(0, (na-1)), each = ns)
-      male_kin$age <- rep(seq(0, (na-1)), each = ns)
+      female_kin$age <- rep( seq( 0 , age_inc*(na-1) , by = age_inc ) , each = ns)
+      male_kin$age <- rep( seq( 0 , age_inc*(na-1) , by = age_inc ) , each = ns)
       female_kin$Sex <- "Female"
       male_kin$Sex <- "Male"
       both_kin <- rbind(female_kin, male_kin)
@@ -736,7 +757,7 @@ create_cumsum_df <- function(kin_matrix_lists,
                                                 stage_kin = as.factor(stage),
                                                 count = num,
                                                 sex_kin = Sex)
-      both_kin$age_focal <- as.numeric(gsub("[^0-9.-]", "", both_kin$age_focal)) - 1
+      both_kin$age_focal <- as.numeric(paste(both_kin$age_focal))
       df <- both_kin
       df$year <- j
       df$group <- kin_member
@@ -770,14 +791,20 @@ create_cumsum_df <- function(kin_matrix_lists,
 create_full_dists_df <- function(kin_matrix_lists,
                                  kin_names,
                                  years,
-                                 start_year,
+                                 model_years,
                                  na,
                                  ns,
-                                 specific_kin = NULL){
+                                 specific_kin = NULL,
+                                 increment = NULL){
+  if(length(years) > length(kin_matrix_lists[[1]])){stop("More years than data")}
+
+  matrix_model_time <- model_years
+  age_inc <- increment
+
   df_year_list <- list()
   for(j in years){
-    ii <- as.numeric(j) - start_year + 1
     df_list <- list()
+    ii <- which(matrix_model_time == j)
     for(i in 1 : length(kin_names)){
       kin_member <- kin_names[[i]]
       kin_data <- kin_matrix_lists[[i]]
@@ -788,10 +815,12 @@ create_full_dists_df <- function(kin_matrix_lists,
       nc <- dims[2]
       female_kin <- df[1:(nr/2), 1:nc]
       male_kin <- df[ (1+nr/2) : nr, 1:nc]
+      colnames(female_kin) <- seq( 0 , age_inc*(na-1) , by = age_inc )
+      colnames(male_kin) <- seq( 0 , age_inc*(na-1) , by = age_inc )
       female_kin$stage <- rep(seq(1, ns), na)
       male_kin$stage <- rep(seq(1, ns), na)
-      female_kin$age <- rep(seq(0, (na-1)), each = ns)
-      male_kin$age <- rep(seq(0, (na-1)), each = ns)
+      female_kin$age <- rep( seq( 0 , age_inc*(na-1) , by = age_inc ) , each = ns)
+      male_kin$age <- rep( seq( 0 , age_inc*(na-1) , by = age_inc ) , each = ns)
       female_kin$Sex <- "Female"
       male_kin$Sex <- "Male"
       both_kin <- rbind(female_kin, male_kin)
@@ -801,7 +830,7 @@ create_full_dists_df <- function(kin_matrix_lists,
                          stage_kin = as.factor(stage),
                          count = value,
                          sex_kin = Sex)
-      both_kin$age_focal <- as.numeric(gsub("[^0-9.-]", "", both_kin$age_focal))-1
+      both_kin$age_focal <- as.numeric(paste(both_kin$age_focal))
       df <- both_kin
       df$year <- j
       df$group <- kin_member
@@ -809,6 +838,7 @@ create_full_dists_df <- function(kin_matrix_lists,
     }
     df_list <- do.call("rbind", df_list)
     df_year_list[[(1+length(df_year_list))]] <- df_list
+
   }
   df_year_list <- do.call("rbind", df_year_list)
   df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
