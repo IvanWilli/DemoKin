@@ -35,7 +35,8 @@ Imports:
     lifecycle,
     tictoc,
     reshape2
-URL: https://github.com/IvanWilli/DemoKin
+URL: https://github.com/IvanWilli/DemoKin,
+    https://ivanwilli.github.io/DemoKin/
 BugReports: https://github.com/IvanWilli/DemoKin/issues
 Depends: 
     R (>= 2.10)
