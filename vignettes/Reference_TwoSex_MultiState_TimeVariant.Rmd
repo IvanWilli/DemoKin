@@ -11,7 +11,7 @@ vignette: >
 
 ```{r, eval = T, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
-library(devtools); load_all()
+# library(devtools); load_all()
 ```
 
 Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model 

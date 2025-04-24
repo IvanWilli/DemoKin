@@ -13,7 +13,7 @@ vignette: >
 
 ```{r, eval = T, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(devtools); load_all()
+# library(devtools); load_all()
 ```
 
 Human males generally live shorter and reproduce later than females. 

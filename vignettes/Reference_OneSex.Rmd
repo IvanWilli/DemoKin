@@ -13,7 +13,7 @@ vignette: >
 
 ```{r, eval = F, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(devtools); load_all()
+# library(devtools); load_all()
 ```
 
 In this vignette, we'll demonstrate how `DemoKin` can be used to compute kinship networks for an average member of a given (female) population. Let us call her Focal: an average Swedish woman who has always lived in Sweden and whose family has never left the country.
