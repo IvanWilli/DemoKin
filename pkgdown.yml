@@ -2,10 +2,13 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
-  Reference_OneSex: Reference_OneSex.html
-  Reference_TwoSex_MultiState_TimeVariant: Reference_TwoSex_MultiState_TimeVariant.html
-  Reference_TwoSex: Reference_TwoSex.html
-last_built: 2025-04-24T14:36Z
+  1_1_OneSex_TimeInvariant_Age: 1_1_OneSex_TimeInvariant_Age.html
+  1_2_OneSex_TimeVarying_Age: 1_2_OneSex_TimeVarying_Age.html
+  1_3_TwoSex_TimeInvariant_Age: 1_3_TwoSex_TimeInvariant_Age.html
+  1_4_TwoSex_TimeVarying_Age: 1_4_TwoSex_TimeVarying_Age.html
+  2_1_OneSex_TimeInvariant_AgeStage: 2_1_OneSex_TimeInvariant_AgeStage.html
+  2_2_TwoSex_TimeVarying_AgeStage: 2_2_TwoSex_TimeVarying_AgeStage.html
+last_built: 2025-04-24T20:02Z
 urls:
   reference: https://ivanwilli.github.io/DemoKin/reference
   article: https://ivanwilli.github.io/DemoKin/articles
