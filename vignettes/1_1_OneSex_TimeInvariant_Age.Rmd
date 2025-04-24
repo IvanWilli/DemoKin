@@ -96,7 +96,6 @@ rm(list = ls())
 install.packages("dplyr")     # Data manipulation
 install.packages("tidyr")     # Data tidying
 install.packages("ggplot2")   # Data visualization
-install.packages("readr")     # Data import
 install.packages("knitr")     # Document generation
 install.packages("data.table")# Efficient data handling
 install.packages("Matrix")    # Matrix operations
@@ -117,7 +116,6 @@ Let's begin by loading the necessary packages for our analysis:
 library(dplyr)    # For data manipulation
 library(tidyr)    # For restructuring data
 library(ggplot2)  # For visualization
-library(readr)    # For reading data
 library(knitr)    # For document generation
 ```
 
