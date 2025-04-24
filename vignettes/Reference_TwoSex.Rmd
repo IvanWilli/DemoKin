@@ -26,11 +26,12 @@ The function `kin2sex` implements two-sex kinship models as introduced by Caswel
 This vignette show how to run two-sex models and highlights some of the advantages of this model over one-sex models in populations with time-invariant and time-variant rates.
 
 ```{r, message=FALSE, warning=FALSE}
-library(DemoKin)
+# library(DemoKin)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
+devtools::load_all()
 ```
 
 ### 1. Demographic rates by sex

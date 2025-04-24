@@ -11,7 +11,7 @@ vignette: >
 
 ```{r, eval = T, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
-# library(devtools); load_all()
+devtools::load_all()
 ```
 
 Since the inception of Caswell's [@caswell_formal_2019] proposed one-sex time-invariant age-structured matrix model 
@@ -28,7 +28,6 @@ We seek the number of, age, and stage distribution of Focal's relatives, for eac
 
 
 ```{r}
-# library(DemoKin)
 library(Matrix)
 library(tictoc)
 options(dplyr.summarise.inform = FALSE) # hide if we don't want to see summarise output (but also #lose #progress bar)
