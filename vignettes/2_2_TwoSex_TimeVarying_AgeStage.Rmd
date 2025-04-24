@@ -92,7 +92,6 @@ If you haven't already installed the required packages from the previous vignett
 install.packages("dplyr")     # Data manipulation
 install.packages("tidyr")     # Data tidying
 install.packages("ggplot2")   # Data visualization
-install.packages("readr")     # Data import
 install.packages("knitr")     # Document generation
 install.packages("data.table")# Efficient data handling
 install.packages("Matrix")    # Matrix operations
@@ -114,7 +113,6 @@ rm(list = ls())
 library(dplyr)    # For data manipulation
 library(tidyr)    # For restructuring data
 library(ggplot2)  # For visualization
-library(readr)    # For reading data
 library(knitr)    # For document generation
 library(Matrix)   # For matrix operations
 library(tictoc)   # For timing operations
@@ -184,7 +182,7 @@ These lists contain period-specific demographic rates:
 
 Now let's implement the two-sex time-varying multi-state model with parity as the stage variable:
 
-```{r parity_model, message=FALSE, warning=FALSE, eval=TRUE}
+```{r parity_model, message=FALSE, warning=FALSE, eval=FALSE}
 # Define time period and parameters
 no_years <- 40  # Run the model for 40 years (1965-2005)
 
@@ -213,7 +211,7 @@ kin_out_1965_2005 <-
 
 Now we need to recode the stage variables to show meaningful parity labels:
 
-```{r parity_output_recode, message=FALSE, warning=FALSE, eval=TRUE}
+```{r parity_output_recode, message=FALSE, warning=FALSE, eval=FALSE}
 # After running the model, recode the parity stage values
 kin_out_1965_2005$kin_summary <- 
   kin_out_1965_2005$kin_summary %>%
@@ -233,7 +231,7 @@ kin_out_1965_2005$kin_full <-
 
 Let's examine the structure of the output:
 
-```{r parity_output_show, message=FALSE, warning=FALSE, eval=TRUE}
+```{r parity_output_show, message=FALSE, warning=FALSE, eval=FALSE}
 head(kin_out_1965_2005$kin_summary)
 ```
 
@@ -253,7 +251,7 @@ Let's visualize the distribution of older aunts and uncles by parity for differe
 
 We first restrict Focal's kinship network to aunts and uncles older than Focal's mother by setting `group` == "oa". We visualize the marginal parity distributions of kin: `stage_kin`, for each age of Focal `age_focal`, using different color schemes. Implicit in the below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
 
-```{r parity_aunts_uncles, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
+```{r parity_aunts_uncles, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
   filter(group == "oa") %>%
   ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
@@ -274,7 +272,7 @@ kin_out_1965_2005$kin_summary %>%
 
 We could also consider any other kin in Focal's network, for instance, offspring using `group` == "d":
 
-```{r parity_offspring, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
+```{r parity_offspring, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
   filter(group == "d") %>%
   ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
@@ -299,7 +297,7 @@ Since we only ran the model for 40 years (between 1965-2005), there is very litt
 
 We can however compare cohorts for 40-year segments of Focal's life. Below, following from the above example, we once again consider offspring and only show Focals born of `cohort` 1910, 1925, or 1965:
 
-```{r parity_cohort, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
+```{r parity_cohort, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
   filter(group == "d", cohort %in% c(1910, 1925, 1965)) %>%
   ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
@@ -327,7 +325,7 @@ kin_out_1965_2005$kin_summary %>%
 
 For more detailed analysis, we can examine the age and parity distribution of specific relatives. Let's look at the younger siblings of a 50-year-old Focal across different years:
 
-```{r parity_siblings_young, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
+```{r parity_siblings_young, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_full %>%
   filter(group == "ys",
          age_focal == 50) %>%
@@ -351,7 +349,7 @@ Notice the discontinuity along the x-axis at age 50. This reflects the fact that
 
 With a simple manipulation of the output data frame, we can also plot the age and parity distribution of all siblings combined:
 
-```{r parity_siblings_all, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
+```{r parity_siblings_all, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_full %>%
   filter((group == "ys" | group == "os"),
          age_focal == 50) %>%
