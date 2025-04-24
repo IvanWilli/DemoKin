@@ -1,3 +1,59 @@
+#' Singapore: List of matrices that redistribute newborns to age-class 1 and "no education" category
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"H_mat_edu"
+
+#' Singapore: Lists of transition matrices showing probabilities of moving between education states. Females
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"T_mat_fem_edu"
+
+#' Singapore: Lists of transition matrices showing probabilities of moving between education states. Males
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"T_mat_male_edu"
+
+#' Singapore: Lists of matrices containing fertility rates by age and education. Females
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"F_mat_fem_edu"
+
+#' Singapore: Lists of matrices containing fertility rates by age and education. Males
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"F_mat_male_edu"
+
+#' Singapore: Lists of matrices containing survival probabilities by age (rows) and education (columns) from 2020-2090. Females
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"U_mat_fem_edu"
+
+#' Singapore: Lists of matrices containing survival probabilities by age (rows) and education (columns) from 2020-2090. Males
+#' @docType data
+#' @format
+#'   The data is aggregated into 5-year age groups and 5-year time intervals
+#' @source
+#'   Wittgenstein Center
+"U_mat_male_edu"
+
 #' UK female fertility from 1965 to 2022
 #' @docType data
 #' @format

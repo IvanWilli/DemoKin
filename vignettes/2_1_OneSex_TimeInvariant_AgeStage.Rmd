@@ -1,0 +1,315 @@
+---
+title: "One-sex time-invariant kinship model specified by age and stage"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    number_sections: true
+    code_folding: show
+    df_print: paged
+    fig_caption: true
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{One-sex time-invariant kinship model specified by age and stage}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+# Set up code chunk options
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE, 
+                      fig.align = 'center',
+                      fig.width = 8,
+                      fig.height = 6,
+                      dpi = 300)
+# Prevent scientific notation (useful for the rate calculation)
+options(scipen = 999999)
+pkgload::load_all()
+```
+
+<style>
+/* Make TOC appear on the right side */
+.tocify {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: 240px;
+  height: calc(100% - 50px);
+  overflow-y: auto;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Adjust main content to make room for right-side TOC */
+.main-container {
+  max-width: calc(100% - 260px);
+  margin-left: 10px;
+  margin-right: 250px;
+}
+
+/* Limit TOC to only show 2 levels */
+.tocify-subheader .tocify-subheader {
+  display: none;
+}
+
+/* Style for learning objectives box */
+.learning-objectives {
+  background-color: #e0f7fa;
+  border-left: 5px solid #00acc1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 3px;
+}
+</style>
+
+<div class="learning-objectives">
+<strong>Learning Objectives</strong>: In this vignette, you will learn how to extend the one-sex kinship model to incorporate stages alongside age. You will understand the implementation of multi-state matrix models, explore how demographic processes can vary by stage (e.g., parity), and analyze how these additional dimensions affect kinship structures.
+</div>
+
+# Introduction {#introduction}
+
+In previous vignettes, we explored kinship models where individuals were classified only by age. However, demographic processes are often influenced by other characteristics beyond age. For example, mortality and fertility rates may vary by marital status, education level, health condition, parity (number of children already born), or other socioeconomic factors.
+
+Multi-state kinship models address this limitation by incorporating both age and stage (additional states) in the analysis. These models allow us to:
+
+- Account for heterogeneity in mortality and fertility by stage
+- Track changes in stage over the life course (e.g., transitions between parity states)
+- Analyze kin availability by both age and stage
+- Understand how stage-specific demographic patterns shape family structures
+- Provide more nuanced estimates of kinship dynamics
+
+In this vignette, we will start from a simple model, **one-sex time-invariant multi-state kinship model**, outlined in Caswell [-@caswell_formal_2020], using the `DemoKin` package. We'll focus specifically on parity as our stage variable, which allows us to analyze how fertility history affects kinship networks.
+
+## Package Installation {#preparation}
+
+If you haven't already installed the required packages from the previous vignettes, here's what you'll need:
+
+```{r installs, eval=FALSE}
+# Install basic data analysis packages
+install.packages("dplyr")     # Data manipulation
+install.packages("tidyr")     # Data tidying
+install.packages("ggplot2")   # Data visualization
+install.packages("readr")     # Data import
+install.packages("knitr")     # Document generation
+install.packages("data.table")# Efficient data handling
+install.packages("Matrix")    # Matrix operations
+
+# Install DemoKin
+# DemoKin is available on CRAN (https://cran.r-project.org/web/packages/DemoKin/index.html), 
+# but we'll use the development version on GitHub (https://github.com/IvanWilli/DemoKin):
+install.packages("remotes")
+remotes::install_github("IvanWilli/DemoKin")
+library(DemoKin)  # For kinship analysis
+```
+
+# Setting Up the Analysis Environment {#load-packages}
+
+Let's load the necessary packages for our analysis:
+
+```{r libraries, warning=F, message=FALSE}
+rm(list = ls())
+library(dplyr)    # For data manipulation
+library(tidyr)    # For restructuring data
+library(ggplot2)  # For visualization
+library(readr)    # For reading data
+library(knitr)    # For document generation
+```
+
+# Multi-State Kinship Models {#multi-state-models}
+
+## Understanding Stage-Structured Models {#understanding-stage-models}
+
+In traditional age-structured models, an individual's demographic rates depend only on their age. In multi-state models, we expand this framework to consider both age and stage, where "stage" represents another characteristic that influences demographic processes.
+
+Key components of multi-state models include:
+
+1. **Age-and-stage-specific mortality rates**: How survival probabilities vary by both age and stage
+2. **Age-and-stage-specific fertility rates**: How fertility varies by both age and stage
+3. **Age-specific transition probabilities**: How individuals move between stages at each age
+
+These components allow us to build more realistic models of population dynamics and kinship networks by accounting for heterogeneity beyond age.
+
+## Parity as a Stage Variable {#parity-models}
+
+In this vignette, we'll focus on **parity** (the number of children already born to a woman) as our stage variable. Parity is particularly relevant for kinship studies because:
+
+- Fertility rates often vary substantially by parity
+- A woman's ultimate family size affects her kinship network
+- Parity transitions follow clear rules (can only increase by integer values)
+- Parity status can influence other demographic processes like mortality
+
+The `DemoKin` package includes data from Slovakia in 1980, which we'll use to implement a parity-based kinship model.
+
+## Understanding the Data Structure {#data-structure}
+
+For multi-state models, we need several matrices that specify how demographic rates vary by both age and stage. Let's examine the structure of the Slovakia data included in the `DemoKin` package:
+
+```{r data_structure}
+# Examine fertility rates by age and parity
+head(svk_fxs[1:5, ])
+
+# Examine survival probabilities by age and parity
+head(svk_pxs[1:5, ])
+
+# Examine birth matrix (where newborns enter the population)
+head(svk_Hxs[1:5, ])
+
+# Look at the structure of the transition matrices
+typeof(svk_Uxs)
+length(svk_Uxs)
+svk_Uxs[[20]]  # Transition matrix for age 20
+```
+
+In this dataset:
+
+- `svk_fxs` is a data frame of fertility rates by age (rows) and parity stage (columns)
+- `svk_pxs` contains survival probabilities by age and parity
+- `svk_Hxs` specifies where newborns enter the population (in this case, at parity 0)
+- `svk_Uxs` is a list of matrices, one for each age, containing the probabilities of transitioning between parity states conditional on survival
+
+For parity, the stages represent:
+
+- Stage 1: Parity 0 (no children)
+- Stage 2: Parity 1 (one child)
+- Stage 3: Parity 2 (two children)
+- Stage 4: Parity 3 (three children)
+- Stage 5: Parity 4 (four children)
+- Stage 6: Parity 5+ (five or more children)
+
+Let's examine the transition matrix for a woman of reproductive age to understand how women move between parity states:
+
+```{r transition_matrix}
+# Display the transition matrix for age 25
+# This shows probabilities of moving between parity states
+svk_Uxs[[25]]
+```
+
+This matrix shows the probabilities of moving from one parity state (columns) to another (rows) for a 25-year-old woman, conditional on survival. Some key observations:
+
+- The matrix shows transitions from column j (starting parity) to row i (ending parity)
+- The diagonal elements represent the probability of remaining in the same parity state
+- Non-zero values appear only in the lower-triangular portion because parity can only increase (women can't "un-have" children)
+- Women at higher parities generally have lower probabilities of having another child
+
+# Implementing the Multi-State Model {#run-model-multi-state}
+
+Now let's implement the multi-state kinship model using the `kin_multi_stage` function:
+
+```{r}
+# Use birth_female=1 because fertility is for females only
+demokin_svk1980_caswell2020 <- 
+  kin_multi_stage(
+    U = svk_Uxs,            # List of transition matrices
+    f = svk_fxs,            # Fertility rates by age and parity
+    D = svk_pxs,            # Survival probabilities by age and parity
+    H = svk_Hxs,            # Birth matrix
+    birth_female = 1,       # All births are female (one-sex model)
+    parity = TRUE           # Stages represent parity states
+  )
+```
+
+This function computes the joint age-parity distribution of kin for a focal individual under the specified demographic conditions. The output includes information on both the age and parity state of each relative.
+
+# Analyzing Age and Parity Distributions {#age-and-parity-distribution}
+
+Let's examine how both age and parity are distributed among relatives. First, we'll look at the age-parity distribution of aunts when the focal individual is 20 and 60 years old:
+
+```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
+demokin_svk1980_caswell2020 %>% 
+  filter(kin %in% c("oa","ya"), age_focal %in% c(20,60)) %>% 
+  mutate(parity = as.integer(stage_kin)-1,
+         parity = case_when(parity == 5 ~ "5+", TRUE ~ as.character(parity))
+         ) %>% 
+  group_by(age_focal, age_kin, parity) %>% 
+  summarise(count = sum(living)) %>% 
+  ggplot() +
+  geom_bar(aes(x = age_kin, y = count, fill = parity), stat = "identity") +
+  geom_vline(aes(xintercept = age_focal), col = 2) +
+  labs(
+    title = "Age and parity distribution of aunts",
+    subtitle = "Slovakia, 1980",
+    x = "Age of aunt",
+    y = "Number of aunts",
+    fill = "Parity"
+  ) +
+  theme_bw() +
+  facet_wrap(~age_focal, nrow = 2, labeller = labeller(
+    age_focal = c("20" = "Focal age: 20", "60" = "Focal age: 60")
+  ))
+```
+
+**Interpretation**: These bar charts show the joint distribution of age and parity for aunts at two different focal ages:
+
+- **When Focal is 20** (upper panel): Aunts are mostly middle-aged (30s-50s) and concentrated in parities 2-3, reflecting the fertility patterns of that generation
+- **When Focal is 60** (lower panel): Aunts are much older (if still alive) and show a similar parity distribution, though with more high-parity individuals due to the fertility patterns of earlier cohorts
+
+The red vertical line indicates Focal's age, providing a reference point for comparing the ages of relatives. This joint distribution provides richer information than looking at age or parity alone.
+
+# Kin Counts by Parity Over the Life Course {#kin-by-parity}
+
+Now let's examine how the parity distribution of different types of relatives changes over Focal's life course. We'll focus on daughters and mothers:
+
+```{r, message=FALSE, warning=FALSE, fig.height=6, fig.width=10}
+demokin_svk1980_caswell2020 %>% 
+  filter(kin %in% c("d","m")) %>% 
+  mutate(parity = as.integer(stage_kin)-1,
+         parity = case_when(parity == 5 ~ "5+", TRUE ~ as.character(parity))) %>% 
+  group_by(age_focal, kin, parity) %>% 
+  summarise(count = sum(living)) %>% 
+  DemoKin::rename_kin() %>% 
+  ggplot() +
+  geom_bar(aes(x = age_focal, y = count, fill = parity), stat = "identity") +
+  labs(
+    title = "Parity distribution of mothers and daughters over the life course",
+    subtitle = "Slovakia, 1980",
+    x = "Age of focal individual",
+    y = "Number of relatives",
+    fill = "Parity"
+  ) +
+  theme_bw() +
+  facet_wrap(~kin_label, nrow = 2)
+```
+
+**Interpretation**: These stacked bar charts reveal how the parity distribution of mothers and daughters evolves across Focal's life course:
+
+- **Mothers**: 
+  - Most mothers are in parity 2-3, reflecting the dominant family size in this population
+  - At Focal's birth (age 0), mothers are necessarily at parity 1 or higher (as they must have at least one child - the Focal individual)
+  - The mothers' parity distribution shows a gradual shift toward higher parities when Focal is young, as some mothers continue to have additional children
+  - The composition is relatively stable after Focal reaches adulthood, with slight changes due to differential mortality by parity
+
+- **Daughters**:
+  - Initially all daughters are in parity 0 (childless)
+  - As Focal ages, daughters transition to higher parity states
+  - By the time Focal reaches old age, the parity distribution of daughters resembles the overall population pattern
+  - The total number increases until Focal's reproductive years end, then remains stable
+
+These patterns highlight the intergenerational transmission of fertility behaviors and how demographic patterns ripple through kinship networks.
+
+# Conclusion
+
+In this vignette, we've explored how to implement one-sex time-invariant multi-state kinship models using the `DemoKin` package. By incorporating both age and stage (parity) in our analysis, we've gained richer insights into the structure of kinship networks than would be possible with age alone.
+
+Key insights include:
+
+1. Demographic processes vary not only by age but also by other characteristics like parity
+2. Multi-state models allow us to track the joint distribution of age and stage among relatives
+3. The parity distribution of relatives evolves in complex ways over the life course
+4. Stage transitions (e.g., between parity states) are a key component of kinship dynamics
+
+While we focused on parity in this vignette, the `kin_multi_stage` function can be used for any state variable by setting the parameter `parity = FALSE` (the default). This flexibility opens up numerous applications:
+
+1. **Health status transitions**: Analyzing how health conditions affect and are affected by kinship networks
+2. **Educational attainment**: Exploring how education levels influence family formation and structure
+3. **Marital status**: Incorporating marriage, divorce, and widowhood into kinship dynamics
+4. **Geographical location**: Modeling proximity and migration within kinship networks
+5. **Labor force participation**: Understanding how work patterns interact with family structures
+
+# References
+

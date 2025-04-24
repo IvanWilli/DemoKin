@@ -1,0 +1,360 @@
+---
+title: "Two-sex time-invariant kinship model specified by age"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    number_sections: true
+    code_folding: show
+    df_print: paged
+    fig_caption: true
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Two-sex time-invariant kinship model specified by age}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+# Set up code chunk options
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE, 
+                      fig.align = 'center',
+                      fig.width = 8,
+                      fig.height = 6,
+                      dpi = 300)
+# Prevent scientific notation (useful for the rate calculation)
+options(scipen = 999999)
+pkgload::load_all()
+```
+
+<style>
+/* Make TOC appear on the right side */
+.tocify {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: 240px;
+  height: calc(100% - 50px);
+  overflow-y: auto;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Adjust main content to make room for right-side TOC */
+.main-container {
+  max-width: calc(100% - 260px);
+  margin-left: 10px;
+  margin-right: 250px;
+}
+
+/* Limit TOC to only show 2 levels */
+.tocify-subheader .tocify-subheader {
+  display: none;
+}
+
+/* Style for learning objectives box */
+.learning-objectives {
+  background-color: #e0f7fa;
+  border-left: 5px solid #00acc1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 3px;
+}
+</style>
+
+<div class="learning-objectives">
+<strong>Learning Objectives</strong>: In this vignette, you will learn how to extend the one-sex kinship model to incorporate both male and female demographic rates. You will understand the implementation of two-sex matrix models, explore how sex-specific mortality and fertility patterns affect kinship structures, and analyze differences in kin availability by sex.
+</div>
+
+# Introduction {#introduction}
+
+Demographic processes fundamental to kinship formation vary significantly between males and females. While one-sex models offer valuable insights into family structures, they overlook these sex differences, which can lead to incomplete understanding of kinship dynamics. Two-sex kinship models address this limitation by incorporating sex-specific demographic rates and tracing both male and female lineages.
+
+Key advantages of two-sex models include:
+
+- Accounting for sex differences in mortality
+- Incorporating sex-specific fertility patterns
+- Enabling analysis of kin availability by sex
+- Allowing for the exploration of sex ratios within kinship networks
+- Providing more realistic estimates of kin availability across the life course
+
+In this vignette, we will implement a **two-sex time-invariant kinship model**, outlined in Caswell [-@caswell_formal_2022], using the `DemoKin` package to understand how sex-specific demographic patterns shape family structures.
+
+## Package Installation {#preparation}
+
+If you haven't already installed the required packages from the previous vignettes, here's what you'll need:
+
+```{r installs, eval=FALSE}
+# Install basic data analysis packages
+install.packages("dplyr")     # Data manipulation
+install.packages("tidyr")     # Data tidying
+install.packages("ggplot2")   # Data visualization
+install.packages("readr")     # Data import
+install.packages("knitr")     # Document generation
+install.packages("data.table")# Efficient data handling
+install.packages("Matrix")    # Matrix operations
+
+# Install DemoKin
+# DemoKin is available on CRAN (https://cran.r-project.org/web/packages/DemoKin/index.html), 
+# but we'll use the development version on GitHub (https://github.com/IvanWilli/DemoKin):
+install.packages("remotes")
+remotes::install_github("IvanWilli/DemoKin")
+library(DemoKin)  # For kinship analysis
+```
+
+# Setting Up the Analysis Environment {#load-packages}
+
+Let's load the necessary packages for our analysis:
+
+```{r libraries, warning=F, message=FALSE}
+rm(list = ls())
+library(dplyr)    # For data manipulation
+library(tidyr)    # For restructuring data
+library(ggplot2)  # For visualization
+library(readr)    # For reading data
+library(knitr)    # For document generation
+```
+
+# Two-Sex Kinship Modeling {#two-sex-model}
+
+## Understanding Sex Differences in Demographic Rates {#model-input-2sex}
+
+The first step in implementing a two-sex kinship model is to understand the sex differences in demographic rates. Human males and females exhibit distinct mortality and fertility patterns:
+
+1. **Mortality differences**: Males generally experience higher mortality rates at all ages, resulting in shorter life expectancy
+2. **Fertility differences**: Males often begin reproduction later and can continue reproducing at older ages
+
+These differences affect kinship structures in several important ways:
+
+- The availability of male versus female relatives (especially at older ages)
+- The timing of kin loss experiences (e.g., when fathers versus mothers die)
+- The number of descendants for male versus female individuals
+
+For our example, we'll use data from France (2012), which is included in the `DemoKin` package. Let's examine the sex-specific mortality and fertility rates:
+
+```{r sex_differences, fig.height= 8, fig.width= 10}
+# Extract sex-specific rates
+fra_fert_f <- fra_asfr_sex[,"ff"]    # Female fertility rates
+fra_fert_m <- fra_asfr_sex[,"fm"]    # Male fertility rates
+fra_surv_f <- fra_surv_sex[,"pf"]    # Female survival probabilities
+fra_surv_m <- fra_surv_sex[,"pm"]    # Male survival probabilities
+
+# Compare total fertility rates by sex
+cat("Difference in TFR (male - female):", sum(fra_fert_m) - sum(fra_fert_f))
+
+# Visualize sex differences in demographic rates
+data.frame(value = c(fra_fert_f, fra_fert_m, fra_surv_f, fra_surv_m),
+           age = rep(0:100, 4),
+           sex = rep(c(rep("f", 101), rep("m", 101)), 2),
+           risk = c(rep("fertility rate", 101 * 2), rep("survival probability", 101 * 2))) %>%
+  ggplot(aes(age, value, col=sex)) + 
+  geom_line(linewidth = 1) + 
+  labs(
+    title = "Sex-specific demographic rates in France (2012)",
+    x = "Age",
+    y = "Rate",
+    color = "Sex"
+  ) +
+  facet_wrap(~ risk, scales = "free_y") + 
+  theme_bw()
+```
+
+**Interpretation**: The graphs reveal important sex differences in demographic rates:
+
+- **Fertility patterns**: While total fertility rates are nearly identical between males and females (difference of only 0.01), the age patterns differ substantially. Male fertility occurs at later ages and has a wider distribution, reflecting the tendency for men to father children at older ages compared to women.
+
+- **Survival probabilities**: Females have higher survival probabilities at most of adult and old ages. This pattern leads to sex imbalances in older populations and affects the availability of different types of relatives.
+
+These sex differences in demographic rates will shape kinship networks in ways that one-sex models cannot capture.
+
+## Implementing the Two-Sex Model {#run-model-2sex}
+
+We now introduce the function `kin2sex`, which extends the one-sex function `kin` to incorporate sex-specific rates. The key differences are:
+
+1. We need to provide both female and male demographic rates
+2. We must specify the sex of the focal individual
+3. We need to indicate the sex ratio at birth (proportion of births that are female)
+
+Let's implement a two-sex time-varying model for France:
+
+```{r two_sex_model}
+kin_result <- kin2sex(
+  pf = fra_surv_f,        # Female survival probabilities
+  pm = fra_surv_m,        # Male survival probabilities
+  ff = fra_fert_f,        # Female fertility rates
+  fm = fra_fert_m,        # Male fertility rates
+  time_invariant = TRUE,  # Use time-invariant model
+  sex_focal = "f",        # Focus on female focal individuals
+  birth_female = .5       # Proportion of births that are female
+)
+```
+
+The output of `kin2sex` is similar to that of `kin`, with an additional column `sex_kin` that specifies the sex of each relative.
+
+## Living Relatives by Sex {#living-relatives-by-sex}
+
+Let's examine how the number of living relatives differs by sex across the life course of a female focal individual:
+
+```{r living_by_sex, message=FALSE, warning=FALSE}
+# Group specific kin types and filter for key relationships
+kin_out <- kin_result$kin_summary %>% 
+  mutate(kin = case_when(kin %in% c("ys", "os") ~ "s",      # Siblings
+                         kin %in% c("ya", "oa") ~ "a",    # Aunts/uncles
+                         TRUE ~ kin)) %>%
+  filter(kin %in% c("d", "m", "gm", "ggm", "s", "a"))     # Select key relationships
+
+# Visualize living kin by sex
+kin_out %>% 
+  group_by(kin, age_focal, sex_kin) %>%
+  summarise(count = sum(count_living)) %>%
+  ggplot(aes(age_focal, count, fill = sex_kin)) +
+  geom_area() +
+  labs(
+    title = "Expected number of living relatives by sex",
+    subtitle = "Female focal individual, France 2012",
+    x = "Age of focal individual",
+    y = "Number of living relatives",
+    fill = "Sex of relative"
+  ) +
+  theme_bw() +
+  facet_wrap(~kin, labeller = labeller(
+    kin = c("a" = "Aunts/Uncles", "d" = "Children", 
+            "gm" = "Grandparents", "ggm" = "Great-grandparents",
+            "m" = "Parents", "s" = "Siblings")
+  ))
+```
+
+**Interpretation**: These stacked area plots reveal how the sex composition of living relatives changes across the life course:
+
+- **Parents (m)**: Fathers (blue) die earlier than mothers (red), leading to a predominance of mothers at older ages
+- **Grandparents (gm)**: Even at birth, grandmothers outnumber grandfathers due to mortality in the grandparental generation
+- **Great-grandparents (ggm)**: Shows an even stronger female predominance due to compounded mortality differences across generations
+- **Siblings (s)**: Brothers die earlier than sisters, leading to a higher proportion of sisters at older ages
+- **Children (d)**: Starts with an even sex ratio, with slight female predominance at older ages due to higher male mortality
+
+These patterns highlight the importance of accounting for sex differences in kinship models, especially when studying older populations.
+
+## Understanding Kinship Terminology in Two-Sex Models {#kinship-terminology}
+
+When using the `kin2sex` function, it's important to understand how relationship codes work:
+
+```{r terminology_note}
+# Example of how to identify specific relatives by sex
+kin_result$kin_summary %>% 
+  filter(kin == "d", sex_kin == "m") %>%  # This selects sons (male children)
+  head()
+```
+
+The function uses the same relationship codes as the one-sex model (see `demokin_codes()`), but now each relative has a specified sex. For example:
+
+- `kin = "d", sex_kin = "f"` refers to daughters
+- `kin = "d", sex_kin = "m"` refers to sons
+- `kin = "m", sex_kin = "f"` refers to mothers
+- `kin = "m", sex_kin = "m"` refers to fathers
+
+This coding system allows for flexible analysis of specific relative types while maintaining compatibility with the one-sex model.
+
+## Sex Ratios in Kinship Networks {#sex-ratios}
+
+Sex ratios (males per female) are a traditional measure in demography that can provide insights into kinship structures. Let's examine how sex ratios vary across different types of relatives:
+
+```{r sex_ratios, message=FALSE, warning=FALSE}
+# Calculate sex ratios (males per female) by kin type and age
+kin_out %>% 
+  group_by(kin, age_focal) %>%
+  summarise(sex_ratio = sum(count_living[sex_kin == "m"], na.rm = TRUE) / 
+                        sum(count_living[sex_kin == "f"], na.rm = TRUE)) %>%
+  ggplot(aes(age_focal, sex_ratio)) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "gray50") +
+  labs(
+    title = "Sex ratios of living relatives across the life course",
+    subtitle = "Males per female, France 2012",
+    x = "Age of focal individual",
+    y = "Sex ratio (m/f)"
+  ) +
+  theme_bw() +
+  facet_wrap(~kin, scales = "free", labeller = labeller(
+    kin = c("a" = "Aunts/Uncles", "d" = "Children", 
+            "gm" = "Grandparents", "ggm" = "Great-grandparents",
+            "m" = "Parents", "s" = "Siblings")
+  ))
+```
+
+**Interpretation**: The sex ratio plots reveal several important patterns:
+
+- **Parents**: The sex ratio starts at 1 (equal numbers of mothers and fathers) but declines rapidly with age, reflecting higher male mortality
+- **Grandparents**: Even at birth, the sex ratio is below 1, with a 25-year-old having only about 0.5 grandfathers per grandmother
+- **Great-grandparents**: Shows even more extreme female predominance
+- **Children**: Maintains a sex ratio close to 1 throughout life, with slight declines at older ages
+- **Siblings**: Shows gradual decline in sex ratio with age due to higher male mortality
+
+These sex ratios have important implications for care relationships and support networks, particularly in older populations where female relatives predominate.
+
+## Timing of Kin Loss by Sex {#kin-loss-by-sex}
+
+The experience of losing relatives differs by the sex of those relatives. Let's examine how the timing of kin loss varies by sex:
+
+```{r kin_loss, message=FALSE, warning=FALSE}
+# Visualize dead kin by sex
+kin_out %>%
+  group_by(kin, sex_kin, age_focal) %>%
+  summarise(count = sum(count_dead)) %>%
+  ggplot(aes(age_focal, count, color = sex_kin)) +
+  geom_line(linewidth = 1) +
+  labs(
+    title = "Number of deceased relatives by sex",
+    subtitle = "Female focal individual, France 2012",
+    x = "Age of focal individual",
+    y = "Number of deceased relatives",
+    color = "Sex of relative"
+  ) +
+  theme_bw() +
+  facet_wrap(~kin, scales = "free", labeller = labeller(
+    kin = c("a" = "Aunts/Uncles", "d" = "Children", 
+            "gm" = "Grandparents", "ggm" = "Great-grandparents",
+            "m" = "Parents", "s" = "Siblings")
+  ))
+```
+
+**Interpretation**: These curves show how the experience of losing relatives differs by sex:
+
+- **Parents**: The loss of fathers (blue) occurs earlier than the loss of mothers (red)
+- **Grandparents**: Grandfather are often lost before birth or early in life, while grandmothers tend to be lost later
+- **Siblings**: Brothers are lost at higher rates than sisters before old ages (75+)
+- **Children**: While rare, the loss of sons occurs at higher rates than daughters
+
+Understanding these patterns is important for studying bereavement experiences and their impacts across the life course.
+
+# Applications of Two-Sex Kinship Models
+
+Two-sex kinship models have numerous applications in demographic and social research:
+
+1. **Gender and care**: Women typically provide more informal care to relatives than men. Two-sex models can help quantify potential care burdens by examining the availability of different types of relatives by sex.
+
+2. **Kinship networks in aging societies**: As populations age, the sex composition of available kin changes dramatically. Two-sex models allow us to project these changes and their implications for social support.
+
+3. **Intergenerational transfers**: Resources often flow differently between male and female relatives. Two-sex models provide the demographic foundation for studying these gendered patterns.
+
+4. **Demographic transitions**: Sex differences in mortality and fertility change during demographic transitions, reshaping kinship networks in ways that one-sex models cannot capture.
+
+5. **Demographic shocks**: Events like wars often affect males and females differently, with long-lasting impacts on kinship structures. Two-sex models can capture these effects.
+
+# Conclusion
+
+In this vignette, we've explored how to implement two-sex kinship models using the `DemoKin` package. By incorporating sex-specific mortality and fertility rates, these models reveal important patterns that one-sex models cannot capture:
+
+1. Female predominance among older relatives due to sex differences in mortality
+2. Systematic differences in the timing of kin loss by sex, with male kin typically lost earlier
+3. Varying sex ratios within kinship networks by relationship type and age
+4. Distinct age distributions of relatives by sex
+
+These insights have significant implications for understanding care relationships, intergenerational transfers, and support systems in aging societies. The two-sex approach substantially enhances our understanding of how gender shapes family structures across the life course, providing a more realistic foundation for both research and policy development.
+
+# References

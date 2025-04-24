@@ -1,0 +1,484 @@
+---
+title: "One-sex time-invariant kinship model specified by age"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    number_sections: true
+    code_folding: show
+    df_print: paged
+    fig_caption: true
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{One-sex time-invariant kinship model specified by age}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+# Set up code chunk options
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE, 
+                      warning = FALSE, 
+                      fig.align = 'center',
+                      fig.width = 8,
+                      fig.height = 6,
+                      dpi = 300)
+# Prevent scientific notation (useful for the rate calculation)
+options(scipen = 999999)
+pkgload::load_all()
+```
+
+<style>
+/* Make TOC appear on the right side */
+.tocify {
+  position: fixed;
+  top: 50px;
+  right: 0;
+  width: 240px;
+  height: calc(100% - 50px);
+  overflow-y: auto;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Adjust main content to make room for right-side TOC */
+.main-container {
+  max-width: calc(100% - 260px);
+  margin-left: 10px;
+  margin-right: 250px;
+}
+
+/* Limit TOC to only show 2 levels */
+.tocify-subheader .tocify-subheader {
+  display: none;
+}
+
+/* Style for learning objectives box */
+.learning-objectives {
+  background-color: #e0f7fa;
+  border-left: 5px solid #00acc1;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 3px;
+}
+</style>
+
+<div class="learning-objectives">
+<strong>Learning Objectives</strong>: In this tutorial, you will learn how to use the DemoKin package to analyze kinship networks, understand the mechanics of one-sex time-invariant models, and visualize kinship dynamics across the life course.
+</div>
+
+# Introduction {#introduction}
+
+Kinship is a fundamental property of human populations and a key form of social structure. Demographers have long been interested in the interplay between demographic change and family configuration. This has led to the development of sophisticated methodological and conceptual approaches for the study of kinship, some of which are explored in this tutorial.
+
+Kinship analysis can answer a range of important questions:
+
+- How many relatives might people have at different ages, and what is the age distribution of these relatives?
+- How does family structure (both the number and age distribution of kin) evolve as populations undergo demographic transition?
+
+In this tutorial, we will implement matrix kinship models using the `DemoKin` package to calculate kin counts and age distributions. We begin with the simplest model: a **time-invariant one-sex model**, outlined in Caswell [-@caswell_formal_2019]. In this model, we assume that everyone in the population experiences the same mortality and fertility rates throughout their lives (e.g., the 2015 rates), and we only trace female kin relationships.
+
+## Preparation {#preparation}
+
+Before starting the session, please ensure you complete the following preparatory steps:
+
+1. If you haven't already, install R and RStudio. This is a useful tutorial: https://rstudio-education.github.io/hopr/starting.html 
+2. Install the following packages in R:
+
+```{r installs, eval=FALSE}
+# Install basic data analysis packages
+rm(list = ls())
+install.packages("dplyr")     # Data manipulation
+install.packages("tidyr")     # Data tidying
+install.packages("ggplot2")   # Data visualization
+install.packages("readr")     # Data import
+install.packages("knitr")     # Document generation
+install.packages("data.table")# Efficient data handling
+install.packages("Matrix")    # Matrix operations
+
+# Install DemoKin
+# DemoKin is available on CRAN (https://cran.r-project.org/web/packages/DemoKin/index.html), 
+# but we'll use the development version on GitHub (https://github.com/IvanWilli/DemoKin):
+install.packages("remotes")
+remotes::install_github("IvanWilli/DemoKin")
+library(DemoKin)  # For kinship analysis
+```
+
+# Setting Up the Analysis Environment {#load-packages}
+
+Let's begin by loading the necessary packages for our analysis:
+
+```{r libraries, warning=F, message=FALSE}
+library(dplyr)    # For data manipulation
+library(tidyr)    # For restructuring data
+library(ggplot2)  # For visualization
+library(readr)    # For reading data
+library(knitr)    # For document generation
+```
+
+<!-- Load additional utility functions that we've prepared for this tutorial: -->
+
+<!-- ```{r functions, warning=F, message=FALSE} -->
+<!-- source("functions.R") -->
+<!-- ``` -->
+
+# Understanding the Demographic Data {#demographic-data}
+
+## Data Overview
+
+The `DemoKin` package includes Swedish demographic data from the Human Mortality Database (HMD) and Human Fertility Database (HFD) as an example dataset. This includes:
+
+- **swe_px**: Age-by-year matrix of survival probabilities
+- **swe_Sx**: Age-by-year matrix of survival ratios
+- **swe_asfr**: Age-by-year matrix of fertility rates
+- **swe_pop**: Age-by-year matrix of population counts
+
+You can view all available data in the package with `data(package="DemoKin")`.
+
+## Exploring the Data
+
+Let's examine a subset of the Swedish demographic data to understand its structure:
+
+```{r data_exploration, warning=FALSE, message=FALSE}
+# First 5 rows and columns of survival probabilities
+head(swe_px[1:5, 1:5])
+
+# Fertility rates for ages 25-30
+head(swe_asfr[26:31, 1:10])
+```
+
+For our time-invariant model, we need to extract the demographic rates for a single year. Let's use 2015 as our reference year:
+
+```{r extract_2015, warning=FALSE, message=FALSE}
+# Extract vectors for 2015
+swe_surv_2015 <- swe_px[,"2015"]  # Survival probabilities
+swe_asfr_2015 <- swe_asfr[,"2015"] # Fertility rates
+```
+
+Let's compare the data between different time periods to understand demographic changes. Here we compare values from 1950 and 2010:
+
+```{r compare_periods, warning=FALSE, message=FALSE}
+# Survival probabilities
+cat("Survival probabilities (px):\n")
+head(swe_px[,c("1950","2010")])
+
+# Fertility rates
+cat("\nFertility rates (asfr):\n")
+head(swe_asfr[,c("1950","2010")])
+
+# Population counts
+cat("\nPopulation counts:\n")
+head(swe_pop[,c("1950","2010")])
+```
+
+## Visualizing Demographic Trends
+
+### Mortality Trends
+
+Let's visualize how mortality has changed over time. We'll plot the probability of dying between ages $x$ and $x+1$ (denoted as $q_x = 1-p_x$) for different years:
+
+```{r mortality_viz}
+swe_px %>%
+  as.data.frame() %>%
+  mutate(age = c(0:100)) %>%
+  pivot_longer(cols = -c(age), names_to = "year", values_to = "px") %>%
+  filter(year %in% seq(1950, 2010, 30)) %>% 
+  mutate(qx = 1-px) %>%
+  ggplot() +
+  geom_line(aes(x = age, y = qx, col = as.character(year)), linewidth = 1) +
+  scale_y_log10() +
+  labs(
+    title = "Age-specific mortality in Sweden (1950-2010)",
+    subtitle = "Probability of dying between ages x and x+1",
+    x = "Age",
+    y = "Probability of dying (qx, log scale)", 
+    col = "Year"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+**Interpretation**: This graph reveals how mortality has declined dramatically across all age groups from 1950 to 2010. The log scale highlights improvements at all ages, with particularly notable declines in infant and child mortality. The characteristic "bathtub" shape of human mortality is clearly visible: high mortality in infancy, followed by very low mortality through childhood and early adulthood, then a steady exponential increase with age.
+
+### Fertility Trends
+
+Now, let's examine how fertility patterns have changed over time:
+
+```{r fertility_viz}
+swe_asfr %>%
+  as.data.frame() %>%
+  mutate(age = c(0:100)) %>%
+  pivot_longer(cols = -c(age), names_to = "year", values_to = "fx") %>%
+  filter(year %in% seq(1950, 2010, 30)) %>% 
+  ggplot() + 
+  geom_line(aes(x = age, y = fx, col = as.character(year)), linewidth = 1) +
+  labs(
+    title = "Age-specific fertility in Sweden (1950-2010)",
+    subtitle = "Fertility rates by age of mother",
+    x = "Age of mother",
+    y = "Age-specific fertility rate (fx)", 
+    col = "Year"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+**Interpretation**: This visualization shows how fertility patterns have changed over the decades. The 1950 curve shows earlier childbearing with higher peak fertility rates. By 2010, fertility has shifted to later ages, reflecting the postponement of childbearing in developed countries. We can also observe the declining total fertility rate (the area under each curve).
+
+### Population Structure
+
+Finally, let's look at how the population structure has evolved:
+
+```{r population_viz}
+swe_pop %>%
+  as.data.frame() %>%
+  mutate(age = c(0:100)) %>%
+  pivot_longer(-age, names_to = "year", values_to = "pop") %>% 
+  mutate(year = gsub("X", "", year)) %>% 
+  filter(year %in% seq(1950, 2010, 30)) %>% 
+  ggplot() + 
+  geom_line(aes(x = age, y = pop, col = as.character(year)), linewidth = 1) +
+  labs(
+    title = "Female population structure in Sweden (1950-2010)",
+    subtitle = "Population counts by age",
+    x = "Age",
+    y = "Population count (thousands)", 
+    col = "Year"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+**Interpretation**: This graph shows how Sweden's female population structure has changed over time. The 1950 distribution shows the effects of baby booms and war years. By 2010, we see population aging with a more uniform distribution across ages and greater longevity, with significant numbers of women surviving to very old ages.
+
+# The DemoKin Package {#the-demokin-package}
+
+## Overview
+
+`DemoKin` is an R package designed to compute the number and age distribution of relatives (kin) of a focal individual under various demographic assumptions. It can analyze both living and deceased kin, and allows for both time-invariant and time-varying demographic rates.
+
+## The `kin()` Function {#kin-function}
+
+The main function in the package is `DemoKin::kin()`, which implements matrix kinship models to calculate expected kin counts.
+
+For our first example, we'll run the simplest model with the following assumptions:
+
+1. **Time-invariant** rates: The same set of mortality and fertility rates apply throughout all time periods (we'll use 2015 rates).
+2. **One-sex** population: We'll only use female data and trace kinship through female lines.
+
+Let's run the basic kinship model:
+
+```{r basic_kin_model}
+# Run the time-invariant, one-sex model
+swe_2015 <- kin(
+  p = swe_surv_2015,          # Vector of survival probabilities
+  f = swe_asfr_2015,          # Vector of fertility rates
+  time_invariant = TRUE       # Use time-invariant model
+)
+```
+
+## Function Arguments {#kin-arguments}
+
+The `kin()` function accepts several important arguments:
+
+- **p**: A vector or matrix of survival probabilities with rows as ages (and columns as years if a matrix)
+- **f**: A vector or matrix of fertility rates with the same dimensions as p
+- **time_invariant**: Logical flag indicating whether to assume time-invariant rates (default: TRUE)
+- **output_kin**: Character vector specifying which kin types to return (e.g., "m" for mother, "d" for daughter)
+
+## Relative Types {#relative-types}
+
+In `DemoKin`, each type of relative is identified by a unique code. These codes differ from those used in Caswell [-@caswell_formal_2019]. The following table shows the relationship between these coding systems:
+
+```{r relative_codes}
+# Display relationship codes
+demokin_codes
+```
+
+## Function Output {#value}
+
+The `kin()` function returns a list containing two data frames:
+
+```{r output_structure}
+# Examine the structure of the output
+str(swe_2015)
+```
+
+### The `kin_full` Data Frame {#kin-full}
+
+This data frame contains detailed information on expected kin counts by:
+- Age of the focal individual
+- Type of kin
+- Age of kin
+- Living/dead status
+
+```{r kin_full_example}
+# View the first few rows of kin_full
+head(swe_2015$kin_full)
+```
+
+### The `kin_summary` Data Frame {#kin-summary}
+
+This data frame provides a summary of expected kin counts by:
+- Age of the focal individual
+- Type of kin
+- Total counts (not broken down by age of kin)
+
+```{r kin_summary_example}
+# View the first few rows of kin_summary
+head(swe_2015$kin_summary)
+```
+
+# Visualizing Kinship Networks {#kinship-diagrams}
+
+## Keyfitz Diagrams
+
+One powerful way to visualize kinship structure is through a network or 'Keyfitz' kinship diagram [@Keyfitz2005]. Let's see the expected number of living female relatives for a 65-year-old woman according to our model:
+
+```{r keyfitz_diagram, fig.height=10, fig.width=12}
+swe_2015$kin_summary %>% 
+  filter(age_focal == 65) %>% 
+  select(kin, count = count_living) %>% 
+  plot_diagram(rounding = 2)
+```
+
+**Interpretation**: This Keyfitz diagram provides a comprehensive view of the kinship network for a 65-year-old woman in Sweden (based on 2015 demographic rates). The diagram shows:
+
+- Vertical relationships: A 65-year-old woman is likely to have around 0.9 daughters and 0.52 granddaughters through daughters, but few great-granddaughters (nearly 0) as they wouldn't have been born yet. Looking upward, she's unlikely to have a living mother (0.16) and almost certainly no living grandmother (nearly 0).
+- Horizontal relationships: She would have about 0.83 living sisters (0.38 old sisters and 0.45 younger sisters) and 0.8 nieces.
+
+This visualization helps us understand the changing composition of family networks across the life course.
+
+# Analyzing Living Kin Over the Life Course {#number-of-living-kin}
+
+Let's run the model again, but this time we'll specify exactly which kin types we want to analyze:
+
+```{r specific_kin_model}
+swe_2015 <- 
+  kin(
+    p = swe_surv_2015,
+    f = swe_asfr_2015,
+    output_kin = c("c", "d", "gd", "ggd", "gm", "m", "n", "a", "s"),  # Specific kin types
+    time_invariant = TRUE
+  )
+```
+
+Now, let's visualize how the expected number of each type of relative changes over the life course:
+
+```{r kin_over_lifecourse, fig.height=8, fig.width=10}
+swe_2015$kin_summary %>%
+  rename_kin() %>%  # Convert kin codes to readable labels
+  ggplot() +
+  geom_line(aes(age_focal, count_living), linewidth = 1)  +
+  theme_bw() +
+  labs(
+    title = "Expected number of living female relatives over the life course",
+    subtitle = "Based on Swedish demographic rates from 2015",
+    x = "Age of focal individual",
+    y = "Number of living female relatives"
+  ) +
+  facet_wrap(~kin_label, scales = "free_y")  # Use different y-scales for each panel
+```
+
+**Interpretation**: These plots show how different kinship relationships evolve over a person's lifetime:
+
+- **Mothers**: Initially 1.0 (everyone has a mother at birth), then gradually declining as mortality takes its toll
+- **Grandmothers**: Start lower (many already deceased at Focal's birth) and decline rapidly
+- **Daughters**: Increasing during reproductive years, then stable
+- **Granddaughters**: Appearing later and increasing as daughters have children
+- **Great-granddaughters**: Appearing even later as granddaughters have children
+- **Sisters**: Relatively stable then declining due to mortality
+- **Aunts and cousins**: Follow similar patterns of eventual decline
+- **nieces**: similar patterns as daughters.
+
+> Note that we are working in a time-invariant framework. You can think of the results as analogous to life expectancy (i.e., expected years of life for a synthetic cohort experiencing a given set of period mortality rates).
+
+## Total Family Size Over the Life Course
+
+How does the overall family size (and family composition) vary over life for an average woman?
+
+```{r family_size_composition}
+# Calculate total kin count at each age
+counts <- 
+  swe_2015$kin_summary %>%
+  group_by(age_focal) %>% 
+  summarise(count_living = sum(count_living)) %>% 
+  ungroup()
+
+# Plot family composition over the life course
+swe_2015$kin_summary %>%
+  select(age_focal, kin, count_living) %>% 
+  rename_kin() %>% 
+  ggplot(aes(x = age_focal, y = count_living)) +
+  geom_area(aes(fill = kin_label), color = "black", alpha = 0.8) +
+  geom_line(data = counts, linewidth = 1.5) +
+  labs(
+    title = "Family size and composition over the life course",
+    subtitle = "Based on Swedish demographic rates from 2015",
+    x = "Age of focal individual",
+    y = "Number of living female relatives",
+    fill = "Kin type"
+  ) +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+**Interpretation**: This stacked area chart reveals fascinating patterns in family size and composition throughout life:
+
+1. **Early life**: Family consists primarily of mothers, grandmothers, aunts, cousins, and sisters
+2. **Young and middle adulthood (20s-40s)**: Total family size increases as daughters and nieces are born
+3. **Late adulthood and Older (50s+)**: Even though granddaughters and granddaughters are born, while older relatives (mothers, aunts, grandmothers) begin to disappear. Family composition shifts dramatically toward descendants (daughters, granddaughters, great-granddaughters)
+
+Therefore, the total family size (black line) shows an interesting U-shape, first declining as older relatives die, then rising again as new generations are born.
+
+# Age Distribution of Relatives {#age-distribution-of-living-kin}
+
+Beyond just counting relatives, we're often interested in their age distribution. Using the `kin_full` data frame, we can examine the age distribution of Focal's relatives at a specific age.
+
+Let's visualize the age distribution of relatives when Focal is 65 years old:
+
+```{r age_distribution, fig.height=8, fig.width=10}
+swe_2015$kin_full %>%
+  rename_kin() %>%
+  filter(age_focal == 65) %>%
+  ggplot(aes(age_kin, living)) +
+  geom_line(linewidth = 1) +
+  geom_vline(xintercept = 65, color = "red", linetype = "dashed") +
+  labs(
+    title = "Age distribution of living female relatives when Focal is 65",
+    subtitle = "Based on Swedish demographic rates from 2015 (red line = Focal's age)",
+    x = "Age of relative",
+    y = "Expected number of living relatives"
+  ) +
+  theme_bw() +
+  facet_wrap(~kin_label, scales = "free_y")
+```
+
+**Interpretation**: These distributions provide rich information about family age structure:
+
+- **Mothers**: If still alive, would be concentrated around age 85-95
+- **Daughters**: Mostly in their 30s and 40s
+- **Granddaughters**: Predominantly young, between ages 0-15
+- **Sisters**: Close to Focal's own age (65)
+- **Nieces**: Mostly in their 30s and 40s, similar to daughters
+- **Cousins**: Close to Focal's own age (65)
+
+Understanding age distributions is crucial for estimating care needs, support systems, and intergenerational transfers within families.
+
+# Conclusion
+
+In this tutorial, we've explored how to use the `DemoKin` package to model kinship dynamics in a time-invariant, one-sex framework. We've seen how different demographic patterns affect family size and composition, and visualized these relationships across the life course.
+
+Key insights include:
+
+1. Family networks are dynamic, changing dramatically throughout the life course
+2. Both family size and composition evolve with age
+3. Modern demographic rates lead to "bean pole" families—vertical extension (multiple generations) but horizontal contraction (fewer siblings, cousins)
+4. Matrix population models provide a powerful framework for understanding these dynamics
+
+# References
