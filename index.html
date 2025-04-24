@@ -62,178 +62,84 @@
 <div class="page-header"><h1 id="demokin">DemoKin<a class="anchor" aria-label="anchor" href="#demokin"></a>
 </h1></div>
 <div class="columns">
-<div class="column" style="width:60%;">
-<p><code>DemoKin</code> uses matrix demographic methods to compute expected (average) kin counts from demographic rates under a range of scenarios and assumptions. The package is an R-language implementation of Caswell [-@caswell_formal_2019; -@caswell_formal_2020; -@caswell_formal_2022], and Caswell and Song [-@caswell_formal_2021]. It draws on previous theoretical development by Goodman, Keyfitz and Pullum [-@goodman_family_1974].</p>
+<div class="column" style="width:30%;">
+<p><img src="reference/figures/DemoKin-Logo.png" style="width:100px;"></p>
 </div>
-<div class="column" style="width:40%;">
-<p><img src="reference/figures/DemoKin-Logo.png" align="right" width="200"></p>
+<div class="column" style="width:70%;">
+<p>DemoKin is an R package for the demographic analysis of kinship networks using matrix-based models.<br>
+It implements methods developed by Caswell and colleagues for estimating the number and age distribution of relatives under various demographic assumptions.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
+<ul>
+<li>Estimate kin counts and age distributions for various types of relatives</li>
+<li>Support for one-sex and two-sex models</li>
+<li>Time-invariant and time-varying approaches</li>
+<li>Multi-state models incorporating additional variables like parity or education</li>
+<li>Visualization tools for kinship networks</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>Download the stable version <a href="https://cran.r-project.org/web/packages/DemoKin/" class="external-link">from CRAN</a>:</p>
+<p>You can install the development version of DemoKin from GitHub:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"DemoKin"</span><span class="op">)</span></span></code></pre></div>
-<p>Or you can install the development version from GitHub:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"IvanWilli/DemoKin"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"IvanWilli/DemoKin"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/IvanWilli/DemoKin" class="external-link">DemoKin</a></span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
-<p>Consider an average Swedish woman called ‘Focal.’ For this exercise, we assume a female closed population in which everyone experiences the Swedish 2015 mortality and fertility rates at each age throughout their life; i.e., the ‘time-invariant’ assumption in Caswell [-@caswell_formal_2019].</p>
-<p>We then ask:</p>
-<blockquote>
-<p>What is the expected number of relatives of Focal over her life course?</p>
-</blockquote>
-<p>Let’s explore this using the Swedish data already included with <code>DemoKin</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/IvanWilli/DemoKin" class="external-link">DemoKin</a></span><span class="op">)</span></span>
-<span><span class="va">swe_surv_2015</span> <span class="op">&lt;-</span> <span class="va">swe_px</span><span class="op">[</span>,<span class="st">"2015"</span><span class="op">]</span></span>
-<span><span class="va">swe_asfr_2015</span> <span class="op">&lt;-</span> <span class="va">swe_asfr</span><span class="op">[</span>,<span class="st">"2015"</span><span class="op">]</span></span>
-<span><span class="va">swe_2015</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kin.html">kin</a></span><span class="op">(</span>p <span class="op">=</span> <span class="va">swe_surv_2015</span>, f <span class="op">=</span> <span class="va">swe_asfr_2015</span>, time_invariant <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><em>p</em> is the survival probability by age from a life table and <em>f</em> are the age specific fertility ratios by age (see <code><a href="reference/kin.html">?kin</a></code> for details).</p>
-<p>Now, we can visualize the implied kin counts (i.e., the average number of living kin) of Focal at age 35 using a network or ‘Keyfitz’ kinship diagram with the function <code>plot_diagram</code>:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># We need to reformat the data a little bit</span></span>
-<span><span class="va">kin_total</span> <span class="op">&lt;-</span> <span class="va">swe_2015</span><span class="op">$</span><span class="va">kin_summary</span></span>
-<span><span class="co"># Keep only data for Focal's age 35</span></span>
-<span><span class="va">kin_total</span> <span class="op">&lt;-</span> <span class="va">kin_total</span><span class="op">[</span><span class="va">kin_total</span><span class="op">$</span><span class="va">age_focal</span> <span class="op">==</span> <span class="fl">35</span> , <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"kin"</span>, <span class="st">"count_living"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">kin_total</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"kin"</span>, <span class="st">"count"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/plot_diagram.html">plot_diagram</a></span><span class="op">(</span><span class="va">kin_total</span>, rounding <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%"></p>
-<p>Relatives are identified by a unique code:</p>
-<table class="table">
-<colgroup>
-<col width="8%">
-<col width="27%">
-<col width="29%">
-<col width="33%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">DemoKin</th>
-<th align="left">Labels_female</th>
-<th align="left">Labels_male</th>
-<th align="left">Labels_2sex</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">coa</td>
-<td align="left">Cousins from older aunts</td>
-<td align="left">Cousins from older uncles</td>
-<td align="left">Cousins from older aunts/uncles</td>
-</tr>
-<tr class="even">
-<td align="left">cya</td>
-<td align="left">Cousins from younger aunts</td>
-<td align="left">Cousins from younger uncles</td>
-<td align="left">Cousins from younger aunts/uncles</td>
-</tr>
-<tr class="odd">
-<td align="left">c</td>
-<td align="left">Cousins</td>
-<td align="left">Cousins</td>
-<td align="left">Cousins</td>
-</tr>
-<tr class="even">
-<td align="left">d</td>
-<td align="left">Daughters</td>
-<td align="left">Sons</td>
-<td align="left">Children</td>
-</tr>
-<tr class="odd">
-<td align="left">gd</td>
-<td align="left">Grand-daughters</td>
-<td align="left">Grand-sons</td>
-<td align="left">Grand-childrens</td>
-</tr>
-<tr class="even">
-<td align="left">ggd</td>
-<td align="left">Great-grand-daughters</td>
-<td align="left">Great-grand-sons</td>
-<td align="left">Great-grand-childrens</td>
-</tr>
-<tr class="odd">
-<td align="left">ggm</td>
-<td align="left">Great-grandmothers</td>
-<td align="left">Great-grandfathers</td>
-<td align="left">Great-grandfparents</td>
-</tr>
-<tr class="even">
-<td align="left">gm</td>
-<td align="left">Grandmothers</td>
-<td align="left">Grandfathers</td>
-<td align="left">Grandparents</td>
-</tr>
-<tr class="odd">
-<td align="left">m</td>
-<td align="left">Mother</td>
-<td align="left">Father</td>
-<td align="left">Parents</td>
-</tr>
-<tr class="even">
-<td align="left">nos</td>
-<td align="left">Nieces from older sisters</td>
-<td align="left">Nephews from older brothers</td>
-<td align="left">Niblings from older siblings</td>
-</tr>
-<tr class="odd">
-<td align="left">nys</td>
-<td align="left">Nieces from younger sisters</td>
-<td align="left">Nephews from younger brothers</td>
-<td align="left">Niblings from younger siblings</td>
-</tr>
-<tr class="even">
-<td align="left">n</td>
-<td align="left">Nieces</td>
-<td align="left">Nephews</td>
-<td align="left">Niblings</td>
-</tr>
-<tr class="odd">
-<td align="left">oa</td>
-<td align="left">Aunts older than mother</td>
-<td align="left">Uncles older than fathers</td>
-<td align="left">Aunts/Uncles older than parents</td>
-</tr>
-<tr class="even">
-<td align="left">ya</td>
-<td align="left">Aunts younger than mother</td>
-<td align="left">Uncles younger than father</td>
-<td align="left">Aunts/Uncles younger than parents</td>
-</tr>
-<tr class="odd">
-<td align="left">a</td>
-<td align="left">Aunts</td>
-<td align="left">Uncles</td>
-<td align="left">Aunts/Uncles</td>
-</tr>
-<tr class="even">
-<td align="left">os</td>
-<td align="left">Older sisters</td>
-<td align="left">Older brothers</td>
-<td align="left">Older siblings</td>
-</tr>
-<tr class="odd">
-<td align="left">ys</td>
-<td align="left">Younger sisters</td>
-<td align="left">Younger brothers</td>
-<td align="left">Younger siblings</td>
-</tr>
-<tr class="even">
-<td align="left">s</td>
-<td align="left">Sisters</td>
-<td align="left">Brothers</td>
-<td align="left">Siblings</td>
-</tr>
-</tbody>
-</table>
+<p>Here’s a basic example of how to use DemoKin:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="co"># Run a one-sex time-invariant kinship model using Swedish data from 2015</span></span>
+<span><span class="va">kin_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/kin.html">kin</a></span><span class="op">(</span></span>
+<span>  p <span class="op">=</span> <span class="va">swe_px</span><span class="op">[</span>,<span class="st">"2015"</span><span class="op">]</span>,        <span class="co"># Survival probabilities</span></span>
+<span>  f <span class="op">=</span> <span class="va">swe_asfr</span><span class="op">[</span>,<span class="st">"2015"</span><span class="op">]</span>,      <span class="co"># Fertility rates</span></span>
+<span>  time_invariant <span class="op">=</span> <span class="cn">TRUE</span>       <span class="co"># Use time-invariant model</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Visualize the expected number of living relatives by age</span></span>
+<span><span class="va">kin_results</span><span class="op">$</span><span class="va">kin_summary</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="reference/rename_kin.html">rename_kin</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">age_focal</span>, <span class="va">count_living</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">kin_label</span>, scales <span class="op">=</span> <span class="st">"free_y"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Expected number of living relatives by age"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Age of focal individual"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Number of relatives"</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="co">#&gt; Joining with `by = join_by(kin)`</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
 </div>
 <div class="section level2">
-<h2 id="vignette">Vignette<a class="anchor" aria-label="anchor" href="#vignette"></a>
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
-<p>For more details, including an extension to time-variant rates, deceased kin, and multi-state models in a one-sex framework, see the <a href="https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_OneSex.html" class="external-link">Reference_OneSex</a> vignette; also accessible from DemoKin: <code><a href="https://ivanwilli.github.io/DemoKin/articles/Reference_OneSex.html">vignette("Reference_OneSex", package = "DemoKin")</a></code>. For two-sex models, see the <a href="https://cran.r-project.org/web/packages/DemoKin/vignettes/Reference_TwoSex.html" class="external-link">Reference_TwoSex</a> vignette; also accessible from DemoKin: <code><a href="https://ivanwilli.github.io/DemoKin/articles/Reference_TwoSex.html">vignette("Reference_TwoSex", package = "DemoKin")</a></code>. If the vignette does not load, you may need to install the package as <code>devtools::install_github("IvanWilli/DemoKin", build_vignettes = T)</code>.</p>
+<p>For detailed documentation, please visit the <a href="https://ivanwilli.github.io/DemoKin/">DemoKin website</a>.</p>
+<p>The site includes several vignettes demonstrating different types of kinship models:</p>
+<div class="section level3">
+<h3 id="models-stratified-by-age">Models stratified by age<a class="anchor" aria-label="anchor" href="#models-stratified-by-age"></a>
+</h3>
+<ul>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/1_1_OneSex_TimeInvariant_Age.html">One-sex time-invariant kinship model</a></li>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/1_2_OneSex_TimeVarying_Age.html">One-sex time-varying kinship model</a></li>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/1_3_TwoSex_TimeInvariant_Age.html">Two-sex time-invariant kinship model</a></li>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/1_4_TwoSex_TimeVarying_Age.html">Two-sex time-varying kinship model</a></li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="models-stratified-by-age-and-stage">Models stratified by age and stage<a class="anchor" aria-label="anchor" href="#models-stratified-by-age-and-stage"></a>
+</h3>
+<ul>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/2_1_OneSex_TimeInvariant_AgeStage.html">One-sex time-invariant multi-state model</a></li>
+<li><a href="https://ivanwilli.github.io/DemoKin/articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying multi-state model</a></li>
+</ul>
+</div>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
@@ -249,7 +155,19 @@
 <h2 id="get-involved">Get involved!<a class="anchor" aria-label="anchor" href="#get-involved"></a>
 </h2>
 <p><code>DemoKin</code> is under constant development. If you’re interested in contributing, please get in touch, create an issue, or submit a pull request. We look forward to hearing from you!</p>
-<!-- ## References -->
+</div>
+<div class="section level2">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<p>Caswell, H. (2019). The formal demography of kinship: A matrix formulation. Demographic Research, 41, 679-712.</p>
+<p>Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research, 42, 1097-1144.</p>
+<p>Caswell, H. &amp; Song, X. (2021). The formal demography of kinship III: Kinship dynamics with time-varying demographic rates. Demographic Research, 45, 517-546.</p>
+<p>Caswell, H. &amp; Song, X. (2022). The formal demography of kinship IV: Two-sex models and their approximations. Demographic Research, 47, 359-396.</p>
+</div>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
+<p>This project is licensed under the MIT License - see the LICENSE file for details.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
