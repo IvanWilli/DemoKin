@@ -26,7 +26,7 @@ First, we compute kin counts in a **time-invariant** framework. We assume that F
 In order to implement the time-invariant models, the function `DemoKin::kin` expects a vector of survival ratios and another vector of fertility rates. In this example, we get the data for the year 2015, and run the matrix models:
 
 ```{r, message=FALSE, warning=FALSE}
-library(DemoKin)
+pkgload::load_all()
 library(tidyr)
 library(dplyr)
 library(ggplot2)

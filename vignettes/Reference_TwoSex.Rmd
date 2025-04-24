@@ -31,7 +31,8 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
-devtools::load_all()
+pkgload::load_all()
+# devtools::load_all()
 ```
 
 ### 1. Demographic rates by sex
@@ -41,6 +42,8 @@ For this example, we use data from 2012 France to exemplify the use of the two-s
 Data on female and male fertility and mortality are included in `DemoKin`. In this population, male and female TFR is almost identical (1.98 and 1.99) but the distributions of fertility by sex varies over age:
 
 ```{r}
+data(fra_asfr_sex, package = "DemoKin")
+data(fra_surv_sex, package = "DemoKin")
 fra_fert_f <- fra_asfr_sex[,"ff"]
 fra_fert_m <- fra_asfr_sex[,"fm"]
 fra_surv_f <- fra_surv_sex[,"pf"]

@@ -18,7 +18,8 @@ Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
-    ggplot2
+    ggplot2,
+    pkgdown
 VignetteBuilder: knitr
 Imports: 
     dplyr,
