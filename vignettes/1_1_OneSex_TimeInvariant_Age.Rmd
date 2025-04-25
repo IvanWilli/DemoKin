@@ -97,8 +97,6 @@ install.packages("dplyr")     # Data manipulation
 install.packages("tidyr")     # Data tidying
 install.packages("ggplot2")   # Data visualization
 install.packages("knitr")     # Document generation
-install.packages("data.table")# Efficient data handling
-install.packages("Matrix")    # Matrix operations
 
 # Install DemoKin
 # DemoKin is available on CRAN (https://cran.r-project.org/web/packages/DemoKin/index.html), 
@@ -118,12 +116,6 @@ library(tidyr)    # For restructuring data
 library(ggplot2)  # For visualization
 library(knitr)    # For document generation
 ```
-
-<!-- Load additional utility functions that we've prepared for this tutorial: -->
-
-<!-- ```{r functions, warning=F, message=FALSE} -->
-<!-- source("functions.R") -->
-<!-- ``` -->
 
 # Understanding the Demographic Data {#demographic-data}
 

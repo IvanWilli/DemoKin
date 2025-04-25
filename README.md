@@ -13,9 +13,14 @@
 
 <div class="column" width="70%">
 
-DemoKin is an R package for the demographic analysis of kinship networks
+This is an R package for the demographic analysis of kinship networks
 using matrix-based models.  
-It implements methods developed by Caswell (2019) and colleagues () for
+It implements methods developed initially by [Caswell
+(2019)](https://www.demographic-research.org/articles/volume/41/24)),
+and continued in successive papers (like [Caswell
+(2020)](https://www.demographic-research.org/articles/volume/42/38) or
+[Caswell
+(2024)](https://www.demographic-research.org/articles/volume/49/41)) for
 estimating the number and age distribution of relatives under various
 demographic assumptions.
 
@@ -114,24 +119,9 @@ Commons. Sha Jiang provided useful comments for improving the package.
 ## Get involved!
 
 `DemoKin` is under constant development. If you’re interested in
-contributing, please get in touch, create an issue, or submit a pull
+contributing, please get in touch, create an
+[issue](https://github.com/IvanWilli/DemoKin/issues), or submit a pull
 request. We look forward to hearing from you!
-
-## References
-
-Caswell, H. (2019). The formal demography of kinship: A matrix
-formulation. Demographic Research, 41, 679-712.
-
-Caswell, H. (2020). The formal demography of kinship II: Multistate
-models, parity, and sibship. Demographic Research, 42, 1097-1144.
-
-Caswell, H. & Song, X. (2021). The formal demography of kinship III:
-Kinship dynamics with time-varying demographic rates. Demographic
-Research, 45, 517-546.
-
-Caswell, H. & Song, X. (2022). The formal demography of kinship IV:
-Two-sex models and their approximations. Demographic Research, 47,
-359-396.
 
 ## License
 

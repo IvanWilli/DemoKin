@@ -81,7 +81,9 @@ In this final vignette, we integrate all elements from previous tutorials into t
 - Stage-based transitions (like parity or education)
 - Joint distributions of age, sex, and stage among relatives
 
-Building on Caswell and colleagues' theoretical developments [-@caswell_formal_2019; -@caswell_formal_2020; -@caswell_formal_2021; -@caswell_formal_2022], this approach provides unprecedented analytical power for understanding complex family structures. We'll implement this comprehensive model using the `kin_multi_stage_time_variant_2sex` function, exploring two examples: one using parity and another using educational attainment to demonstrate how these models illuminate contemporary family dynamics in ways simpler models cannot.
+
+
+Building on previous Caswell and colleagues' theoretical developments [-@caswell_formal_2019; -@caswell_formal_2020; -@caswell_formal_2021; -@caswell_formal_2022], Butterick and others [-@Butterick2025] created an integral approach providing unprecedented analytical power for understanding complex family structures. We'll apply this comprehensive model using the `kin_multi_stage_time_variant_2sex` function, exploring two examples: one using parity and another using educational attainment to demonstrate how these models illuminate contemporary family dynamics in ways simpler models cannot.
 
 ## Package Installation {#preparation}
 
@@ -93,7 +95,6 @@ install.packages("dplyr")     # Data manipulation
 install.packages("tidyr")     # Data tidying
 install.packages("ggplot2")   # Data visualization
 install.packages("knitr")     # Document generation
-install.packages("data.table")# Efficient data handling
 install.packages("Matrix")    # Matrix operations
 
 # Install DemoKin
@@ -115,9 +116,7 @@ library(tidyr)    # For restructuring data
 library(ggplot2)  # For visualization
 library(knitr)    # For document generation
 library(Matrix)   # For matrix operations
-library(tictoc)   # For timing operations
 options(dplyr.summarise.inform = FALSE) # hide summarise output
-# source("kin_multi_stage_time_variant_2sex.R")
 ```
 
 # Two-Sex Time-Varying Multi-State Models {#two-sex-time-varying-multi-state}
@@ -182,6 +181,8 @@ These lists contain period-specific demographic rates:
 
 Now let's implement the two-sex time-varying multi-state model with parity as the stage variable:
 
+> Note: This model run takes approximately 30 minutes to complete, so we let to the reader its run. 
+
 ```{r parity_model, message=FALSE, warning=FALSE, eval=FALSE}
 # Define time period and parameters
 no_years <- 40  # Run the model for 40 years (1965-2005)
@@ -206,8 +207,6 @@ kin_out_1965_2005 <-
     output_years = c(1965, 1975, 1985, 1995, 2005)     # Selected output years
   )
 ```
-
-> Note: This model run takes approximately 30 minutes to complete. 
 
 Now we need to recode the stage variables to show meaningful parity labels:
 
@@ -450,7 +449,6 @@ kin_out_2020_2090 <-
     summary_kin = TRUE,                                  # Produce summary statistics
     sex_Focal = "Female",                                # Focal is female
     initial_stage_Focal = 1,                             # Focal starts with no education
-    # model_years = output_year,                            # the sequence of years we model
     output_years = output_year                           # All years
   )
 ```

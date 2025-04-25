@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estimate Population Kin Distribution • DemoKin</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/litera/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/simplex/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -104,7 +104,7 @@
 </div>
 <div class="column" style="width:70%;">
 <p>DemoKin is an R package for the demographic analysis of kinship networks using matrix-based models.<br>
-It implements methods developed by Caswell and colleagues for estimating the number and age distribution of relatives under various demographic assumptions.</p>
+It implements methods developed by initially by <a href="https://www.demographic-research.org/articles/volume/41/24" class="external-link">Caswell (2019)</a>), and continued in successive papers (like <a href="https://www.demographic-research.org/articles/volume/42/38" class="external-link">Caswell (2020)</a>) for estimating the number and age distribution of relatives under various demographic assumptions.</p>
 </div>
 </div>
 <div class="section level2">
@@ -150,9 +150,7 @@ It implements methods developed by Caswell and colleagues for estimating the num
 <span>    title <span class="op">=</span> <span class="st">"Expected number of living relatives by age"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Age of focal individual"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Number of relatives"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Joining with `by = join_by(kin)`</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
@@ -191,15 +189,7 @@ It implements methods developed by Caswell and colleagues for estimating the num
 <div class="section level2">
 <h2 id="get-involved">Get involved!<a class="anchor" aria-label="anchor" href="#get-involved"></a>
 </h2>
-<p><code>DemoKin</code> is under constant development. If you’re interested in contributing, please get in touch, create an issue, or submit a pull request. We look forward to hearing from you!</p>
-</div>
-<div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
-</h2>
-<p>Caswell, H. (2019). The formal demography of kinship: A matrix formulation. Demographic Research, 41, 679-712.</p>
-<p>Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. Demographic Research, 42, 1097-1144.</p>
-<p>Caswell, H. &amp; Song, X. (2021). The formal demography of kinship III: Kinship dynamics with time-varying demographic rates. Demographic Research, 45, 517-546.</p>
-<p>Caswell, H. &amp; Song, X. (2022). The formal demography of kinship IV: Two-sex models and their approximations. Demographic Research, 47, 359-396.</p>
+<p><code>DemoKin</code> is under constant development. If you’re interested in contributing, please get in touch, create an <a href="https://github.com/IvanWilli/DemoKin/issues" class="external-link">issue</a>, or submit a pull request. We look forward to hearing from you!</p>
 </div>
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>

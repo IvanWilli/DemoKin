@@ -2,8 +2,7 @@ url: https://ivanwilli.github.io/DemoKin/
 template:
   params:
     bootstrap: 5
-    bootswatch: minty
-    theme: breeze-light
+    bootswatch: simplex
 
 navbar:
   title: "DemoKin"
