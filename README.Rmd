@@ -28,7 +28,7 @@ library(knitr)
 ::: {.column width="70%"}
 
 DemoKin is an R package for the demographic analysis of kinship networks using matrix-based models.  
-It implements methods developed by Caswell and colleagues for estimating the number and age distribution of relatives under various demographic assumptions.
+It implements methods developed by Caswell (2019) and colleagues (\ref{}) for estimating the number and age distribution of relatives under various demographic assumptions.
 
 :::
 :::
@@ -55,7 +55,7 @@ library(DemoKin)
 
 Here's a basic example of how to use DemoKin:
 
-```{r, eval = T}
+```{r, eval = F}
 
 # Run a one-sex time-invariant kinship model using Swedish data from 2015
 kin_results <- kin(

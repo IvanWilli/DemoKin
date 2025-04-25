@@ -1,11 +1,11 @@
 url: https://ivanwilli.github.io/DemoKin/
 template:
   params:
-    bootswatch: simplex
+    bootstrap: 5
+    bootswatch: minty
     theme: breeze-light
 
 navbar:
-  type: reverse
   title: "DemoKin"
   structure:
     left: [home, tutorials, reference]
@@ -28,20 +28,23 @@ navbar:
         href: articles/1_3_TwoSex_TimeInvariant_Age.html
       - text: "Two-sex time-varying model"
         href: articles/1_4_TwoSex_TimeVarying_Age.html
-      - text: "One-sex time-invariant model"
+      - text: "One-sex time-invariant Age-Stage model"
         href: articles/2_1_OneSex_TimeInvariant_AgeStage.html
-      - text: "Two-sex time-varying model"
+      - text: "Two-sex time-varying Age-Stage model"
         href: articles/2_2_TwoSex_TimeVarying_AgeStage.html
     reference:
-      - title: "References"
-      - subtitle: "Estimate kinship count distributions"
-        desc: Indicators to evaluate the degreee of age heaping
-        contents:
-          - starts_with("kin")
-      - subtitle: "Ploting kinship count distributions"
-        desc: Indicators to evaluate the degreee of age heaping
-      - contents:
-          - starts_with("plot")
+      text: "Functions"
+      href: reference/index.html
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/IvanWilli/DemoKin
+
+# reference:
+#   - title: "Model estimation"
+#     desc: "Estimate kinship count distribution"
+#     contents:
+#       - starts_with("kin")
+#   - title: "Kinship diagram"
+#     desc: "Visualize a kinship diagram"
+#     contents:
+#       - starts_with("plot")
