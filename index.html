@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estimate Population Kin Distribution • DemoKin</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/simplex/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/minty/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -22,7 +22,7 @@
 
 
     <div class="container template-home">
-      <header><div class="navbar navbar-reverse navbar-fixed-top" role="navigation">
+      <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
@@ -65,15 +65,15 @@
       <a href="articles/1_4_TwoSex_TimeVarying_Age.html">Two-sex time-varying model</a>
     </li>
     <li>
-      <a href="articles/2_1_OneSex_TimeInvariant_AgeStage.html">One-sex time-invariant model</a>
+      <a href="articles/2_1_OneSex_TimeInvariant_AgeStage.html">One-sex time-invariant Age-Stage model</a>
     </li>
     <li>
-      <a href="articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying model</a>
+      <a href="articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying Age-Stage model</a>
     </li>
   </ul>
 </li>
 <li>
-  <a></a>
+  <a href="reference/index.html">Functions</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -104,7 +104,7 @@
 </div>
 <div class="column" style="width:70%;">
 <p>DemoKin is an R package for the demographic analysis of kinship networks using matrix-based models.<br>
-It implements methods developed by Caswell and colleagues for estimating the number and age distribution of relatives under various demographic assumptions.</p>
+It implements methods developed by Caswell (2019) and colleagues () for estimating the number and age distribution of relatives under various demographic assumptions.</p>
 </div>
 </div>
 <div class="section level2">
@@ -150,9 +150,7 @@ It implements methods developed by Caswell and colleagues for estimating the num
 <span>    title <span class="op">=</span> <span class="st">"Expected number of living relatives by age"</span>,</span>
 <span>    x <span class="op">=</span> <span class="st">"Age of focal individual"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Number of relatives"</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="co">#&gt; Joining with `by = join_by(kin)`</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-3-1.png" width="100%"></p>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
@@ -238,7 +236,7 @@ It implements methods developed by Caswell and colleagues for estimating the num
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Iván Williams <br><small class="roles"> Maintainer </small>  </li>
+<li>Iván Williams <br><small class="roles"> Author, maintainer </small>  </li>
 <li>Diego Alburez-Gutierrez <br><small class="roles"> Author </small>  </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
