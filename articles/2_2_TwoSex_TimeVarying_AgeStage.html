@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Two-sex time-varying kinship model specified by age and stage • DemoKin</title>
-<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/minty/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+<!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/simplex/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
@@ -162,9 +162,11 @@ simultaneously accounts for:</p>
 <li>Stage-based transitions (like parity or education)</li>
 <li>Joint distributions of age, sex, and stage among relatives</li>
 </ul>
-<p>Building on Caswell and colleagues’ theoretical developments <span class="citation">(2019, 2020, 2022; 2021)</span>, this approach provides
-unprecedented analytical power for understanding complex family
-structures. We’ll implement this comprehensive model using the
+<p>Building on previous Caswell and colleagues’ theoretical developments
+<span class="citation">(2019, 2020, 2022; 2021)</span>, Butterick and
+others <span class="citation">(2025)</span> created an integral approach
+providing unprecedented analytical power for understanding complex
+family structures. We’ll apply this comprehensive model using the
 <code>kin_multi_stage_time_variant_2sex</code> function, exploring two
 examples: one using parity and another using educational attainment to
 demonstrate how these models illuminate contemporary family dynamics in
@@ -180,7 +182,6 @@ previous vignettes, here’s what you’ll need:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tidyr"</span><span class="op">)</span>     <span class="co"># Data tidying</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"ggplot2"</span><span class="op">)</span>   <span class="co"># Data visualization</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"knitr"</span><span class="op">)</span>     <span class="co"># Document generation</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"data.table"</span><span class="op">)</span><span class="co"># Efficient data handling</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"Matrix"</span><span class="op">)</span>    <span class="co"># Matrix operations</span></span>
 <span></span>
 <span><span class="co"># Install DemoKin</span></span>
@@ -202,9 +203,7 @@ previous vignettes, here’s what you’ll need:</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>  <span class="co"># For visualization</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span>    <span class="co"># For document generation</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span>   <span class="co"># For matrix operations</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jabiru/tictoc" class="external-link">tictoc</a></span><span class="op">)</span>   <span class="co"># For timing operations</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>dplyr.summarise.inform <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># hide summarise output</span></span>
-<span><span class="co"># source("kin_multi_stage_time_variant_2sex.R")</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>dplyr.summarise.inform <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co"># hide summarise output</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="two-sex-time-varying-multi-state">Two-Sex Time-Varying Multi-State Models<a class="anchor" aria-label="anchor" href="#two-sex-time-varying-multi-state"></a>
@@ -307,6 +306,10 @@ age-class 1 and parity 0</li>
 </h3>
 <p>Now let’s implement the two-sex time-varying multi-state model with
 parity as the stage variable:</p>
+<blockquote>
+<p>Note: This model run takes approximately 30 minutes to complete, so
+we let to the reader its run.</p>
+</blockquote>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define time period and parameters</span></span>
 <span><span class="va">no_years</span> <span class="op">&lt;-</span> <span class="fl">40</span>  <span class="co"># Run the model for 40 years (1965-2005)</span></span>
@@ -330,9 +333,6 @@ parity as the stage variable:</p>
 <span>    <span class="co"># model_years &lt;- seq(1965, 2005, 5),                     # the sequence of years we model</span></span>
 <span>    output_years <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1965</span>, <span class="fl">1975</span>, <span class="fl">1985</span>, <span class="fl">1995</span>, <span class="fl">2005</span><span class="op">)</span>     <span class="co"># Selected output years</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<blockquote>
-<p>Note: This model run takes approximately 30 minutes to complete.</p>
-</blockquote>
 <p>Now we need to recode the stage variables to show meaningful parity
 labels:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -610,10 +610,9 @@ education as the stage variable:</p>
 <span>    summary_kin <span class="op">=</span> <span class="cn">TRUE</span>,                                  <span class="co"># Produce summary statistics</span></span>
 <span>    sex_Focal <span class="op">=</span> <span class="st">"Female"</span>,                                <span class="co"># Focal is female</span></span>
 <span>    initial_stage_Focal <span class="op">=</span> <span class="fl">1</span>,                             <span class="co"># Focal starts with no education</span></span>
-<span>    <span class="co"># model_years = output_year,                            # the sequence of years we model</span></span>
 <span>    output_years <span class="op">=</span> <span class="va">output_year</span>                           <span class="co"># All years</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 46.951 sec elapsed</span></span></code></pre>
+<pre><code><span><span class="co">## 46.908 sec elapsed</span></span></code></pre>
 <blockquote>
 <p>Note: This model run takes approximately 3 minutes to complete.</p>
 </blockquote>
@@ -872,6 +871,12 @@ intersect with kinship</li>
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="ref-Butterick2025" class="csl-entry">
+Butterick, Joe W. B., Peter W. F. Smith, Jakub Bijak, and Jason Hilton.
+2025. <span>“A Mathematical Framework for Time-Variant Multi-State
+Kinship Modelling.”</span> <em>Theoretical Population Biology</em> 163:
+1–12. https://doi.org/<a href="https://doi.org/10.1016/j.tpb.2025.02.002" class="external-link">https://doi.org/10.1016/j.tpb.2025.02.002</a>.
+</div>
 <div id="ref-caswell_formal_2019" class="csl-entry">
 Caswell, Hal. 2019. <span>“The Formal Demography of Kinship:
 <span>A</span> Matrix Formulation.”</span> <em>Demographic Research</em>
