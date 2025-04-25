@@ -1,22 +1,24 @@
 url: https://ivanwilli.github.io/DemoKin/
 template:
-  bootstrap: 5
-  bootswatch: flatly
-  bslib:
-    primary: "#0054AD"
-    border-radius: 0.5rem
-    btn-border-radius: 0.25rem
+  params:
+    bootswatch: simplex
+    theme: breeze-light
 
 navbar:
+  type: reverse
+  title: "DemoKin"
   structure:
-    left: [home, age_models, stage_models]
+    left: [home, tutorials, reference]
     right: [github]
   components:
     home:
+      strip_header: true
+      title: DemoKin
+      description: Demographic analysis of kinship networks using matrix-based models.
       icon: fas fa-home fa-lg
       href: index.html
-    age_models:
-      text: "Models by Age"
+    tutorials:
+      text: "Tutorials"
       menu:
       - text: "One-sex time-invariant model"
         href: articles/1_1_OneSex_TimeInvariant_Age.html
@@ -26,25 +28,20 @@ navbar:
         href: articles/1_3_TwoSex_TimeInvariant_Age.html
       - text: "Two-sex time-varying model"
         href: articles/1_4_TwoSex_TimeVarying_Age.html
-    stage_models:
-      text: "Models by Age and Stage"
-      menu:
       - text: "One-sex time-invariant model"
         href: articles/2_1_OneSex_TimeInvariant_AgeStage.html
       - text: "Two-sex time-varying model"
         href: articles/2_2_TwoSex_TimeVarying_AgeStage.html
+    reference:
+      - title: "References"
+      - subtitle: "Estimate kinship count distributions"
+        desc: Indicators to evaluate the degreee of age heaping
+        contents:
+          - starts_with("kin")
+      - subtitle: "Ploting kinship count distributions"
+        desc: Indicators to evaluate the degreee of age heaping
+      - contents:
+          - starts_with("plot")
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/IvanWilli/DemoKin
-
-articles:
-  - title: "Models by Age"
-    contents:
-      - 1_1_OneSex_TimeInvariant_Age
-      - 1_2_OneSex_TimeVarying_Age
-      - 1_3_TwoSex_TimeInvariant_Age
-      - 1_4_TwoSex_TimeVarying_Age
-  - title: "Models by Age and Stage"
-    contents:
-      - 2_1_OneSex_TimeInvariant_AgeStage
-      - 2_2_TwoSex_TimeVarying_AgeStage
