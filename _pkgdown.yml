@@ -2,7 +2,7 @@ url: https://ivanwilli.github.io/DemoKin/
 template:
   params:
     bootstrap: 5
-    bootswatch: simplex
+    bootswatch: united
 
 navbar:
   title: "DemoKin"

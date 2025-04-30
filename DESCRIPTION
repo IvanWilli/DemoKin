@@ -10,7 +10,8 @@ Authors@R: c(
     person("Xi", "Song", email = "xisong@sas.upenn.edu", role = "ctb"),
     person("Caswell", "Hal", email = "caswell@demogr.mpg.de", role = "ctb"),
     person("Benjamin", "Schlüter", email = "benjamin.schluter@utoronto.ca", role = "ctb"),
-    person("Butterick", "Joe", email = "J.Butterick@soton.ac.uk", role = "ctb"))
+    person("Butterick", "Joe", email = "J.Butterick@soton.ac.uk", role = "ctb"),
+    person("Jiang", "Sha", email = "jiang@demogr.mpg.de", role = "ctb"))
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

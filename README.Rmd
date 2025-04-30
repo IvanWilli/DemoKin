@@ -91,6 +91,26 @@ The site includes several vignettes demonstrating different types of kinship mod
 - [One-sex time-invariant multi-state model](https://ivanwilli.github.io/DemoKin/articles/2_1_OneSex_TimeInvariant_AgeStage.html)
 - [Two-sex time-varying multi-state model](https://ivanwilli.github.io/DemoKin/articles/2_2_TwoSex_TimeVarying_AgeStage.html)
 
+## Contributors
+
+`DemoKin` has benefited from the work of many people over the years, including:
+
+- **Ivan Williams** (University of Buenos Aires) leads the technical development of `DemoKin` with a particular focus on the implementation of the functions in R.
+
+- **Diego Alburez-Gutierrez** (Max Planck Institute for Demographic Research) coordinates the development of the package.
+
+- **Hal Caswell** (University of Amsterdam) provided crucial MATLAB code for computing matrix kinship models.
+
+- **Shi Song** (University of Pennsylvania) contributed the code to estimate time variant kinship models.
+
+- **Benjamin Schlüter** (University of Toronto) contributed code to implement bereavement analysis by cause of death.
+
+- **Joe Butterick** (University of Southampton) contributed code to implement time-variant, two-sex  multistate kinship models.
+
+- **Sha Jiang** (Max Planck Institute for Demographic Research) helped create and organise the documention for the package, including developing the package’s website.
+
+- **Amanda Martins** (Max Planck Institute for Demographic Research) developed materials for teaching DemoKin, including a course at the [European Doctoral School of Demography]( https://amandamartinsal.github.io/EDSD_kinship_24-25/).
+
 ## Citation
 
 Williams, Iván; Alburez-Gutierrez, Diego; and the DemoKin team. (2021) DemoKin: An R package to implement demographic matrix kinship models. URL: https://github.com/IvanWilli/DemoKin.
