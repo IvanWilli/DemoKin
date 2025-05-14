@@ -115,7 +115,7 @@ including:
 - **Hal Caswell** (University of Amsterdam) provided crucial MATLAB code
   for computing matrix kinship models.
 
-- **Shi Song** (University of Pennsylvania) contributed the code to
+- **Xi Song** (University of Pennsylvania) contributed the code to
   estimate time variant kinship models.
 
 - **Benjamin Schlüter** (University of Toronto) contributed code to
