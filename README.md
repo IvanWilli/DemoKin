@@ -16,8 +16,8 @@
 This is an R package for the demographic analysis of kinship networks
 using matrix-based models.  
 It implements methods developed initially by [Caswell
-(2019)](https://www.demographic-research.org/articles/volume/41/24)),
-and continued in successive papers (like [Caswell
+(2019)](https://www.demographic-research.org/articles/volume/41/24), and
+continued in successive papers (like [Caswell
 (2020)](https://www.demographic-research.org/articles/volume/42/38) or
 [Caswell
 (2024)](https://www.demographic-research.org/articles/volume/49/41)) for
@@ -122,6 +122,9 @@ including:
   implement bereavement analysis by cause of death.
 
 - **Joe Butterick** (University of Southampton) contributed code to
+  implement time-variant, two-sex multistate kinship models.
+
+- **Jason Hilton** (University of Southampton) contributed code to
   implement time-variant, two-sex multistate kinship models.
 
 - **Sha Jiang** (Max Planck Institute for Demographic Research) helped
