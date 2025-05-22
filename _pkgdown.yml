@@ -35,7 +35,7 @@ navbar:
       text: "Functions"
       href: reference/index.html
     articles:
-      text: "Functions"
+      text: "Articles"
       href: articles/0_0_Papers.html
     github:
       icon: fab fa-github fa-lg
