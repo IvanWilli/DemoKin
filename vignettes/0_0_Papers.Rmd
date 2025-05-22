@@ -1,0 +1,64 @@
+---
+title: "Papers using DemoKin"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    df_print: paged
+    fig_caption: true
+---
+
+## Published Articles and Pre-prints using DemoKin
+
+Acosta, E., Alburez-Gutierrez, D., Gargiulo, M., & Torres, C. (2025). *Weaponizing kinship: A demographic analysis of bereavement in the Colombian conflict* (Version 1) [Preprint]. SocArXiv. <https://osf.io/p87aw>
+
+Alburez-Gutierrez, D., Acosta, E., Zagheni, E., & Williams, N. E. (2024). The long-lasting effect of armed-conflict deaths on the living: Quantifying family bereavement. *Science Advances, 10*(30), eado6951. <https://doi.org/10.1126/sciadv.ado6951>
+
+Alburez-Gutierrez, D., Basellini, U., & Zagheni, E. (2024). When do mothers bury a child? Heterogeneity in the maternal age at offspring loss across the demographic transition. *Population Studies*. Advance online publication. <https://doi.org/10.1080/00324728.2024.2345075>
+
+Alburez-Gutierrez, D., Williams, I., & Caswell, H. (2023). Projections of human kinship for all countries. *Proceedings of the National Academy of Sciences, 120*(52), e2315722120. <https://doi.org/10.1073/pnas.2315722120>
+
+Adhikari, S., & Alburez-Gutierrez, D. (2025). *The future of grandparenthood in South Asia: The role of population aging and educational expansion* (MPIDR Working Paper WP-2025-003). Max Planck Institute for Demographic Research. <https://doi.org/10.4054/MPIDR-WP-2025-003>
+
+Ellis, S., Franks, D. W., Nielsen, M. L. K., Weiss, M. N., Croft, D. P., *et al.* (2024). The evolution of menopause in toothed whales. *Nature, 627*, 579–585. <https://doi.org/10.1038/s41586-024-07159-9>
+
+Feng, K., Song, X., & Caswell, H. (2024). Kinship and care: Racial disparities in potential dementia caregiving in the United States from 2000 to 2060. *The Journals of Gerontology: Series A, 79*(Suppl 1), S32–S41. <https://doi.org/10.1093/gerona/glae106>
+
+Hünteler, B. M., Polizzi, A., & van Raalte, A. A. (2024). *Changing kinship structures in East and West Germany before and after reunification* [Preprint]. SocArXiv. <https://doi.org/10.31235/osf.io/6bf7k>
+
+Jiang, S., Zuo, W., Guo, Z., Caswell, H., & Tuljapurkar, S. (2023). How does the demographic transition affect kinship networks? *Demographic Research, 48*, 899–930. <https://doi.org/10.4054/DemRes.2023.48.32>
+
+Jiang, S., Zuo, W., Guo, Z., & Tuljapurkar, S. (in press). Changing demographic rates reshape kinship networks. *Demography*.
+
+Matos-Moreno, A., Alburez-Gutierrez, D., Verdery, A. M., Santos-Lozada, A. R., Fernández Soto, M., & Williams, I. (2025). Kinship structures for left-behind older adults in high-out-migration contexts: Evidence from Puerto Rico. *The Journals of Gerontology: Series B, 80*(6), gbaf052. <https://doi.org/10.1093/geronb/gbaf052>
+
+Robles, A., Martes-Camargo, P., & Rodríguez-Franco, R. (2024). ¿Quién cuida a la niña? Provisión de cuidados y estructura de parentesco en América Latina [Who takes care of the girl? Care provision and kinship structure in Latin America]. *Revista Brasileira de Estudos de População, 41*, e0274, 1–24. <https://doi.org/10.20947/S0102-3098a0274>
+
+Schlüter, B.-S., Alburez-Gutierrez, D., Bibbins-Domingo, K., Alexander, M. J., & Kiang, M. V. (2024). Youth experiencing parental death due to drug poisoning and firearm violence in the US, 1999–2020. *JAMA, 331*(20), 1741–1747. <https://doi.org/10.1001/jama.2024.8391>
+
+Snyder, M., Alburez-Gutierrez, D., Williams, I., & Zagheni, E. (2022). Estimates from 31 countries show the significant impact of COVID-19 excess mortality on the incidence of family bereavement. *Proceedings of the National Academy of Sciences of the United States of America, 119*(26), e2202686119. <https://doi.org/10.1073/pnas.2202686119>
+
+Song, X., & Caswell, H. (2022). The role of kinship in racial differences in exposure to unemployment. *Demography, 59*(4), 1325–1352. <https://doi.org/10.1215/00703370-10057831>
+
+van Damme, M., Alburez-Gutierrez, D., & Castro, A. (2025). Estimating kinship size of older adults in Europe with models and surveys. *Demography*, 1–1961236. <https://doi.org/10.1215/00703370-11961236>
+
+## Formal demography papers
+
+Butterick, J. W. B., Smith, P. W. F., Bijak, J., & Hilton, J. (2025). A mathematical framework for time-variant multi-state kinship modelling. *Theoretical Population Biology, 163*, 1–12. <https://doi.org/10.1016/j.tpb.2025.02.002>
+
+
+Caswell, H. (2019). The formal demography of kinship: A matrix formulation. *Demographic Research, 41*(24), 679–712. <https://doi.org/10.4054/DemRes.2019.41.24>
+
+Caswell, H. (2020). The formal demography of kinship II: Multistate models, parity, and sibship. *Demographic Research, 42*(38), 1097–1146. <https://doi.org/10.4054/DemRes.2020.42.38>
+
+Caswell, H., & Song, X. (2021). The formal demography of kinship III: Kinship dynamics with time-varying demographic rates. *Demographic Research, 45*(16), 517–546. <https://doi.org/10.4054/DemRes.2021.45.16>
+
+Caswell, H. (2022). The formal demography of kinship IV: Two-sex models and their approximations. *Demographic Research, 47*(13), 359–396. <https://doi.org/10.4054/DemRes.2022.47.13>
+
+Caswell, H., Margolis, R., & Verdery, A. M. (2023). The formal demography of kinship V: Kin loss, bereavement, and causes of death. *Demographic Research, 49*(41), 1163–1200. <https://doi.org/10.4054/DemRes.2023.49.41>
+
+Caswell, H. (2024). The formal demography of kinship VI: Demographic stochasticity and variance in the kinship network. *Demographic Research, 51*(39), 1201–1256. <https://doi.org/10.4054/DemRes.2024.51.39>

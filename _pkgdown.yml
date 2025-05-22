@@ -7,7 +7,7 @@ template:
 navbar:
   title: "DemoKin"
   structure:
-    left: [home, tutorials, reference]
+    left: [home, tutorials, reference, articles]
     right: [github]
   components:
     home:
@@ -34,6 +34,9 @@ navbar:
     reference:
       text: "Functions"
       href: reference/index.html
+    articles:
+      text: "Functions"
+      href: articles/0_0_Papers.html
     github:
       icon: fab fa-github fa-lg
       href: https://github.com/IvanWilli/DemoKin
