@@ -1,5 +1,4 @@
 
-
 #' Estimate kin counts by age, stage, and sex, in a time variant framework
 
 #' @description Implementation of combined formal demographic models: Caswell II,III,IV.
@@ -339,6 +338,9 @@ all_kin_dy <- function(Uf,
     Initial_stage_Focal <- 1
 
     population_age_stage_of_parenting <- pi_mix_parity(Uf, Um, Ff, Fm, alpha, na, ns)
+
+    parents_joint_age_stage <- population_age_stage_of_parenting[[1]]
+
     mothers_age_stage <- population_age_stage_of_parenting[[2]]
     fathers_age_stage <- population_age_stage_of_parenting[[3]]
 
@@ -348,6 +350,9 @@ all_kin_dy <- function(Uf,
   }
   else{
     population_age_stage_of_parenting <- pi_mix(Uf, Um, Ff, Fm, alpha, na, ns)
+
+    parents_joint_age_stage <- population_age_stage_of_parenting[[1]]
+
     mothers_age_stage <- population_age_stage_of_parenting[[2]]
     fathers_age_stage <- population_age_stage_of_parenting[[3]]
 
@@ -392,7 +397,7 @@ all_kin_dy <- function(Uf,
   ### Initial distributions for kin with non-zero deterministic initial conditions:
   # Focal, parents, children, grand+great children, younger siblings, and younger nieces/nehpews
   X_Focal[,1] <- IC_Focal
-  X_parents[, 1] <- mothers_age_stage
+  X_parents[, 1] <- parents_joint_age_stage
 
   ### projection all kin with deterministic initial conditions
   for(i in 1 : (na-1)){
@@ -553,6 +558,9 @@ all_kin_dy_TV <- function(Uf,
     Initial_stage_Focal <- 1
 
     population_age_stage_of_parenting <- pi_mix_TV_parity(Ff, Fm, alpha, na, ns, population_age_stage_structure)
+
+    parents_joint_age_stage <- population_age_stage_of_parenting[[1]]
+
     mothers_age_stage <- population_age_stage_of_parenting[[2]]
     fathers_age_stage <- population_age_stage_of_parenting[[3]]
 
@@ -563,6 +571,9 @@ all_kin_dy_TV <- function(Uf,
   else{
 
     population_age_stage_of_parenting <- pi_mix_TV(Ff, Fm, alpha, na, ns, population_age_stage_structure)
+
+    parents_joint_age_stage <- population_age_stage_of_parenting[[1]]
+
     mothers_age_stage <- population_age_stage_of_parenting[[2]]
     fathers_age_stage <- population_age_stage_of_parenting[[3]]
 
@@ -604,7 +615,7 @@ all_kin_dy_TV <- function(Uf,
   ### Initial distributions for kin with non-zero deterministic initial conditions:
   ## Focal, parents, children, grand+great children, younger siblings, and younger nieces/nehpews
   X_Focal[,1] <- IC_Focal
-  X_parents[, 1] <- mothers_age_stage
+  X_parents[, 1] <- parents_joint_age_stage
   ### projection all above kin with deterministic initial conditions
   for(i in 1 : (na-1)){
     X_Focal[,i+1] <- G_tilde %*% previous_kin_Focal[,i]
@@ -873,7 +884,7 @@ pi_mix <- function(Uf, Um, Ff, Fm, alpha, na, ns){
   ### Age distributions
   pi_F <- kronecker( diag(na), Matrix::t(rep(1, ns)) ) %*% (pi_f)
   pi_M <- kronecker( diag(na), Matrix::t(rep(1, ns)) ) %*% (pi_m)
-  return(list(c(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
+  return(list(rbind(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
 }
 
 #' Mixing distributions for the time-variant multi-state 2-sex model: Non-parity case
@@ -901,7 +912,7 @@ pi_mix_TV <- function(Ff, Fm, alpha, na, ns, previous_age_stage_dist){
   ### Age distributions
   pi_F <- kronecker( diag(na), Matrix::t(rep(1, ns)) ) %*% (pi_f)
   pi_M <- kronecker( diag(na), Matrix::t(rep(1, ns)) ) %*% (pi_m)
-  return(list(c(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
+  return(list(rbind(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
 }
 
 #' Mixing distributions for the time-invariant multi-state 2-sex model: Parity-specific case
@@ -944,7 +955,7 @@ pi_mix_parity <- function(Uf, Um, Ff, Fm, alpha, na, ns){
   ### Joint distributions
   pi_f <- out_mum %*% pi_F
   pi_m <- out_dad %*% pi_M
-  return(list(c(pi_f,pi_m), pi_f, pi_m, pi_F, pi_M))
+  return(list(rbind(pi_f,pi_m), pi_f, pi_m, pi_F, pi_M))
 }
 
 #' Mixing distributions for the time-variant multi-state 2-sex model: Parity-specific case
@@ -983,7 +994,7 @@ pi_mix_TV_parity <- function(Ff, Fm, alpha, na, ns, previous_age_stage_dist){
   ### Joint distributions
   pi_f <- out_mum %*% pi_F
   pi_m <- out_dad %*% pi_M
-  return(list(c(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
+  return(list(rbind(pi_f,pi_m),pi_f,pi_m,pi_F,pi_M))
 }
 
 
