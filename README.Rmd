@@ -53,7 +53,7 @@ library(DemoKin)
 
 Here's a basic example of how to use DemoKin:
 
-```{r, eval = F}
+```{r, eval = T, warning=FALSE, message=F, dev="svg"}
 
 # Run a one-sex time-invariant kinship model using Swedish data from 2015
 kin_results <- kin(
