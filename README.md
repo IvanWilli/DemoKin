@@ -74,7 +74,7 @@ kin_results$kin_summary %>%
   )
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.svg" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.svg" width="70%" />
 
 ## Documentation
 
