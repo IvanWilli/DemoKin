@@ -9,7 +9,7 @@
 #' @param output_cohort integer. Year of birth of focal to return as output. Could be a vector. Should be within input data years range.
 #' @param output_period integer. Year for which to return kinship structure. Could be a vector. Should be within input data years range.
 #' @param output_kin character. kin to return as output: "m" for mother, "d" for daughter,... See `vignette` for exahustive kin.
-#' @param birth_female numeric. Female portion at birth.
+#' @param birth_female numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 
 #' @return A data frame of population kinship structure, with Focal's cohort, focal´s age, period year, type of relatives
@@ -40,6 +40,13 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
 
+  # birth_female needs to be dynamic. Complete in case length is lower than data
+  if(length(birth_female) < n_years_data){
+    last_birth_female <- tail(birth_female, n=1)
+    n_birth_female <- length(birth_female)
+    birth_female <- c(birth_female, rep(last_birth_female, n_years_data - n_birth_female))
+  }
+
   # consider input data for age distribution at child born, or flag it
   no_Pi <- FALSE
   if(is.null(pi)){
@@ -66,17 +73,17 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     diag(Mt) <- 1 - p[,t]
     Ut <- rbind(cbind(Ut,zeros),cbind(Mt,zeros))
     ft <- matrix(0, nrow=ages*2, ncol=ages*2)
-    ft[1,1:ages] <- f[,t] * birth_female
+    ft[1,1:ages] <- f[,t] * birth_female[t]
     A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
     # stable assumption at start
     if (t==1){
       p1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
-      f1 <- ft[1,][1:ages]/birth_female
+      f1 <- ft[1,][1:ages]/birth_female[1]
       A_decomp <- eigen(A)
       w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
       pit <- w*A[1,]/sum(w*A[1,])
       pi1 <- pit[1:ages]
-      kin_all[[1]] <- kin_time_invariant(p = p1, f = f1, pi = pi1, birth_female = birth_female,
+      kin_all[[1]] <- kin_time_invariant(p = p1, f = f1, pi = pi1, birth_female = birth_female[1],
                                          list_output = TRUE)
     }
     # project pi

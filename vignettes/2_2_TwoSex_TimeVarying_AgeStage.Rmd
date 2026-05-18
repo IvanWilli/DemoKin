@@ -240,20 +240,20 @@ The output includes:
 - `kin_stage`: Stage (parity) of the relatives
 - `sex_kin`: Sex of the relatives
 - `year`: Calendar year of observation
-- `group`: Type of relative (d = children, oa = older aunts/uncles, etc.)
-- `count`: Expected number of living relatives
+- `kin`: Type of relative (d = children, oa = older aunts/uncles, etc.)
+- `living`: Expected number of living relatives
 - `cohort`: Birth cohort of the focal individual
 
 ### Period Analysis of Kin by Parity {#parity-period-analysis}
 
 Let's visualize the distribution of older aunts and uncles by parity for different ages of Focal across different calendar years.
 
-We first restrict Focal's kinship network to aunts and uncles older than Focal's mother by setting `group` == "oa". We visualize the marginal parity distributions of kin: `stage_kin`, for each age of Focal `age_focal`, using different color schemes. Implicit in the below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
+We first restrict Focal's kinship network to aunts and uncles older than Focal's mother by setting `kin` == "oa". We visualize the marginal parity distributions of kin: `stage_kin`, for each age of Focal `age_focal`, using different color schemes. Implicit in the below plot is that we really plot Focal's born into different `cohort` -- i.e., in the 2005 panel we show a 50 year old Focal was born in 1955, while a 40 year old Focal was born in 1965.
 
 ```{r parity_aunts_uncles, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
-  filter(group == "oa") %>%
-  ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  filter(kin == "oa") %>%
+  ggplot(aes(x = age_focal, y = living, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
   facet_grid(sex_kin ~ year) +
   scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
@@ -269,12 +269,12 @@ kin_out_1965_2005$kin_summary %>%
   )
 ```
 
-We could also consider any other kin in Focal's network, for instance, offspring using `group` == "d":
+We could also consider any other kin in Focal's network, for instance, offspring using `kin` == "d":
 
 ```{r parity_offspring, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
-  filter(group == "d") %>%
-  ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  filter(kin == "d") %>%
+  ggplot(aes(x = age_focal, y = living, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
   facet_grid(sex_kin ~ year) +
   scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
@@ -298,8 +298,8 @@ We can however compare cohorts for 40-year segments of Focal's life. Below, foll
 
 ```{r parity_cohort, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_summary %>%
-  filter(group == "d", cohort %in% c(1910, 1925, 1965)) %>%
-  ggplot(aes(x = age_focal, y = count, color = stage_kin, fill = stage_kin)) +
+  filter(kin == "d", cohort %in% c(1910, 1925, 1965)) %>%
+  ggplot(aes(x = age_focal, y = living, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
   facet_grid(sex_kin ~ cohort) +
   theme_bw() +
@@ -326,9 +326,9 @@ For more detailed analysis, we can examine the age and parity distribution of sp
 
 ```{r parity_siblings_young, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_full %>%
-  filter(group == "ys",
+  filter(kin == "ys",
          age_focal == 50) %>%
-  ggplot(aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot(aes(x = age_kin, y = living, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
   facet_grid(sex_kin ~ year) +
   scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
@@ -350,9 +350,9 @@ With a simple manipulation of the output data frame, we can also plot the age an
 
 ```{r parity_siblings_all, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=FALSE}
 kin_out_1965_2005$kin_full %>%
-  filter((group == "ys" | group == "os"),
+  filter((kin == "ys" | kin == "os"),
          age_focal == 50) %>%
-  pivot_wider(names_from = group, values_from = count) %>%
+  pivot_wider(names_from = kin, values_from = living) %>%
   mutate(count = `ys` + `os`) %>%
   ggplot(aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
@@ -500,11 +500,10 @@ First, let's visualize the total number of living kin by educational attainment 
 ```{r education_total_kin, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
 kin_out_2020_2090$kin_summary %>%
   # Exclude Focal from the analysis
-  filter(group != "Focal") %>% 
+  filter(kin != "Focal") %>% 
   filter(cohort == 2020) %>%
-  rename(kin = group) %>% 
   # rename_kin(sex = "2sex") %>% 
-  summarise(count = sum(count), .by = c(stage_kin, age_focal)) %>%
+  summarise(count = sum(living), .by = c(stage_kin, age_focal)) %>%
   ggplot(aes(x = age_focal, y = count, fill = stage_kin)) +
   geom_area(colour = "black") +
   labs(
@@ -522,11 +521,10 @@ Now let's look at specific types of relatives:
 
 ```{r education_specific_kin, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
 kin_out_2020_2090$kin_summary %>%
-  filter(group %in% c("d", "gd", "m", "gm")) %>% 
+  filter(kin %in% c("d", "gd", "m", "gm")) %>% 
   filter(cohort == 2020) %>%
-  rename(kin = group) %>% 
   # rename_kin(sex = "2sex") %>% 
-  summarise(count = sum(count), .by = c(kin, stage_kin, age_focal)) %>%
+  summarise(count = sum(living), .by = c(kin, stage_kin, age_focal)) %>%
   ggplot(aes(x = age_focal, y = count, fill = stage_kin)) +
   geom_area(colour = "black") +
   labs(
@@ -553,13 +551,12 @@ Let's examine the age and educational distribution of key relatives when the foc
 ```{r education_age_distribution, message=FALSE, warning=FALSE, fig.height=6, fig.width=10, eval=TRUE}
 kin_out_2020_2090$kin_full %>%
   filter(
-    group %in%  c("d", "gd", "m", "gm"),
+    kin %in%  c("d", "gd", "m", "gm"),
     age_focal == 60,
     cohort == 2020
   ) %>%
-  rename(kin = group) %>% 
   # rename_kin("2sex") %>% 
-  ggplot(aes(x = age_kin, y = count, color = stage_kin, fill = stage_kin)) +
+  ggplot(aes(x = age_kin, y = living, color = stage_kin, fill = stage_kin)) +
   geom_bar(position = "stack", stat = "identity") +
   scale_x_continuous(breaks = c(0,10,20,30,40,50,60,70,80,90,100)) +
   labs(
@@ -592,12 +589,11 @@ Now let's examine how the educational composition of specific relatives changes 
 ```{r education_descendants_time, message=FALSE, warning=FALSE, fig.height=6, fig.width=8, eval=TRUE}
 kin_out_2020_2090$kin_summary %>%
   filter(
-    group %in% c("d", "gd"),
+    kin %in% c("d", "gd"),
     age_focal == 60
   ) %>% 
-  rename(kin = group) %>% 
   # rename_kin(sex = "2sex") %>% 
-  summarise(count = sum(count), .by = c(stage_kin, kin, year)) %>%
+  summarise(count = sum(living), .by = c(stage_kin, kin, year)) %>%
   ggplot(aes(x = year, y = count, fill = stage_kin)) +
   geom_area(colour = "black") +
   labs(

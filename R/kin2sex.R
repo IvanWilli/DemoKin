@@ -21,7 +21,7 @@
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
 #' @param output_age_focal integer. Vector of ages to select (and make faster the run).
-#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
+#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param summary_kin logical. Whether or not include `kin_summary` table (see output details). Default `TRUE`.
 #' @return A list with:
 #' \itemize{

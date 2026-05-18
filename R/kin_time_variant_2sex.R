@@ -16,7 +16,7 @@
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
 #' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
-#' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1.
+#' @param birth_female numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 #' @return A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age and sex.
 #' @export
@@ -47,6 +47,13 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   agess        <- ages*2
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
+
+  # birth_female needs to be dynamic. Complete in case length is lower than data
+  if(length(birth_female) < n_years_data){
+    last_birth_female <- tail(birth_female, n=1)
+    n_birth_female <- length(birth_female)
+    birth_female <- c(birth_female, rep(last_birth_female, n_years_data - n_birth_female))
+  }
 
   # consider input data for age distribution at child born, or flag it to fill it
   Pif <- pif; no_Pif <- FALSE
@@ -90,9 +97,9 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     Fft[1,] <- ff[,t]
     Fmt[1,] <- fm[,t]
     Ft <- Ft_star <- matrix(0, agess*2, agess*2)
-    Ft[1:agess,1:agess] <- rbind(cbind(birth_female * Fft, birth_female * Fmt),
-                                 cbind((1-birth_female) * Fft, (1-birth_female) * Fmt))
-    Ft_star[1:agess,1:ages] <- rbind(birth_female * Fft, (1-birth_female) * Fft)
+    Ft[1:agess,1:agess] <- rbind(cbind(birth_female[t] * Fft, birth_female[t] * Fmt),
+                                 cbind((1-birth_female[t]) * Fft, (1-birth_female[t]) * Fmt))
+    Ft_star[1:agess,1:ages] <- rbind(birth_female[t] * Fft, (1-birth_female[t]) * Fft)
     Fl[[as.character(years_data[t])]] <- Ft
     Fl_star[[as.character(years_data[t])]] <- Ft_star
     A <- Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
@@ -118,7 +125,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
                                               ff = f1f, fm = f1m,
                                               sex_focal = sex_focal,
                                               pif = pif1, pim = pim1,
-                                              birth_female = birth_female, list_output = TRUE)
+                                              birth_female = birth_female[1], list_output = TRUE)
     }
     # project pi
     if(no_Pim | no_Pif){

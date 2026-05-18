@@ -12,7 +12,7 @@
 #' @param T_list_males list of lists with matrix entries: each outer list entry is period-specific, and composed of
 #'                     a list of stochastic matrices which describe age-specific male probabilities of transferring stage
 #' @param H_list list with matrix entries: redistribution of newborns across each stage to a specific age-class
-#' @param birth_female numeric. birth ratio of females to males in population
+#' @param birth_female numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param parity logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default `TRUE`.
 #' @param output_kin vector. A vector of particular kin one wishes to obtain results for, e.g., c("m","d","oa"). Default is all kin types.
 #' @param summary_kin logical. Results as a data frame of accumulated kin by age of Focal if TRUE, and kin by their age*stage distribution by age of Focal if FALSE.
@@ -48,6 +48,13 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   if(!is.list(U_list_females) | !is.list(U_list_males)){stop("U's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(F_list_females) | !is.list(F_list_males)){stop("F's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
   if(!is.list(T_list_females) | !is.list(T_list_males)){stop("T's must be a list with time-series length. Each list entry should be an age*stage dimensional matrix")}
+
+  # birth_female needs to be dynamic. Complete in case length is lower than data
+  if(length(birth_female) < no_years){
+    last_birth_female <- tail(birth_female, n=1)
+    n_birth_female <- length(birth_female)
+    birth_female <- c(birth_female, rep(last_birth_female, no_years - n_birth_female))
+  }
 
   ### Define empty lists for the accumulated kin of Focals's life-course -- each list entry will reflect a time-period
   changing_pop_struct <- list()
@@ -150,7 +157,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                               U_tilde_males ,
                               F_tilde_females,
                               F_tilde_males,
-                              1-birth_female,
+                              1-birth_female[1],
                               na,
                               ns,
                               parity,
@@ -197,7 +204,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                              U_tilde_males,
                              F_tilde_females,
                              F_tilde_males,
-                             1-birth_female,
+                             1-birth_female[year],
                              na,
                              ns,
                              parity,
@@ -736,8 +743,8 @@ create_cumsum_df <- function(kin_matrix_lists,
       male_kin$stage <- rep(seq(1, ns), na)
       female_kin$age <- rep(seq(0, (na-1)), each = ns)
       male_kin$age <- rep(seq(0, (na-1)), each = ns)
-      female_kin$Sex <- "Female"
-      male_kin$Sex <- "Male"
+      female_kin$Sex <- "f"
+      male_kin$Sex <- "m"
       both_kin <- rbind(female_kin, male_kin)
       both_kin <- both_kin %>% reshape2::melt(id = c("age","stage","Sex")) %>%
         dplyr::group_by(variable, stage, Sex) %>%
@@ -745,22 +752,21 @@ create_cumsum_df <- function(kin_matrix_lists,
         dplyr::ungroup()
       both_kin <- both_kin %>% dplyr::transmute(age_focal = variable,
                                                 stage_kin = as.factor(stage),
-                                                count = num,
+                                                living = num,
                                                 sex_kin = Sex)
       both_kin$age_focal <- as.numeric(gsub("[^0-9.-]", "", both_kin$age_focal)) - 1
       df <- both_kin
       df$year <- j
-      df$group <- kin_member
+      df$kin <- kin_member
       df_list[[length(df_list)+1]] <- df
     }
     df_list <- do.call("rbind", df_list)
     df_year_list[[(1+length(df_year_list))]] <- df_list
   }
   df_year_list <- do.call("rbind", df_year_list)
-  df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
-                                                 cohort_factor = as.factor(cohort))
+  df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal))
   if(!is.null(specific_kin)){
-    df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
+    df_year_list <- df_year_list %>% dplyr::filter(kin %in% specific_kin)
   }
   return(df_year_list)
 }
@@ -803,29 +809,28 @@ create_full_dists_df <- function(kin_matrix_lists,
       male_kin$stage <- rep(seq(1, ns), na)
       female_kin$age <- rep(seq(0, (na-1)), each = ns)
       male_kin$age <- rep(seq(0, (na-1)), each = ns)
-      female_kin$Sex <- "Female"
-      male_kin$Sex <- "Male"
+      female_kin$Sex <- "f"
+      male_kin$Sex <- "m"
       both_kin <- rbind(female_kin, male_kin)
       both_kin <- both_kin %>% reshape2::melt(id = c("age","stage","Sex")) %>%
         dplyr::transmute(age_focal = variable,
                          age_kin = age,
                          stage_kin = as.factor(stage),
-                         count = value,
+                         living = value,
                          sex_kin = Sex)
       both_kin$age_focal <- as.numeric(gsub("[^0-9.-]", "", both_kin$age_focal))-1
       df <- both_kin
       df$year <- j
-      df$group <- kin_member
+      df$kin <- kin_member
       df_list[[length(df_list)+1]] <- df
     }
     df_list <- do.call("rbind", df_list)
     df_year_list[[(1+length(df_year_list))]] <- df_list
   }
   df_year_list <- do.call("rbind", df_year_list)
-  df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal),
-                                                 cohort_factor = as.factor(cohort))
+  df_year_list <- df_year_list %>% dplyr::mutate(cohort = as.numeric(year) - as.numeric(age_focal))
   if(!is.null(specific_kin)){
-    df_year_list <- df_year_list %>% dplyr::filter(group %in% specific_kin)
+    df_year_list <- df_year_list %>% dplyr::filter(kin %in% specific_kin)
   }
   return(df_year_list)
 }
