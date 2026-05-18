@@ -585,7 +585,7 @@ to age-class 1 and “no education” category</li>
 <span>    y <span class="op">=</span> <span class="st">"TFR"</span>,</span>
 <span>    color <span class="op">=</span> <span class="st">"Education"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/edu_trends-1.png" width="2400" style="display: block; margin: auto;"></p>
+<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/edu_trends-1.png" class="r-plt" alt="" width="2400" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="education-model-running">Running the Education Model<a class="anchor" aria-label="anchor" href="#education-model-running"></a>
@@ -615,7 +615,7 @@ education as the stage variable:</p>
 <span>    initial_stage_Focal <span class="op">=</span> <span class="fl">1</span>,                             <span class="co"># Focal starts with no education</span></span>
 <span>    output_years <span class="op">=</span> <span class="va">output_year</span>                           <span class="co"># All years</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## 46.329 sec elapsed</span></span></code></pre>
+<pre><code><span><span class="co">## 33.438 sec elapsed</span></span></code></pre>
 <blockquote>
 <p>Note: This model run takes approximately 3 minutes to complete.</p>
 </blockquote>
@@ -682,7 +682,7 @@ attainment for a woman born in 2020 in Singapore:</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_total_kin-1.png" width="2400" style="display: block; margin: auto;"></p>
+<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_total_kin-1.png" class="r-plt" alt="" width="2400" style="display: block; margin: auto;"></p>
 <p>Now let’s look at specific types of relatives:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">kin_out_2020_2090</span><span class="op">$</span><span class="va">kin_summary</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -703,7 +703,7 @@ attainment for a woman born in 2020 in Singapore:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">kin</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_specific_kin-1.png" width="2400" style="display: block; margin: auto;"></p>
+<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_specific_kin-1.png" class="r-plt" alt="" width="2400" style="display: block; margin: auto;"></p>
 <p><strong>Interpretation</strong> This visualization captures how
 educational expansion transforms family networks, showing the increasing
 educational diversity across generations in Singapore:</p>
@@ -745,7 +745,7 @@ when the focal individual is 60 years old:</p>
 <span>    axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">90</span>, vjust <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
 <span>    legend.position <span class="op">=</span> <span class="st">"bottom"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_age_distribution-1.png" width="3000" style="display: block; margin: auto;"></p>
+<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_age_distribution-1.png" class="r-plt" alt="" width="3000" style="display: block; margin: auto;"></p>
 <p><strong>Interpretation</strong>: This visualization reveals the
 evolving educational composition of different types of relatives across
 the life course for a woman born in 2020 in Singapore:</p>
@@ -792,7 +792,7 @@ women across different calendar years:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="va">.</span> <span class="op">~</span> <span class="va">kin</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_descendants_time-1.png" width="2400" style="display: block; margin: auto;"></p>
+<p><img src="2_2_TwoSex_TimeVarying_AgeStage_files/figure-html/education_descendants_time-1.png" class="r-plt" alt="" width="2400" style="display: block; margin: auto;"></p>
 <p><strong>Interpretation</strong>:</p>
 <ul>
 <li>
@@ -873,7 +873,7 @@ intersect with kinship</li>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-Butterick2025" class="csl-entry">
 Butterick, Joe W. B., Peter W. F. Smith, Jakub Bijak, and Jason Hilton.
 2025. <span>“A Mathematical Framework for Time-Variant Multi-State
@@ -886,14 +886,15 @@ Caswell, Hal. 2019. <span>“The Formal Demography of Kinship:
 41 (September): 679–712. <a href="https://doi.org/10.4054/DemRes.2019.41.24" class="external-link">https://doi.org/10.4054/DemRes.2019.41.24</a>.
 </div>
 <div id="ref-caswell_formal_2020" class="csl-entry">
-———. 2020. <span>“The Formal Demography of Kinship <span>II</span>:
-<span>Multistate</span> Models, Parity, and Sibship.”</span>
-<em>Demographic Research</em> 42 (June): 1097–1146. <a href="https://doi.org/10.4054/DemRes.2020.42.38" class="external-link">https://doi.org/10.4054/DemRes.2020.42.38</a>.
+Caswell, Hal. 2020. <span>“The Formal Demography of Kinship
+<span>II</span>: <span>Multistate</span> Models, Parity, and
+Sibship.”</span> <em>Demographic Research</em> 42 (June): 1097–146. <a href="https://doi.org/10.4054/DemRes.2020.42.38" class="external-link">https://doi.org/10.4054/DemRes.2020.42.38</a>.
 </div>
 <div id="ref-caswell_formal_2022" class="csl-entry">
-———. 2022. <span>“The Formal Demography of Kinship <span>IV</span>:
-<span>Two</span>-Sex Models and Their Approximations.”</span>
-<em>Demographic Research</em> 47 (September): 359–96. <a href="https://doi.org/10.4054/DemRes.2022.47.13" class="external-link">https://doi.org/10.4054/DemRes.2022.47.13</a>.
+Caswell, Hal. 2022. <span>“The Formal Demography of Kinship
+<span>IV</span>: <span>Two</span>-Sex Models and Their
+Approximations.”</span> <em>Demographic Research</em> 47 (September):
+359–96. <a href="https://doi.org/10.4054/DemRes.2022.47.13" class="external-link">https://doi.org/10.4054/DemRes.2022.47.13</a>.
 </div>
 <div id="ref-caswell_formal_2021" class="csl-entry">
 Caswell, Hal, and Xi Song. 2021. <span>“The Formal Demography of Kinship
@@ -920,7 +921,7 @@ Demographic Rates.”</span> <em>Demographic Research</em> 45 (August):
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer>
