@@ -97,8 +97,8 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
   }
 
   # filter years and kin that were selected
-  names(kin_all) <- as.character(years_data)
-
+names(kin_all) <- as.character(c(years_data, last(years_data) + last(diff(years_data))))
+  
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
