@@ -239,7 +239,7 @@ timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
   # atribuible to focal sex
   pios = if(sex_focal == "f") pif else pim
   os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pios
-  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pios
+  nos[1:agess,1] = pkin[["gd"]][1:agess,] %*% pios
 
   for (ix in 1:om){
     phi[,ix+1] = Gt %*% phi[, ix]
