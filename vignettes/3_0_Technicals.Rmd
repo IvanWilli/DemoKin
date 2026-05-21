@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-devtools::load_all()
+pkgload::load_all()
 ```
 
 ## Location of deaths
@@ -30,6 +30,7 @@ This means that, for a given kin type and kin age, the ratio between deaths duri
 
 years_use <- c("1900", "1901", "1902")
 
+# model
 kin_mothers <- kin_time_variant(
   p = swe_px[, years_use],
   f = swe_asfr[, years_use],
@@ -37,6 +38,7 @@ kin_mothers <- kin_time_variant(
   output_kin = "m"
 )
 
+# pick a kin to check
 check_mothers <- subset(
   kin_mothers,
   year == 1900 &
@@ -45,9 +47,9 @@ check_mothers <- subset(
     living > 0
 )
 
+# check probabilities
 check_mothers$death_over_living <- check_mothers$dead / check_mothers$living
 check_mothers$period_death_prob <- 1 - swe_px[check_mothers$age_kin + 1, "1900"]
-
 head(
   check_mothers[
     check_mothers$age_kin >= 15,
