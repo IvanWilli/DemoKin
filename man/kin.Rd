@@ -14,6 +14,7 @@ kin(
   output_period = NULL,
   output_kin = NULL,
   output_age_focal = NULL,
+  output_year_last = FALSE,
   birth_female = 1/2.04,
   summary_kin = TRUE
 )
@@ -34,14 +35,15 @@ in a more general perspective) with rows as ages (and columns as years in case o
 
 \item{output_period}{integer. Vector of period years for returning results. Should be within input data years range.}
 
-\item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,...}
+\item{output_kin}{character. kin types to return: "m" for mother, "d" for daughter,... See \code{demokin_codes}.}
 
 \item{output_age_focal}{integer. Vector of ages to select (and make faster the run).}
 
 \item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring, this needs to be set as 1. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
-\item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.
-this needs to be set as 1.}
+\item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.}
+
+\item{output_year_last.}{Include or not last year of living kin. If rates are from years 0 to n, not including is no output in n+1. Deafult FALSE.}
 }
 \value{
 A list with:

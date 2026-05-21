@@ -19,8 +19,9 @@
 #' @param nm numeric. Only for `time_invariant = FALSE`. Same as `pm` but for population distribution (counts or `%`). Optional.
 #' @param output_cohort integer. Vector of year cohorts for returning results. Should be within input data years range.
 #' @param output_period integer. Vector of period years for returning results. Should be within input data years range.
-#' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,...
+#' @param output_kin character. kin types to return: "m" for mother, "d" for daughter,... See `demokin_codes`.
 #' @param output_age_focal integer. Vector of ages to select (and make faster the run).
+#' @param output_year_last. Include or not last year of living kin. If rates are from years 0 to n, not including is no output in n+1. Deafult FALSE.
 #' @param birth_female numeric. Female portion at birth. This multiplies `f` argument. If `f` is already for female offspring, this needs to be set as 1. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param summary_kin logical. Whether or not include `kin_summary` table (see output details). Default `TRUE`.
 #' @return A list with:
@@ -56,7 +57,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                  pif = NULL, pim = NULL,
                  nf = NULL, nm = NULL,
                  Hf = NULL, Hm = NULL,
-                 output_cohort = NULL, output_period = NULL, output_kin=NULL,output_age_focal = NULL,
+                 output_cohort = NULL, output_period = NULL, output_kin=NULL, output_age_focal = NULL, output_year_last = FALSE,
                  summary_kin = TRUE)
   {
 
@@ -130,7 +131,11 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                                         output_cohort = output_cohort, output_period = output_period,
                                         output_kin = output_kin)
     }
-      message(paste0("Assuming stable population before ", min(years_data), "."))
+    # do not include last year output as default (issue 51)
+      if(!output_year_last){
+        kin_full <- kin_full[kin_full$year <= (years_data+diff(years_data)[1]),] 
+      }
+    message(paste0("Assuming stable population before ", min(years_data), "."))
   }
 
   # reorder
