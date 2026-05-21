@@ -8,10 +8,10 @@
 #' @export
 rename_kin <- function(df, sex = "f"){
   if(!"kin" %in% names(df)) stop("Input df needs a column named kin.")
-  if(sex == "f") demokin_codes_sex <- DemoKin::demokin_codes[,c("DemoKin", "Labels_female")]
-  if(sex == "m") demokin_codes_sex <- DemoKin::demokin_codes[,c("DemoKin", "Labels_male")]
-  if(sex == "2sex") demokin_codes_sex <- DemoKin::demokin_codes[,c("DemoKin", "Labels_2sex")]
-  colnames(demokin_codes_sex) <- c("kin", "kin_label")
+  if(sex == "f") demokin_codes <- DemoKin::demokin_codes[,c("DemoKin", "Labels_female")]
+  if(sex == "m") demokin_codes <- DemoKin::demokin_codes[,c("DemoKin", "Labels_male")]
+  if(sex == "2sex") demokin_codes <- DemoKin::demokin_codes[,c("DemoKin", "Labels_2sex")]
+  colnames(demokin_codes) <- c("kin", "kin_label")
   df %>%
-    dplyr::left_join(demokin_codes_sex)
+    dplyr::left_join(demokin_codes)
 }

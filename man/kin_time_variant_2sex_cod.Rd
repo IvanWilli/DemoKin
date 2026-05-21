@@ -38,7 +38,7 @@ kin_time_variant_2sex_cod(
 
 \item{sex_focal}{character. "f" for female or "m" for male.}
 
-\item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring, this needs to be set as 1.}
+\item{birth_female}{numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
 \item{pif}{numeric. For using some specific age distribution of childbearing for mothers (same length as ages). Default \code{NULL}.}
 

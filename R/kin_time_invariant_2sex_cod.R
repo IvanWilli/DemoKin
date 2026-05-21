@@ -64,13 +64,9 @@ kin_time_invariant_2sex_cod <- function(pf = NULL,
   zeros_d = matrix(0, nrow = (causes*ages), ncol = (causes*ages)) # zero matrix for death kin part
 
   Uf[row(Uf)-1 == col(Uf)] <- pf[-ages]
-
-  # BEN: What is the purpose of the following line? By default it is zero due to
-  #      how the matrix is created
-  Uf[ages, ages] = Uf[ages]
-
+  Uf[ages, ages] = pf[ages]
   Um[row(Um)-1 == col(Um)] <- pm[-ages]
-  Um[ages, ages] = Um[ages]
+  Um[ages, ages] = pm[ages]
 
   # BEN: Building of M, matrix of cause-specific prob. of dying.
   #      Hence, M = H D(h_tilde)^{-1} D(q)
@@ -159,8 +155,10 @@ kin_time_invariant_2sex_cod <- function(pf = NULL,
     ggm[,i+1]  = Ut %*% ggm[,i]
   }
 
-  os[1:(agess),1]  = d[1:(agess),] %*% pif
-  nos[1:(agess),1] = gd[1:(agess),] %*% pif
+   # initial conditions on os and nos depends of focal sex
+  pios <- if(sex_focal == "f") pif else pim
+  os[1:(agess),1]  = d[1:(agess),] %*% pios
+  nos[1:(agess),1] = gd[1:(agess),] %*% pios
   for(i in 1:(ages-1)){
     os[,i+1]  = Ut %*% os[,i]
     nos[,i+1] = Ut %*% nos[,i] + Ft %*% os[,i]
@@ -188,15 +186,7 @@ kin_time_invariant_2sex_cod <- function(pf = NULL,
 
   # as data.frame
   kin <- purrr::map2(kin_list, names(kin_list),
-                     function(x,y){
-
-                       # BEN: Death take place in the same year and age!
-                       #      I adapted the code
-                       #      below such that it works with the new dimensions.
-
-                       # reassign deaths to Focal experienced age
-                       x[(agess+1):(agess + agess*causes),1:(ages-1)] <- x[(agess+1):(agess + agess*causes),2:ages]
-                       x[(agess+1):(agess + agess*causes),ages] <- 0
+                     function(x,y){                  
                        out <- as.data.frame(x)
                        colnames(out) <- age
                        out %>%
@@ -214,6 +204,18 @@ kin_time_invariant_2sex_cod <- function(pf = NULL,
   ) %>%
     purrr::reduce(rbind)
 
+  # relocate deaths, and keep selected years and ages (cohorts)
+  death_cols <- grep("^deadcause", names(kin), value = TRUE)
+  id_cols <- setdiff(names(kin), c("living", death_cols))
+  kin <- merge(
+    kin[, c(id_cols, "living")],
+    transform(
+      kin[, c(id_cols, death_cols)],
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
+  
   # results as list?
   if(list_output) {
     out <- kin_list
@@ -223,33 +225,3 @@ kin_time_invariant_2sex_cod <- function(pf = NULL,
 
   return(out)
 }
-
-## BEN: ========================================================================
-
-# Checks
-
-# No dead parent at birth: deadcausei=0 when age_focal==0
-# ff # fertility starts at age 13
-# kin |> filter(kin == "m", age_focal ==0, age_kin >= 12)
-#
-# # pi when age_focal==0 and age_kin when fx>0:
-# kin |> filter(kin == "m", age_kin >= 13, age_focal ==0)
-# pif[14:101]
-#
-# # mother dying from cause i at age x when focal is age==1 comes from nber of
-# # living mother age x when focal is age==1 multiplied by (1-pf[x])*(1/3)
-# kin |> filter(kin == "m", age_kin == 14, age_focal ==1)
-# 0.000246 * ((1-pf[15])*(1/3)) # mother
-# 0.0000486 * ((1-pm[15])*(1/3)) # father
-#
-# # Store to compare with kin_time_invariant_2sex.R
-# saveRDS(
-#   kin,
-#   here(
-#     "checks",
-#     "output_time_invariant_2sex.rds"
-#   )
-# )
-
-
-## =============================================================================

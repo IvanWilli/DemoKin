@@ -39,12 +39,14 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
   ages         <- length(age)
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
+  year_step    <- diff(years_data)[1]
 
   # birth_female needs to be dynamic. Complete in case length is lower than data
   if(length(birth_female) < n_years_data){
     last_birth_female <- tail(birth_female, n=1)
     n_birth_female <- length(birth_female)
     birth_female <- c(birth_female, rep(last_birth_female, n_years_data - n_birth_female))
+    message("Length of birth_female lower than years of risk. Completed with last value...")
   }
 
   # consider input data for age distribution at child born, or flag it
@@ -56,15 +58,13 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
       pi <- matrix(0, nrow=ages, ncol=n_years_data)
     }else{
       no_Pi <- FALSE
-      pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,length(years_data)))
+      pi <- rbind(t(t(n * f)/colSums(n * f)), matrix(0,ages,n_years_data))
     }
   }
 
   # loop over years
   kin_all <- list()
-  pb <- progress::progress_bar$new(
-    format = "Running over input years [:bar] :percent",
-    total = n_years_data + 1, clear = FALSE, width = 50)
+  message("Running kinship model...")
   for (t in 1:n_years_data){
     # build set of matrix
     Ut <- Mt <- matrix(0, nrow=ages, ncol=ages)
@@ -77,7 +77,7 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     A <- Ut[1:ages,1:ages] + ft[1:ages,1:ages]
     # stable assumption at start
     if (t==1){
-      p1 <- c(diag(Ut[-1,])[1:om],Ut[om,om])
+      p1 <- c(diag(Ut[-1,])[1:om],Ut[ages,ages])
       f1 <- ft[1,][1:ages]/birth_female[1]
       A_decomp <- eigen(A)
       w <- as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
@@ -93,11 +93,12 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     }
     # kin for next year
     kin_all[[t+1]] <- timevarying_kin(Ut = Ut, ft = ft, pit = pi[,t], ages, pkin = kin_all[[t]])
-    pb$tick()
   }
 
+   message("Preparing output...")
+  
   # filter years and kin that were selected
-names(kin_all) <- as.character(c(years_data, last(years_data) + last(diff(years_data))))
+  names(kin_all) <- as.character(c(years_data, dplyr::last(years_data) + year_step))
   
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
@@ -114,13 +115,9 @@ names(kin_all) <- as.character(c(years_data, last(years_data) + last(diff(years_
     purrr::map(~ .[selected_kin_position])
 
   # long format
-  message("Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
-      # reassign deaths to Focal experienced age
-      x[(ages+1):(ages*2),1:(ages-1)] <- x[(ages+1):(ages*2),2:ages]
-      x[(ages+1):(ages*2),ages] <- 0
       x <- as.data.frame(x)
       x$year <- Y
       x$kin <- y
@@ -131,12 +128,24 @@ names(kin_all) <- as.character(c(years_data, last(years_data) + last(diff(years_
       data.table::rbindlist() %>%
       stats::setNames(c(as.character(age), "year","kin","age_kin","alive")) %>%
       data.table::melt(id.vars = c("year","kin","age_kin","alive"), variable.name = "age_focal", value.name = "count")
-    X$age_focal = as.integer(as.character(X$age_focal))
-    X$year = as.integer(X$year)
-    X$cohort = X$year - X$age_focal
+    X$age_focal <- as.integer(as.character(X$age_focal))
+    X$year <- as.integer(X$year)
+    X$cohort <- X$year - X$age_focal
     X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],] %>%
       data.table::dcast(year + kin + age_kin + age_focal + cohort ~ alive, value.var = "count")
-    }) %>% data.table::rbindlist()
+    }) %>% 
+    data.table::rbindlist()
+
+  # relocate deaths, and keep selected years and ages (cohorts)
+  kin <- merge(
+    kin[, setdiff(names(kin), "dead")],
+    transform(
+      kin[, setdiff(names(kin), "living")],
+      year = year - 1,
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
 
   # results as list?
   if(list_output) {

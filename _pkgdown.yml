@@ -7,7 +7,7 @@ template:
 navbar:
   title: "DemoKin"
   structure:
-    left: [home, tutorials, reference, articles]
+    left: [home, tutorials, reference, technicals, articles]
     right: [github]
   components:
     home:
@@ -31,6 +31,8 @@ navbar:
         href: articles/2_1_OneSex_TimeInvariant_AgeStage.html
       - text: "Two-sex time-varying Age-Stage model"
         href: articles/2_2_TwoSex_TimeVarying_AgeStage.html
+      - text: "Technical details"
+        href: articles/3_0_Technicals.html
     reference:
       text: "Functions"
       href: reference/index.html

@@ -39,9 +39,9 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   agess = ages * 2
   Uf = Um = Ff = Fm = Gt = zeros = matrix(0, nrow=ages, ncol=ages)
   Uf[row(Uf)-1 == col(Uf)] <- pf[-ages]
-  Uf[ages, ages] = Uf[ages]
+  Uf[ages, ages] = pf[ages]
   Um[row(Um)-1 == col(Um)] <- pm[-ages]
-  Um[ages, ages] = Um[ages]
+  Um[ages, ages] = pm[ages]
   Mm <- diag(1-pm)
   Mf <- diag(1-pf)
   Ut <- as.matrix(rbind(
@@ -58,14 +58,14 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
 
   # parents age distribution under stable assumption in case no input
   if(is.null(pim) | is.null(pif)){
-  A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
-  A_decomp = eigen(A)
-  lambda = as.double(A_decomp$values[1])
-  w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
-  wf = w[1:ages]
-  wm = w[(ages+1):(2*ages)]
-  pif = wf * ff / sum(wf * ff)
-  pim = wm * fm / sum(wm * fm)
+    A = Matrix::bdiag(Uf, Um) + Ft_star[1:agess,1:agess]
+    A_decomp = eigen(A)
+    lambda = as.double(A_decomp$values[1])
+    w = as.double(A_decomp$vectors[,1])/sum(as.double(A_decomp$vectors[,1]))
+    wf = w[1:ages]
+    wm = w[(ages+1):(2*ages)]
+    pif = wf * ff / sum(wf * ff)
+    pim = wm * fm / sum(wm * fm)
   }
 
   # initial count matrix (kin ages in rows and focal age in column)
@@ -139,9 +139,6 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
   # as data.frame
   kin <- purrr::map2(kin_list, names(kin_list),
                      function(x,y){
-                       # reassign deaths to Focal experienced age
-                       x[(agess+1):(agess*2),1:(ages-1)] <- x[(agess+1):(agess*2),2:ages]
-                       x[(agess+1):(agess*2),ages] <- 0
                        out <- as.data.frame(x)
                        colnames(out) <- age
                        out %>%
@@ -155,6 +152,16 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                      }
   ) %>%
     purrr::reduce(rbind)
+
+  # relocate deaths, and keep selected years and ages (cohorts)
+  kin <- merge(
+    kin[, setdiff(names(kin), "dead")],
+    transform(
+      kin[, setdiff(names(kin), "living")],
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
 
   # results as list?
   if(list_output) {

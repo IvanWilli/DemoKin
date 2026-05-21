@@ -65,6 +65,7 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
     last_birth_female <- tail(birth_female, n=1)
     n_birth_female <- length(birth_female)
     birth_female <- c(birth_female, rep(last_birth_female, n_years_data - n_birth_female))
+    message("Length of birth_female lower than years of risk. Completed with last value...")
   }
 
   # BEN: The zero matrix was deleted from line above and has
@@ -97,9 +98,7 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
   # get lists of matrix
   Ul = Fl = Fl_star = list()
   kin_all <- list()
-  pb <- progress::progress_bar$new(
-    format = "Running over input years [:bar] :percent",
-    total = n_years_data + 1, clear = FALSE, width = 60)
+  message("Running kinship model...")
 
   # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   # BEN: First load function at the end of script
@@ -172,6 +171,7 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
                                                   ff = f1f, fm = f1m,
                                                   pif = pif1, pim = pim1,
                                                   Hf = H1f, Hm = H1m,
+                                                  sex_focal = sex_focal,
                                                   birth_female = birth_female[1], list_output = TRUE)
     }
 
@@ -188,11 +188,12 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
     # kin for next year
     kin_all[[t+1]] <- timevarying_kin_2sex_cod(Ut=Ut, Ft=Ft, Ft_star=Ft_star, causes,
                                                pit=pit, sex_focal, ages, pkin=kin_all[[t]])
-    pb$tick()
   }
 
+  message("Preparing output...")
+
   # filter years and kin that were selected
-  names(kin_all) <- as.character(c(years_data, last(years_data) + last(diff(years_data))))
+  names(kin_all) <- as.character(c(years_data, dplyr::last(years_data) + dplyr::last(diff(years_data))))
 
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
@@ -208,14 +209,11 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
   kin_list <- kin_all %>%
     purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
     purrr::map(~ .[selected_kin_position])
+  
   # long format
-  message("Preparing output...")
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
     X <- purrr::map2(X, names(X), function(x,y){
-      # reassign deaths to Focal experienced age
-      x[(agess+1):(agess + agess*causes),1:(ages-1)] <- x[(agess+1):(agess + agess*causes),2:ages]
-      x[(agess+1):(agess + agess*causes),ages] <- 0
       x <- data.table::as.data.table(x)
       x$year <- Y
       x$kin <- y
@@ -233,6 +231,19 @@ kin_time_variant_2sex_cod <- function(pf = NULL, pm = NULL,
     X <- X[X$age_focal %in% out_selected$age[out_selected$year==as.integer(Y)],]
     X <- data.table::dcast(X, year + kin + sex_kin + age_kin + age_focal + cohort ~ alive, value.var = "count", fun.aggregate = sum)
   }) %>% data.table::rbindlist()
+
+  # relocate deaths, and keep selected years and ages (cohorts)
+  death_cols <- grep("^deadcause", names(kin), value = TRUE)
+  id_cols <- setdiff(names(kin), c("living", death_cols))
+  kin <- merge(
+    kin[, c(id_cols, "living")],
+    transform(
+      kin[, c(id_cols, death_cols)],
+      year = year - 1,
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
 
   # results as list?
   if(list_output) {
@@ -286,9 +297,6 @@ timevarying_kin_2sex_cod<- function(Ut, Ft, Ft_star, causes, pit, sex_focal, age
   sex_index <- ifelse(sex_focal == "f", 1, ages+1)
   phi[sex_index, 1] <- 1
 
-  # BEN: NOT SURE ABOUT WHAT IS HAPPENING BELOW
-  # Rows are multiplied by the sum of the pi?
-
   # initial distribution
   m[1:agess,1]   = pit
   gm[1:agess,1]  = pkin[["m"]][1:agess,] %*% (pif + pim)
@@ -300,7 +308,7 @@ timevarying_kin_2sex_cod<- function(Ut, Ft, Ft_star, causes, pit, sex_focal, age
   # atribuible to focal sex
   pios <- if(sex_focal == "f") pif else pim
   os[1:agess,1]  = pkin[["d"]][1:agess,] %*% pios
-  nos[1:agess,1] = pkin[["gd"]][1:ages,] %*% pios
+  nos[1:agess,1] = pkin[["gd"]][1:agess,] %*% pios
 
   for (ix in 1:om){
     phi[,ix+1] = Gt %*% phi[, ix]

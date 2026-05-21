@@ -167,7 +167,6 @@ T_mat_fem <- Parity_transfers_by_age_list_UK  # Female parity transitions
 T_mat_male <- Parity_transfers_by_age_list_UK # Male parity transitions (same as female)
 U_mat_fem <- Female_parity_mortality_list_UK  # Female survival
 U_mat_male <- Male_parity_mortality_list_UK   # Male survival
-H_mat <- Redistribution_by_parity_list_UK     # Birth redistribution matrices
 ```
 
 These lists contain period-specific demographic rates:
@@ -175,7 +174,8 @@ These lists contain period-specific demographic rates:
 - `U_mat_fem`/`U_mat_male`: Lists of matrices containing survival probabilities by age (rows) and parity (columns) from 1965-2022
 - `F_mat_fem`/`F_mat_male`: Lists of matrices containing fertility rates by age and parity 
 - `T_mat_fem`/`T_mat_male`: Lists of transition matrices showing probabilities of moving between parity states
-- `H_mat`: List of matrices that redistribute newborns to age-class 1 and parity 0
+
+Careful: Actual application assumes that always *newborn* will be assign to *age 0*.
 
 ## Running the Parity Model {#parity-model-running}
 
@@ -196,14 +196,12 @@ kin_out_1965_2005 <-
     F_list_males = F_mat_male[1:(1+no_years)],         # Male fertility matrices
     T_list_females = T_mat_fem[1:(1+no_years)],        # Female transition matrices
     T_list_males = T_mat_fem[1:(1+no_years)],          # Male transition matrices
-    H_list = H_mat[1:(1+no_years)],                    # Birth redistribution matrices
     birth_female = 1 - 0.51,                           # UK sex ratio (49% female)
     parity = TRUE,                                      # Stages represent parity
     output_kin = c("d", "oa", "ys", "os"),             # Selected kin types
     summary_kin = TRUE,                                 # Produce summary statistics
     sex_Focal = "Female",                               # Focal is female
     initial_stage_Focal = 1,                            # Focal starts at parity 0
-    # model_years <- seq(1965, 2005, 5),                     # the sequence of years we model
     output_years = c(1965, 1975, 1985, 1995, 2005)     # Selected output years
   )
 ```
@@ -443,7 +441,6 @@ kin_out_2020_2090 <-
     F_list_males = F_mat_male_edu[1:(1+no_years)],      # Male fertility matrices
     T_list_females = T_mat_fem_edu[1:(1+no_years)],     # Female transition matrices
     T_list_males = T_mat_fem_edu[1:(1+no_years)],       # Male transition matrices
-    H_list = H_mat_edu[1:(1+no_years)],                 # Birth redistribution matrices
     birth_female = 1/(1.06+1),                          # Singapore sex ratio (48.5% female)
     parity = FALSE,                                      # Stages represent education
     summary_kin = TRUE,                                  # Produce summary statistics

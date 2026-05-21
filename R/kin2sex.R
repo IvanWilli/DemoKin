@@ -144,7 +144,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
     if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
     kin_full <- kin_full %>%
       dplyr::group_by(kin, age_kin, age_focal, sex_kin, cohort, year) %>%
-      dplyr::summarise_at(vars(c("living", dplyr::starts_with("dea"))), funs(sum)) %>%
+      dplyr::summarise_at(dplyr::vars(c("living", dplyr::starts_with("dea"))), dplyr::funs(sum)) %>%
       dplyr::ungroup()
   }
 

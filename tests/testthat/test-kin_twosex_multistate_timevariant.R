@@ -28,7 +28,6 @@ test_that("same output in multi_stage (caswell 2020)", {
                                                   list(Fm),
                                                   list(Tf),
                                                   list(Tm),
-                                                  list(H),
                                                   birth_female = 0.49, ## svk_fxs already divided
                                                   output_kin = NULL,
                                                   parity = TRUE,
@@ -39,9 +38,9 @@ test_that("same output in multi_stage (caswell 2020)", {
 
 
   ## Younger sisters
-  jcmp_ys <- joe_output %>% dplyr::filter(sex_kin == "Female", group == "ys") %>%
-    dplyr::select(age_focal, age_kin, stage_kin, count) %>%
-    dplyr::transmute(age_focal = age_focal, age_kin = age_kin, stage_kin = stage_kin, count = count) # Joe's
+  jcmp_ys <- joe_output %>% dplyr::filter(sex_kin == "f", kin == "ys") %>%
+    dplyr::select(age_focal, age_kin, stage_kin, living) %>%
+    dplyr::transmute(age_focal = age_focal, age_kin = age_kin, stage_kin = stage_kin, count = living) # Joe's
   hals_output_ys <- kin_svk1990_caswell2020$ys # Hal's
   hals_output_ys <- as.data.frame(hals_output_ys)
   colnames(hals_output_ys) <- seq(0,109,1)
@@ -54,9 +53,9 @@ test_that("same output in multi_stage (caswell 2020)", {
     dplyr::transmute(age_focal = age_focal, age_kin = age_kin, stage_kin = stage_kin, count = count)
 
   ## Older sisters
-  jcmp_os <- joe_output %>% dplyr::filter(sex_kin == "Female", group == "os") %>%
-    dplyr::select(age_focal, age_kin, stage_kin, count) %>%
-    dplyr::transmute(age_focal = age_focal, age_kin = age_kin, stage_kin = stage_kin, count = count) # Joe's
+  jcmp_os <- joe_output %>% dplyr::filter(sex_kin == "f", kin == "os") %>%
+    dplyr::select(age_focal, age_kin, stage_kin, living) %>%
+    dplyr::transmute(age_focal = age_focal, age_kin = age_kin, stage_kin = stage_kin, count = living) # Joe's
   hals_output_os <- kin_svk1990_caswell2020$os # Hal's
   hals_output_os <- as.data.frame(hals_output_os)
   colnames(hals_output_os) <- seq(0,109,1)

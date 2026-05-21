@@ -11,7 +11,6 @@ kin_multi_stage_time_variant_2sex(
   F_list_males = NULL,
   T_list_females = NULL,
   T_list_males = NULL,
-  H_list = NULL,
   birth_female = 0.49,
   parity = FALSE,
   output_kin = NULL,
@@ -36,9 +35,7 @@ a list of stochastic matrices which describe age-specific female probabilities o
 \item{T_list_males}{list of lists with matrix entries: each outer list entry is period-specific, and composed of
 a list of stochastic matrices which describe age-specific male probabilities of transferring stage}
 
-\item{H_list}{list with matrix entries: redistribution of newborns across each stage to a specific age-class}
-
-\item{birth_female}{numeric. birth ratio of females to males in population}
+\item{birth_female}{numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
 \item{parity}{logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default \code{TRUE}.}
 

@@ -97,9 +97,6 @@ kin_time_invariant <- function(p = NULL, f = NULL,
   # reshape as data.frame
   kin <- purrr::map2(kin_list, names(kin_list),
                function(x,y){
-                    # reassign deaths to Focal experienced age
-                    x[(ages+1):(ages*2),1:(ages-1)] <- x[(ages+1):(ages*2),2:ages]
-                    x[(ages+1):(ages*2),ages] <- 0
                     out <- as.data.frame(x)
                     colnames(out) <- age
                     out %>%
@@ -112,6 +109,16 @@ kin_time_invariant <- function(p = NULL, f = NULL,
                     }
                ) %>%
               purrr::reduce(rbind)
+
+  # relocate deaths, and keep selected years and ages (cohorts)
+  kin <- merge(
+    kin[, setdiff(names(kin), "dead")],
+    transform(
+      kin[, setdiff(names(kin), "living")],
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
 
   # results as list?
   if(list_output) {

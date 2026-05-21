@@ -11,7 +11,6 @@
 #'                     a list of stochastic matrices which describe age-specific female probabilities of transferring stage
 #' @param T_list_males list of lists with matrix entries: each outer list entry is period-specific, and composed of
 #'                     a list of stochastic matrices which describe age-specific male probabilities of transferring stage
-#' @param H_list list with matrix entries: redistribution of newborns across each stage to a specific age-class
 #' @param birth_female numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param parity logical. parity states imply age distribution of mothers re-scaled to not have parity 0 when Focal born. Default `TRUE`.
 #' @param output_kin vector. A vector of particular kin one wishes to obtain results for, e.g., c("m","d","oa"). Default is all kin types.
@@ -30,7 +29,6 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               F_list_males = NULL,
                                               T_list_females = NULL,
                                               T_list_males = NULL,
-                                              H_list = NULL,
                                               birth_female = 0.49, ## Sex ratio -- note is 1 - alpha
                                               parity = FALSE,
                                               output_kin = NULL, # enter a vector of specific kin if we only want to analyse these (e.g., c("m","d"))
@@ -54,6 +52,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     last_birth_female <- tail(birth_female, n=1)
     n_birth_female <- length(birth_female)
     birth_female <- c(birth_female, rep(last_birth_female, no_years - n_birth_female))
+    message("Length of birth_female lower than years of risk. Completed with last value...")
   }
 
   ### Define empty lists for the accumulated kin of Focals's life-course -- each list entry will reflect a time-period
@@ -79,10 +78,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
   ###                               F_tilde : makes newborns from stage/age; puts them to stage/age
   ###                         2) -- project Focal and kin using above projection matrices
 
-  pb <- progress::progress_bar$new(
-    format = "Timescale [:bar] :percent",
-    total = no_years + 1, clear = FALSE, width = 60)
-  tictoc::tic()
+  message("Running kinship model...")
   for(year in 1:no_years){
     T_data_f <- T_list_females[[year]] ## For each year we have na number of Transfer matrices
     T_data_m <- T_list_males[[year]]   ## which give probabilities of age-dep movement from stage to stage
@@ -92,7 +88,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     F_m_list <- list()
     U_f_list <- list()
     U_m_list <- list()
-    H_list2 <- list()
+    H_list <- list()
 
     for(stage in 1:ns){
       Uf <- Matrix::Matrix(nrow = na, ncol = na, data = 0, sparse = TRUE)
@@ -103,9 +99,10 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
       Um[na,na] <- U_list_males[[year]][na,stage]
       U_f_list[[(1+length(U_f_list))]] <- Uf
       U_m_list[[(1+length(U_m_list))]] <- Um
+      # always build newborn redistribution to age 0
       H_mat <- Matrix::Matrix(nrow = na, ncol = na, data = 0, sparse = TRUE)
       H_mat[1,] <- 1
-      H_list2[[(1+length(H_list2))]] <- H_mat
+      H_list[[(1+length(H_list))]] <- H_mat
     }
     for(age in 1:na){
       T_f <- T_data_f[[age]]
@@ -122,7 +119,7 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     ## create the appropriate block-diagonal matrices
     U_f_BDD <- block_diag_function(U_f_list) ## direct sum of female survivorship, independent over stage (ns diagonal blocks)
     U_m_BDD <- block_diag_function(U_m_list) ## direct sum of male survivorship, independent over stage (ns diagonal blocks)
-    H_BDD <- block_diag_function(H_list2) ## direct sum of which age newborns enter, independent over stage (ns diagonal blocks)
+    H_BDD <- block_diag_function(H_list) ## direct sum of which age newborns enter, independent over stage (ns diagonal blocks)
     T_f_BDD <- block_diag_function(T_f_list) ## direct sum of female stage transitions, independent over age (na diagonal blocks)
     T_m_BDD <- block_diag_function(T_m_list) ## direct sum of male stage transitions, independent over age (na diagonal blocks)
     F_f_BDD <- block_diag_function(F_f_list) ## direct sum of female stage->stage reproductions, independent over age (na blocks)
@@ -243,9 +240,11 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
     younger_cousin_array[[(1+length(younger_cousin_array))]] <- kin_out[["cya"]]
     older_cousin_array[[(1+length(older_cousin_array))]] <- kin_out[["coa"]]
     changing_pop_struct[[(1+length(changing_pop_struct))]] <- kin_out[["ps"]]
-    pb$tick()
+    
   }
-  tictoc::toc()
+  
+  message("Preparing output...")
+
   ## create a list of output kin -- each element a time-period specific list of matrices
   ## label the kin names to match DemoKin:
   relative_data <- list("Focal" = Focal_array,

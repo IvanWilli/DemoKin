@@ -143,7 +143,7 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
   }
 
   os[,1]  = d %*% piage
-  nos[,1] = gd[1:ages,] %*% piage
+  nos[,1] = gd %*% piage
   for(i in 1:(ages-1)){
     os[,i+1]  = Utt %*% os[,i]
     nos[,i+1] = Utt %*% nos[,i] + ftt %*% os[,i]
@@ -173,9 +173,6 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
   # kin_full as data.frame
   kin_full <- purrr::map2(kin_list, names(kin_list),
                           function(x,y){
-                            # reassign deaths to Focal experienced age
-                            x[(ages*s+1):(ages*s*2),1:(ages-1)] <- x[(ages*s+1):(ages*s*2),2:ages]
-                            x[(ages*s+1):(ages*s*2),ages] <- 0
                             out <- as.data.frame(x)
                             colnames(out) <- age
                             out %>%
@@ -188,6 +185,16 @@ kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                               tidyr::pivot_wider(names_from = alive, values_from = count)
                           }) %>%
     purrr::reduce(rbind)
+
+  # relocate deaths, and keep selected years and ages (cohorts)
+  kin_full <- merge(
+    kin_full[, setdiff(names(kin_full), "dead")],
+    transform(
+      kin_full[, setdiff(names(kin_full), "living")],
+      age_focal = age_focal - 1
+    ),
+    all.x = TRUE
+  )
 
   # results as list?
   if(list_output) {

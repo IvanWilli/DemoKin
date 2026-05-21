@@ -31,7 +31,7 @@ kin_time_variant(
 
 \item{output_kin}{character. kin to return as output: "m" for mother, "d" for daughter,... See \code{vignette} for exahustive kin.}
 
-\item{birth_female}{numeric. Female portion at birth.}
+\item{birth_female}{numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
 \item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
 }

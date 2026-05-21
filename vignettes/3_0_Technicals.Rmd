@@ -1,0 +1,65 @@
+---
+title: "Technical details"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    df_print: paged
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+devtools::load_all()
+```
+
+## Location of deaths
+
+In the time-varying models, **living** kin are *stocks*: they refer to the expected number of relatives alive at the beginning of the period, by the Focal's age, the kin's age, and calendar year. **Deaths** are *flows* over the *following year of risk*. In the output, those deaths are located at the year and Focal age at which the risk interval begins.
+
+This means that, for a given kin type and kin age, the ratio between deaths during the year and living kin at the start of the year should reproduce the period death probability, `1 - p`. The small example below uses the one-sex time-varying model and checks this relationship for mothers.
+
+```{r death-location-example}
+
+years_use <- c("1900", "1901", "1902")
+
+kin_mothers <- kin_time_variant(
+  p = swe_px[, years_use],
+  f = swe_asfr[, years_use],
+  output_period = as.integer(years_use[1:2]),
+  output_kin = "m"
+)
+
+check_mothers <- subset(
+  kin_mothers,
+  year == 1900 &
+    kin == "m" &
+    age_focal == 0 &
+    living > 0
+)
+
+check_mothers$death_over_living <- check_mothers$dead / check_mothers$living
+check_mothers$period_death_prob <- 1 - swe_px[check_mothers$age_kin + 1, "1900"]
+
+head(
+  check_mothers[
+    check_mothers$age_kin >= 15,
+    c("year", "age_focal", "kin", "age_kin",
+      "death_over_living", "period_death_prob")
+  ],
+  8
+)
+```
+
+The columns `death_over_living` and `period_death_prob` coincide because they describe the same interval: deaths of mothers during 1900 divided by mothers alive at the start of 1900. Living kin are therefore interpreted as a stock, while deaths are interpreted as a period flow.
+
+Because deaths are flows over the interval after a stock is observed, the final stock in a time series has no following interval inside the model. Therefore, *deaths for the last input year are not available unless the model is projected one additional period*.
+
+For the case of time-invariant models, all previous is also valid but only considering age of Focal, time is not included.
