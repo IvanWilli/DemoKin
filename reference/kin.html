@@ -99,6 +99,7 @@ kin count distribution by kin and age.</p>
 <span>  output_period <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  output_kin <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  output_age_focal <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  output_year_last <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  birth_female <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="fl">2.04</span>,</span>
 <span>  summary_kin <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -138,7 +139,7 @@ in a more general perspective) with rows as ages (and columns as years in case o
 
 
 <dt id="arg-output-kin">output_kin<a class="anchor" aria-label="anchor" href="#arg-output-kin"></a></dt>
-<dd><p>character. kin types to return: "m" for mother, "d" for daughter,...</p></dd>
+<dd><p>character. kin types to return: "m" for mother, "d" for daughter,... See <code>demokin_codes</code>.</p></dd>
 
 
 <dt id="arg-output-age-focal">output_age_focal<a class="anchor" aria-label="anchor" href="#arg-output-age-focal"></a></dt>
@@ -150,8 +151,11 @@ in a more general perspective) with rows as ages (and columns as years in case o
 
 
 <dt id="arg-summary-kin">summary_kin<a class="anchor" aria-label="anchor" href="#arg-summary-kin"></a></dt>
-<dd><p>logical. Whether or not include <code>kin_summary</code> table (see output details). Default <code>TRUE</code>.
-this needs to be set as 1.</p></dd>
+<dd><p>logical. Whether or not include <code>kin_summary</code> table (see output details). Default <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-output-year-last-">output_year_last.<a class="anchor" aria-label="anchor" href="#arg-output-year-last-"></a></dt>
+<dd><p>Include or not last year of living kin. If rates are from years 0 to n, not including is no output in n+1. Deafult FALSE.</p></dd>
 
 </dl></div>
     <div id="value">
