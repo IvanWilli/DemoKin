@@ -52,6 +52,9 @@
     <li>
       <a href="../articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying Age-Stage model</a>
     </li>
+    <li>
+      <a href="../articles/3_0_Technicals.html">Technical details</a>
+    </li>
   </ul></li>
 <li>
   <a href="../reference/index.html">Functions</a>
@@ -91,7 +94,6 @@
 <span>  F_list_males <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  T_list_females <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  T_list_males <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  H_list <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  birth_female <span class="op">=</span> <span class="fl">0.49</span>,</span>
 <span>  parity <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  output_kin <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -132,12 +134,8 @@ a list of stochastic matrices which describe age-specific female probabilities o
 a list of stochastic matrices which describe age-specific male probabilities of transferring stage</p></dd>
 
 
-<dt id="arg-h-list">H_list<a class="anchor" aria-label="anchor" href="#arg-h-list"></a></dt>
-<dd><p>list with matrix entries: redistribution of newborns across each stage to a specific age-class</p></dd>
-
-
 <dt id="arg-birth-female">birth_female<a class="anchor" aria-label="anchor" href="#arg-birth-female"></a></dt>
-<dd><p>numeric. birth ratio of females to males in population</p></dd>
+<dd><p>numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.</p></dd>
 
 
 <dt id="arg-parity">parity<a class="anchor" aria-label="anchor" href="#arg-parity"></a></dt>

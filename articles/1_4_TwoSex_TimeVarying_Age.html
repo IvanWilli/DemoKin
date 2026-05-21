@@ -69,6 +69,9 @@
     <li>
       <a href="../articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying Age-Stage model</a>
     </li>
+    <li>
+      <a href="../articles/3_0_Technicals.html">Technical details</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -537,15 +540,20 @@ dimension 2 by 101 (number of causes by number of ages).</p>
 <p>Let’s examine the structure of the output:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kin_out_cod_invariant</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 9</span></span></span>
-<span><span class="co">##   year  cohort age_focal sex_kin kin   age_kin living deadcause1 deadcause2</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             0 f       d           0      0          0          0</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             1 f       d           0      0          0          0</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             2 f       d           0      0          0          0</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             3 f       d           0      0          0          0</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             4 f       d           0      0          0          0</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>             5 f       d           0      0          0          0</span></span></code></pre>
+<pre><code><span><span class="co">##   year cohort age_focal sex_kin kin age_kin     living    deadcause1</span></span>
+<span><span class="co">## 1   NA     NA         0       f coa       0 0.06821502 0.00003911666</span></span>
+<span><span class="co">## 2   NA     NA         1       f coa       0 0.06474427 0.00003712642</span></span>
+<span><span class="co">## 3   NA     NA         2       f coa       0 0.06073589 0.00003482789</span></span>
+<span><span class="co">## 4   NA     NA         3       f coa       0 0.05631309 0.00003229172</span></span>
+<span><span class="co">## 5   NA     NA         4       f coa       0 0.05160610 0.00002959258</span></span>
+<span><span class="co">## 6   NA     NA         5       f coa       0 0.04674486 0.00002680499</span></span>
+<span><span class="co">##      deadcause2</span></span>
+<span><span class="co">## 1 0.00003911666</span></span>
+<span><span class="co">## 2 0.00003712642</span></span>
+<span><span class="co">## 3 0.00003482789</span></span>
+<span><span class="co">## 4 0.00003229172</span></span>
+<span><span class="co">## 5 0.00002959258</span></span>
+<span><span class="co">## 6 0.00002680499</span></span></code></pre>
 <p>The output now includes additional columns for each cause of death.
 Let’s visualize the distribution of parental deaths by cause, sex, and
 age for a 30-year-old Focal:</p>

@@ -69,6 +69,9 @@
     <li>
       <a href="../articles/2_2_TwoSex_TimeVarying_AgeStage.html">Two-sex time-varying Age-Stage model</a>
     </li>
+    <li>
+      <a href="../articles/3_0_Technicals.html">Technical details</a>
+    </li>
   </ul>
 </li>
 <li>
@@ -533,12 +536,12 @@ frames:</p>
 <code class="sourceCode R"><span><span class="co"># Examine the structure of the output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">swe_2015</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## List of 2</span></span>
-<span><span class="co">##  $ kin_full   : tibble [142,814 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">##   ..$ kin      : chr [1:142814] "d" "d" "d" "d" ...</span></span>
+<span><span class="co">##  $ kin_full   :'data.frame': 142814 obs. of  7 variables:</span></span>
+<span><span class="co">##   ..$ kin      : chr [1:142814] "coa" "coa" "coa" "coa" ...</span></span>
 <span><span class="co">##   ..$ age_kin  : int [1:142814] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
 <span><span class="co">##   ..$ age_focal: int [1:142814] 0 1 2 3 4 5 6 7 8 9 ...</span></span>
-<span><span class="co">##   ..$ living   : num [1:142814] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
-<span><span class="co">##   ..$ dead     : num [1:142814] 0 0 0 0 0 0 0 0 0 0 ...</span></span>
+<span><span class="co">##   ..$ living   : num [1:142814] 0.0166 0.0156 0.0145 0.0132 0.0119 ...</span></span>
+<span><span class="co">##   ..$ dead     : num [1:142814] 0.0000343 0.0000323 0.0000299 0.0000273 0.0000246 ...</span></span>
 <span><span class="co">##   ..$ cohort   : logi [1:142814] NA NA NA NA NA NA ...</span></span>
 <span><span class="co">##   ..$ year     : logi [1:142814] NA NA NA NA NA NA ...</span></span>
 <span><span class="co">##  $ kin_summary: tibble [1,414 × 10] (S3: tbl_df/tbl/data.frame)</span></span>
@@ -561,15 +564,13 @@ Living/dead status</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># View the first few rows of kin_full</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">swe_2015</span><span class="op">$</span><span class="va">kin_full</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">##   kin   age_kin age_focal living  dead cohort year </span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> d           0         0      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> d           0         1      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> d           0         2      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> d           0         3      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> d           0         4      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> d           0         5      0     0 <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span></span></span></code></pre>
+<pre><code><span><span class="co">##   kin age_kin age_focal     living          dead cohort year</span></span>
+<span><span class="co">## 1 coa       0         0 0.01656529 0.00003429015     NA   NA</span></span>
+<span><span class="co">## 2 coa       0         1 0.01559054 0.00003227242     NA   NA</span></span>
+<span><span class="co">## 3 coa       0         2 0.01445779 0.00002992763     NA   NA</span></span>
+<span><span class="co">## 4 coa       0         3 0.01320815 0.00002734088     NA   NA</span></span>
+<span><span class="co">## 5 coa       0         4 0.01188306 0.00002459793     NA   NA</span></span>
+<span><span class="co">## 6 coa       0         5 0.01052478 0.00002178630     NA   NA</span></span></code></pre>
 </div>
 <div class="section level4">
 <h4 id="kin-summary">The <code>kin_summary</code> Data Frame<a class="anchor" aria-label="anchor" href="#kin-summary"></a>
