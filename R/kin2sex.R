@@ -87,6 +87,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
   if(time_invariant){
       if(!is.vector(pf)) {
         output_period <- min(years_data)
+        message("time_invariant = TRUE, but p is not a vector. Assuming stable population with ", output_period, ".")
         pf <- pf[,as.character(output_period)]
         pm <- pm[,as.character(output_period)]
         ff <- ff[,as.character(output_period)]
@@ -132,9 +133,9 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                                         output_kin = output_kin)
     }
     # do not include last year output as default (issue 51)
-      if(!output_year_last){
-        kin_full <- kin_full[kin_full$year <= (years_data+diff(years_data)[1]),] 
-      }
+    if(!output_year_last){
+      kin_full <- kin_full[kin_full$year <= max(years_data), ] 
+    }
     message(paste0("Assuming stable population before ", min(years_data), "."))
   }
 
@@ -155,7 +156,7 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
 
   # summary
   # select period/cohort/ge
-  if(!is.null(output_age_focal) & all(output_age_focal %in% 1:120)){
+  if(!is.null(output_age_focal) & all(output_age_focal %in% 0:120)){
     kin_full <- kin_full %>% dplyr::filter(age_focal %in% output_age_focal)
   }
   if(!is.null(output_cohort)){

@@ -233,7 +233,7 @@ output_period_cohort_combination <- function(output_cohort = NULL, output_period
   # no specific
   if(is.null(output_period) & is.null(output_cohort)){
     message("No specific output was set. Return all period data.")
-    output_period <- years_data
+    output_period <- c(years_data, max(years_data) + diff(years_data)[1])
   }
 
   # cohort combination
