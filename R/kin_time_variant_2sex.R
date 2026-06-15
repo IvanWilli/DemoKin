@@ -47,6 +47,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   agess        <- ages*2
   om           <- max(age)
   zeros        <- matrix(0, nrow=ages, ncol=ages)
+  year_step    <- diff(years_data)[1]
 
   # birth_female needs to be dynamic. Complete in case length is lower than data
   if(length(birth_female) < n_years_data){
@@ -143,9 +144,10 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
 
   message(" Preparing output...")
   
-  # filter years and kin that were selected
+  # name years
   names(kin_all) <- as.character(c(years_data, dplyr::last(years_data) + dplyr::last(diff(years_data))))
 
+  # filter years and kin that were selected
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
 
@@ -160,6 +162,7 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
   kin_list <- kin_all %>%
     purrr::keep(names(.) %in% as.character(unique(out_selected$year))) %>%
     purrr::map(~ .[selected_kin_position])
+  
   # long format
   kin <- lapply(names(kin_list), FUN = function(Y){
     X <- kin_list[[Y]]
@@ -187,11 +190,14 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
     kin[, setdiff(names(kin), "dead")],
     transform(
       kin[, setdiff(names(kin), "living")],
-      year = year - 1,
-      age_focal = age_focal - 1
+      year = year - year_step,
+      age_focal = age_focal - year_step
     ),
     all.x = TRUE
   )
+  if (!is.null(output_period)) {
+    kin <- kin[kin$year %in% output_period, ]
+  }
 
   # results as list?
   if(list_output) {

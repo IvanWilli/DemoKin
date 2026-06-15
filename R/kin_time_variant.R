@@ -97,9 +97,10 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
 
    message("Preparing output...")
   
-  # filter years and kin that were selected
+  # name years
   names(kin_all) <- as.character(c(years_data, dplyr::last(years_data) + year_step))
   
+  # filter years and kin that were selected
   # combinations to return
   out_selected <- output_period_cohort_combination(output_cohort, output_period, age = age, years_data = years_data)
   possible_kin <- c("d","gd","ggd","m","gm","ggm","os","ys","nos","nys","oa","ya","coa","cya")
@@ -141,11 +142,14 @@ kin_time_variant <- function(p = NULL, f = NULL, pi = NULL, n = NULL,
     kin[, setdiff(names(kin), "dead")],
     transform(
       kin[, setdiff(names(kin), "living")],
-      year = year - 1,
-      age_focal = age_focal - 1
+      year = year - year_step,
+      age_focal = age_focal - year_step
     ),
     all.x = TRUE
   )
+  if (!is.null(output_period)) {
+    kin <- kin[kin$year %in% output_period, ]
+  }
 
   # results as list?
   if(list_output) {
@@ -230,11 +234,8 @@ timevarying_kin<- function(Ut, ft, pit, ages, pkin){
 #' @export
 output_period_cohort_combination <- function(output_cohort = NULL, output_period = NULL, age = NULL, years_data = NULL){
 
-  # no specific
-  if(is.null(output_period) & is.null(output_cohort)){
-    message("No specific output was set. Return all period data.")
-    output_period <- c(years_data, max(years_data) + diff(years_data)[1])
-  }
+  # data setp input
+  year_step    <- diff(years_data)[1]
 
   # cohort combination
   if(!is.null(output_cohort)){
@@ -244,8 +245,17 @@ output_period_cohort_combination <- function(output_cohort = NULL, output_period
   }else{selected_cohorts_year_age <- c()}
 
   # period combination
-  if(!is.null(output_period)){selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
+  if(!is.null(output_period)){
+    output_period <- c(output_period, max(output_period) + year_step)
+    selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
   }else{selected_years_age <- c()}
+
+  # no specific
+  if(is.null(output_period) & is.null(output_cohort)){
+    message("No specific output was set. Return all period data.")
+    output_period <- c(years_data, max(years_data) + year_step)
+    selected_years_age <- expand.grid(age, output_period) %>% dplyr::rename(age=1,year=2)
+  }
 
   # end
   return(dplyr::bind_rows(selected_years_age,selected_cohorts_year_age) %>% dplyr::distinct())
