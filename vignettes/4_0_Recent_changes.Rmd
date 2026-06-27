@@ -1,0 +1,103 @@
+---
+title: "Recent changes"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    theme: readable
+    highlight: pygments
+    df_print: paged
+    fig_caption: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+This page summarizes the commits made to DemoKin during the last year, from
+2025-05-25 to 2026-05-25. Each entry includes the Git reference number and a
+short description of the change, with emphasis on information that helps users
+understand model behavior, output changes, and documentation updates.
+
+Use the reference number to inspect a specific commit in Git. For example:
+
+```{bash, eval=FALSE}
+git show 66e0c84
+```
+
+## Main user-facing changes
+
+### Final year output
+
+The `kin()` and `kin2sex()` wrappers gained an `output_year_last` argument. By
+default, DemoKin does not include the extra projected year `n + 1` when the input
+rates cover years `0` to `n`. Users who need living kin in that final projected
+year can request it explicitly.
+
+Related fixes also make the default time-varying output include the internally
+needed final projection before wrapper-level filtering is applied.
+
+### Death timing and output interpretation
+
+Death counts were relocated so that deaths are aligned with the start of the
+risk interval. Living kin are interpreted as stocks at the start of a period or
+age interval, while deaths are interpreted as flows over the following interval.
+This affects one-sex, two-sex, cause-of-death, and multistate models.
+
+The technical vignette explains this behavior in detail and gives a small check
+showing that deaths divided by living kin reproduce the corresponding period
+death probability.
+
+### Time-varying birth sex ratio
+
+Time-varying models now accept `birth_female` as either a single value or a
+vector that varies across years. If the vector is shorter than the input time
+series, the final value is repeated for the remaining years.
+
+### More consistent output names
+
+The two-sex time-varying age-stage output was adjusted to match the rest of the
+package more closely. Important column names now include:
+
+- `living` instead of `count`
+- `kin` instead of `group`
+- `sex_kin` values `f` and `m` instead of `Female` and `Male`
+
+## Commit list
+
+| Date | Ref. | Change made |
+|---|---:|---|
+| 2026-05-25 | `66e0c84` | Fixed the last-year output behavior in `kin()`, `kin2sex()`, and the time-varying period/cohort selector. The wrappers now filter to `max(years_data)` by default, while the lower-level selector still builds the extra projected year needed internally. |
+| 2026-05-21 | `cdc95f4` | Added the `output_year_last` argument to `kin()` and `kin2sex()`, with documentation, so users can choose whether to include the final projected living-kin year. Fixes issue `#51`. |
+| 2026-05-21 | `b6d640a` | Restored the internal `rename_kin()` helper variable name to `demokin_codes_sex`, keeping the join behavior explicit by sex-specific labels. |
+| 2026-05-21 | `f989c24` | Updated the technical vignette to use `pkgload::load_all()` instead of `devtools::load_all()`, and added small comments to clarify the example. |
+| 2026-05-21 | `dec5334` | Relocated death counts so deaths are aligned with the start of the risk interval; updated one-sex, two-sex, cause-of-death, and multistate kin functions, tests, documentation, and the new technical vignette. |
+| 2026-05-18 | `4777ac5` | Fixed time-varying output so the final projected year is named and kept instead of being filtered out too early. |
+| 2026-05-18 | `0c407c3` | Fixed incorrect row indexing in `timevarying_kin_2sex()`, preventing male niece counts from recycling female values. This fixes issue `#48`. |
+| 2026-05-18 | `c09c0c6` | Allowed `birth_female` to vary by year in time-varying models; renamed multistate output columns for consistency with package conventions. |
+| 2026-05-18 | `dd8957e` | Corrected a typo in the packaged `demokin_codes` dataset. |
+| 2025-06-05 | `9267590` | Improved README plot rendering and sizing; regenerated the README SVG figure. |
+| 2025-06-05 | `a0edaa1` | Merged remote `main` into local `main`, integrating the README and multistate updates. |
+| 2025-06-05 | `e28ef28` | Enabled and displayed the README example plot, adding the generated SVG figure to `README.md`. |
+| 2025-06-04 | `810a27d` | Merged pull request `#45` from `ButterickJoe/main`, bringing in multistate time-varying two-sex model changes. |
+| 2025-06-03 | `7481930` | Deleted a temporary root-level `kin_multi_stage_time_variant_2sex.R` file after its contents were integrated under `R/`. |
+| 2025-06-03 | `932f26e` | Updated `R/kin_multi_stage_time_variant_2sex.R`: corrected parent joint age-stage initialization and changed mixing distributions to return female and male rows together. |
+| 2025-06-03 | `2e382fb` | Added an uploaded `kin_multi_stage_time_variant_2sex.R` file at the repository root. |
+
+## Notes for users
+
+The changes above are based on the local Git history available in this project
+clone. If the remote repository has newer commits that have not yet been fetched,
+they will not appear in this list.
+
+When comparing results across versions, pay particular attention to the
+last-year output changes in `66e0c84` and `cdc95f4`, the death timing change in
+`dec5334`, and the output-column changes in `c09c0c6`, since these are the
+changes most likely to affect downstream scripts.

@@ -33,6 +33,8 @@ navbar:
         href: articles/2_2_TwoSex_TimeVarying_AgeStage.html
       - text: "Technical details"
         href: articles/3_0_Technicals.html
+      - text: "Recent changes"
+        href: articles/4_0_Recent_changes.html
     reference:
       text: "Functions"
       href: reference/index.html
