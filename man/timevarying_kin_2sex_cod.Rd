@@ -4,7 +4,17 @@
 \alias{timevarying_kin_2sex_cod}
 \title{one time projection kin}
 \usage{
-timevarying_kin_2sex_cod(Ut, Ft, Ft_star, causes, pit, sex_focal, ages, pkin)
+timevarying_kin_2sex_cod(
+  Ut,
+  Ft,
+  Ft_star,
+  causes,
+  pit,
+  sex_focal,
+  ages,
+  pkin,
+  fast = FALSE
+)
 }
 \arguments{
 \item{Ut}{numeric. A matrix of survival probabilities (or ratios).}
@@ -22,6 +32,15 @@ timevarying_kin_2sex_cod(Ut, Ft, Ft_star, causes, pit, sex_focal, ages, pkin)
 \item{ages}{numeric.}
 
 \item{pkin}{numeric. A list with kin count distribution in previous year.}
+
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
 }
 \value{
 A list of 14 types of kin matrices (kin age by Focal age, blocked for two sex) projected one time interval.

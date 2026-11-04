@@ -17,6 +17,14 @@
 #'
 #' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is children, `oa` is older aunts/uncles, etc.), sex, alive and death. If `list_output = TRUE` then this is a list.
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 
 kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
@@ -25,7 +33,15 @@ kin_time_invariant_2sex <- function(pf = NULL, pm = NULL,
                                     birth_female = 1/2.04,
                                     pif = NULL, pim = NULL,
                                     output_kin = NULL,
-                                    list_output = FALSE){
+                                    list_output = FALSE,
+                                    fast = FALSE){
+  # fast = TRUE: same model and output, C++ projection (R/fast_kin_time_invariant_2sex.R)
+  if (isTRUE(fast)) {
+    return(kin_time_invariant_2sex_fast(pf = pf, pm = pm, ff = ff, fm = fm, sex_focal = sex_focal,
+                                        birth_female = birth_female, pif = pif, pim = pim,
+                                        output_kin = output_kin, list_output = list_output))
+  }
+
 
   # global vars
   .<-sex_kin<-alive<-count<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL

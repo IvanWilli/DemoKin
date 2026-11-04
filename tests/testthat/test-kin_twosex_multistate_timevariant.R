@@ -11,7 +11,9 @@
 # Numerically check!
 
 
-test_that("same output in multi_stage (caswell 2020)", {
+# run once with the R code (fast = FALSE, the default) and once with the C++ path
+for (fast in c(FALSE, TRUE)) {
+test_that(paste0("same output in two-sex multi_stage time variant (caswell 2020), fast = ", fast), {
   Tf <- svk_Uxs
   Tm <- svk_Uxs
   Ff <- svk_fxs
@@ -34,7 +36,8 @@ test_that("same output in multi_stage (caswell 2020)", {
                                                   summary_kin = FALSE,
                                                   sex_Focal = "Female", ##  define Focal's sex at birth
                                                   initial_stage_Focal = 1, ## Define Focal's stage at birth
-                                                  output_years = seq(1990, (1990)))
+                                                  output_years = seq(1990, (1990)),
+                                                  fast = fast)
 
 
   ## Younger sisters
@@ -73,3 +76,4 @@ test_that("same output in multi_stage (caswell 2020)", {
 
 
 })
+}

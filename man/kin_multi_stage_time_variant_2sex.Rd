@@ -17,7 +17,8 @@ kin_multi_stage_time_variant_2sex(
   summary_kin = TRUE,
   sex_Focal = "Female",
   initial_stage_Focal = NULL,
-  output_years
+  output_years,
+  fast = FALSE
 )
 }
 \arguments{
@@ -48,6 +49,15 @@ a list of stochastic matrices which describe age-specific male probabilities of 
 \item{initial_stage_Focal}{Numeric in Natural number set {1,2,...,}. The stage which Focal is born into (e.g., 1 for parity 0)}
 
 \item{output_years}{vector. The times at which we wish to count kin: start year = output_years\link{1}, and end year = output_years\link{length.}}
+
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
 }
 \value{
 A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.

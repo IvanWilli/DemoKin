@@ -19,6 +19,14 @@
 #' @param birth_female numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.
 #' @param list_output logical. Results as a list with years elements (as a result of `output_cohort` and `output_period` combination), with a second list of `output_kin` elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default `FALSE`
 #' @return A data.frame with year, cohort, Focal´s age, related ages, sex and type of kin (for example `d` is daughter, `oa` is older aunts, etc.), including living and dead kin at that age and sex.
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 
 kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
@@ -28,7 +36,16 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
                                    pif = NULL, pim = NULL,
                                    nf = NULL, nm = NULL,
                                    output_cohort = NULL, output_period = NULL, output_kin = NULL,
-                                   list_output = FALSE){
+                                   list_output = FALSE,
+                                   fast = FALSE){
+  # fast = TRUE: same model and output, C++ projection (R/fast_kin_time_variant_2sex.R)
+  if (isTRUE(fast)) {
+    return(kin_time_variant_2sex_fast(pf = pf, pm = pm, ff = ff, fm = fm, sex_focal = sex_focal,
+                                      birth_female = birth_female, pif = pif, pim = pim, nf = nf, nm = nm,
+                                      output_cohort = output_cohort, output_period = output_period,
+                                      output_kin = output_kin, list_output = list_output))
+  }
+
 
   # global vars
   .<-living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
@@ -220,8 +237,21 @@ kin_time_variant_2sex <- function(pf = NULL, pm = NULL,
 #' @param ages numeric.
 #' @param pkin numeric. A list with kin count distribution in previous year.
 #' @return A list of 14 types of kin matrices (kin age by Focal age, blocked for two sex) projected one time interval.
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
-timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin){
+timevarying_kin_2sex<- function(Ut, Ft, Ft_star, pit, sex_focal, ages, pkin, fast = FALSE){
+  # fast = TRUE: the same one-step projection in C++ (R/fast_internal_2sex.R)
+  if (isTRUE(fast)) {
+    return(project_kin_2sex(Ut, Ft, Ft_star, pit, sex_focal, ages, prev = pkin))
+  }
+
 
   agess <- ages*2
   om <- ages-1

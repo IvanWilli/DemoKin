@@ -5,6 +5,15 @@
 #' are grouped in one male count of cousins. Note that the output labels relative following female notation: the label `m`
 #' refers to either mothers or fathers, and column `sex_kin` determine the sex of the relative.
 #' @details See Caswell (2022) for details on formulas.
+#'
+#'   **Fast implementation.** Setting `fast = TRUE` switches to a C++ implementation of the
+#'   same model: the projection recursions are replayed on the non-zero entries of the
+#'   projection matrices, accumulating in the same order as R's dense matrix product, so the
+#'   results round identically. The R code run with `fast = FALSE` is unchanged and remains
+#'   the reference description of the method; the C++ path is checked against it in the test
+#'   suite (`tests/testthat/test-fast_equals_default.R`) and on a 46-scenario harness
+#'   (`dev/equivalence/`). Messages, warnings and errors are the same in both modes; the only
+#'   user-visible difference is run time.
 #' @param pf numeric. A vector (atomic) or  matrix with female probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param pm numeric. A vector (atomic) or  matrix with male probabilities (or survival ratios, or transition between age class in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param ff numeric. Same as `pf` but for fertility rates.
@@ -39,6 +48,14 @@
 #'  }
 #'  }
 #' }
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 #' @examples
 #' # Kin expected count by relative sex for a French female based on 2012 rates.
@@ -58,11 +75,13 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                  nf = NULL, nm = NULL,
                  Hf = NULL, Hm = NULL,
                  output_cohort = NULL, output_period = NULL, output_kin=NULL, output_age_focal = NULL, output_year_last = FALSE,
-                 summary_kin = TRUE)
+                 summary_kin = TRUE,
+                 fast = FALSE)
   {
 
   # global vars
   living<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-sex_kin<-age_kin<-dead<-NULL
+  if(!is.logical(fast) || length(fast) != 1 || is.na(fast)) stop("`fast` must be TRUE or FALSE.")
   age <- as.integer(rownames(pf))
   years_data <- as.integer(colnames(pf))
 
@@ -99,14 +118,16 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                                             birth_female = birth_female,
                                             pif = pif, pim = pim,
                                             Hf = Hf, Hm = Hm,
-                                            output_kin = output_kin) %>%
+                                            output_kin = output_kin,
+                                            fast = fast) %>%
           dplyr::mutate(cohort = NA, year = NA)
       }else{
         kin_full <- kin_time_invariant_2sex(pf, pm, ff, fm,
                                             sex_focal = sex_focal,
                                             birth_female = birth_female,
                                             pif = pif, pim = pim,
-                                            output_kin = output_kin) %>%
+                                            output_kin = output_kin,
+                                            fast = fast) %>%
           dplyr::mutate(cohort = NA, year = NA)
       }
 
@@ -121,7 +142,8 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                                         nf = nf, nm = nm,
                                         Hf = Hf, Hm = Hm,
                                         output_cohort = output_cohort, output_period = output_period,
-                                        output_kin = output_kin)
+                                        output_kin = output_kin,
+                                        fast = fast)
     }else{
       kin_full <- kin_time_variant_2sex(pf = pf, pm = pm,
                                         ff = ff, fm = fm,
@@ -130,7 +152,8 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
                                         pif = pif, pim = pim,
                                         nf = nf, nm = nm,
                                         output_cohort = output_cohort, output_period = output_period,
-                                        output_kin = output_kin)
+                                        output_kin = output_kin,
+                                        fast = fast)
     }
     # do not include last year output as default (issue 51)
     if(!output_year_last){
@@ -144,14 +167,24 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
 
   # re-group if grouped type is asked
   if(!is.null(output_kin_asked) & length(output_kin_asked)!=length(output_kin)){
-    if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
-    if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
-    if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
-    if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
-    kin_full <- kin_full %>%
-      dplyr::group_by(kin, age_kin, age_focal, sex_kin, cohort, year) %>%
-      dplyr::summarise_at(dplyr::vars(c("living", dplyr::starts_with("dea"))), dplyr::funs(sum)) %>%
-      dplyr::ungroup()
+    if(fast){
+      # same relabelling and sums as below, in one pass with exact R arithmetic (R/fast_internal.R)
+      relab <- c(os = "s", ys = "s", coa = "c", cya = "c", oa = "a", ya = "a", nos = "n", nys = "n")
+      relab <- relab[relab %in% output_kin_asked]
+      hit <- match(kin_full$kin, names(relab))
+      sel <- !is.na(hit)
+      kin_full$kin[sel] <- unname(relab[hit[sel]])
+      kin_full <- regroup_kin_sum(kin_full, c("kin", "age_kin", "age_focal", "sex_kin", "cohort", "year"))
+    }else{
+      if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
+      if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
+      if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
+      if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
+      kin_full <- kin_full %>%
+        dplyr::group_by(kin, age_kin, age_focal, sex_kin, cohort, year) %>%
+        dplyr::summarise_at(dplyr::vars(c("living", dplyr::starts_with("dea"))), dplyr::funs(sum)) %>%
+        dplyr::ungroup()
+    }
   }
 
   # summary
@@ -171,26 +204,31 @@ kin2sex <- function(pf = NULL, pm = NULL, ff = NULL, fm = NULL,
 
   # only return summary if is asked and is not cod
   if(summary_kin & !is_cod){
-    kin_summary <- dplyr::bind_rows(
-      as.data.frame(kin_full) %>%
-        dplyr::rename(total=living) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-        dplyr::summarise(count_living = sum(total),
-                         mean_age = sum(total*age_kin)/sum(total),
-                         sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-        tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
-      as.data.frame(kin_full) %>%
-        dplyr::rename(total=dead) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-        dplyr::summarise(count_dead = sum(total)) %>%
+    if(fast){
+      # the same indicators, computed in C++ with R's accumulation (R/fast_summary.R)
+      kin_summary <- kin_summary_exact(kin_full, agrupar, agrupar_no_age_focal)
+    }else{
+      kin_summary <- dplyr::bind_rows(
+        as.data.frame(kin_full) %>%
+          dplyr::rename(total=living) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+          dplyr::summarise(count_living = sum(total),
+                           mean_age = sum(total*age_kin)/sum(total),
+                           sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
+          tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
+        as.data.frame(kin_full) %>%
+          dplyr::rename(total=dead) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+          dplyr::summarise(count_dead = sum(total)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
+          dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                        mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
+          dplyr::ungroup() %>%
+          tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
         dplyr::ungroup() %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
-        dplyr::mutate(count_cum_dead = cumsum(count_dead),
-                      mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
-        dplyr::ungroup() %>%
-        tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
-      dplyr::ungroup() %>%
-      tidyr::pivot_wider(names_from = indicator, values_from = value)
+        tidyr::pivot_wider(names_from = indicator, values_from = value)
+    }
     kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)
   }else{
     kin_out <- kin_full

@@ -8,3 +8,9 @@ diego.txt
 .mat
 .csv
 docs
+src/*.o
+src/*.so
+src/*.dll
+src/symbols.rds
+dev/equivalence/ref_original/
+dev/equivalence/out_*/

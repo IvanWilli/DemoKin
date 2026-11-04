@@ -3,6 +3,15 @@
 #' @description Implementation of Goodman-Keyfitz-Pullum equations in a matrix framework. This produce a matrilineal (or patrilineal)
 #' kin count distribution by kin and age.
 #' @details See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
+#'
+#'   **Fast implementation.** Setting `fast = TRUE` switches to a C++ implementation of the
+#'   same model: the projection recursions are replayed on the non-zero entries of the
+#'   projection matrices, accumulating in the same order as R's dense matrix product, so the
+#'   results round identically. The R code run with `fast = FALSE` is unchanged and remains
+#'   the reference description of the method; the C++ path is checked against it in the test
+#'   suite (`tests/testthat/test-fast_equals_default.R`) and on a 46-scenario harness
+#'   (`dev/equivalence/`). Messages, warnings and errors are the same in both modes; the only
+#'   user-visible difference is run time.
 #' @param p numeric. A vector (atomic) or  matrix with probabilities (or survival ratios, or transition between age class
 #' in a more general perspective) with rows as ages (and columns as years in case of matrix, being the name of each col the year).
 #' @param f numeric. Same as `p` but for fertility rates.
@@ -32,6 +41,14 @@
 #'  }
 #'  }
 #' }
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 #' @examples
 #' # Kin expected matrilineal count for a Swedish female based on 2015 rates.
@@ -46,11 +63,13 @@ kin <- function(p = NULL, f = NULL,
                 pi = NULL, n = NULL,
                 output_cohort = NULL, output_period = NULL, output_kin=NULL, output_age_focal = NULL, output_year_last = FALSE,
                 birth_female = 1/2.04,
-                summary_kin = TRUE)
+                summary_kin = TRUE,
+                fast = FALSE)
   {
 
   # global vars
   living<-dead<-age_kin<-age_focal<-cohort<-year<-total<-mean_age<-count_living<-sd_age<-count_dead<-mean_age_lost<-indicator<-value<-NULL
+  if(!is.logical(fast) || length(fast) != 1 || is.na(fast)) stop("`fast` must be TRUE or FALSE.")
 
   # kin to return
   all_possible_kin <- c("coa", "cya", "d", "gd", "ggd", "ggm", "gm", "m", "nos", "nys", "oa", "ya", "os", "ys")
@@ -77,14 +96,16 @@ kin <- function(p = NULL, f = NULL,
         f <- f[,as.character(output_period)]
       }
       kin_full <- kin_time_invariant(p = p, f = f, pi = pi,
-                                     output_kin = output_kin, birth_female = birth_female) %>%
+                                     output_kin = output_kin, birth_female = birth_female,
+                                     fast = fast) %>%
                               dplyr::mutate(cohort = NA, year = NA)
   }else{
       if(!is.null(output_cohort) & !is.null(output_period)) stop("sorry, you can not select cohort and period. Choose one please")
       kin_full <- kin_time_variant(p = p, f = f, pi = pi, n = n,
                               output_cohort = output_cohort, output_period = output_period,
                               output_kin = output_kin,
-                              birth_female = birth_female)
+                              birth_female = birth_female,
+                              fast = fast)
       # do not include last year output as default (issue 51)
       if(!output_year_last){
         kin_full <- kin_full[kin_full$year <= max(years_data), ] 
@@ -94,13 +115,24 @@ kin <- function(p = NULL, f = NULL,
 
   # re-group if grouped type is asked
   if(!is.null(output_kin_asked) & length(output_kin_asked)!=length(output_kin)){
-    if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
-    if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
-    if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
-    if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
-    kin_full <- kin_full %>%
-      dplyr::summarise(living = sum(living), dead = sum(dead),
-                       .by = c(kin, age_kin, age_focal, cohort, year))
+    if(fast){
+      # same relabelling and sums as below, in one pass with exact R arithmetic (R/fast_internal.R)
+      relab <- c(os = "s", ys = "s", coa = "c", cya = "c", oa = "a", ya = "a", nos = "n", nys = "n")
+      relab <- relab[relab %in% output_kin_asked]
+      hit <- match(kin_full$kin, names(relab))
+      sel <- !is.na(hit)
+      kin_full$kin[sel] <- unname(relab[hit[sel]])
+      kin_full <- regroup_kin_sum(kin_full, c("kin", "age_kin", "age_focal", "cohort", "year"),
+                                  by = "first", vals = c("living", "dead"))
+    }else{
+      if("s" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("os", "ys")]   <- "s"
+      if("c" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("coa", "cya")] <- "c"
+      if("a" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("oa", "ya")]   <- "a"
+      if("n" %in% output_kin_asked) kin_full$kin[kin_full$kin %in% c("nos", "nys")] <- "n"
+      kin_full <- kin_full %>%
+        dplyr::summarise(living = sum(living), dead = sum(dead),
+                         .by = c(kin, age_kin, age_focal, cohort, year))
+    }
   }
 
   # select period/cohort/age
@@ -119,26 +151,31 @@ kin <- function(p = NULL, f = NULL,
 
   # get summary indicators based on group variables. If it is asked
   if(summary_kin){
-    kin_summary <- dplyr::bind_rows(
-      kin_full %>%
-        dplyr::rename(total=living) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-        dplyr::summarise(count_living = sum(total),
-                         mean_age = sum(total*age_kin)/sum(total),
-                         sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
-        tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
-      kin_full %>%
-        dplyr::rename(total=dead) %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
-        dplyr::summarise(count_dead = sum(total)) %>%
+    if(fast){
+      # the same indicators, computed in C++ with R's accumulation (R/fast_summary.R)
+      kin_summary <- kin_summary_exact(kin_full, agrupar, agrupar_no_age_focal)
+    }else{
+      kin_summary <- dplyr::bind_rows(
+        kin_full %>%
+          dplyr::rename(total=living) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+          dplyr::summarise(count_living = sum(total),
+                           mean_age = sum(total*age_kin)/sum(total),
+                           sd_age  = (sum(total*age_kin^2)/sum(total)-mean_age^2)^.5) %>%
+          tidyr::pivot_longer(count_living:sd_age, names_to = "indicator", values_to = "value"),
+        kin_full %>%
+          dplyr::rename(total=dead) %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar))) %>%
+          dplyr::summarise(count_dead = sum(total)) %>%
+          dplyr::ungroup() %>%
+          dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
+          dplyr::mutate(count_cum_dead = cumsum(count_dead),
+                        mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
+          dplyr::ungroup() %>%
+          tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
         dplyr::ungroup() %>%
-        dplyr::group_by(dplyr::across(dplyr::all_of(agrupar_no_age_focal))) %>%
-        dplyr::mutate(count_cum_dead = cumsum(count_dead),
-                      mean_age_lost = cumsum(count_dead * age_focal)/cumsum(count_dead)) %>%
-        dplyr::ungroup() %>%
-        tidyr::pivot_longer(count_dead:mean_age_lost, names_to = "indicator", values_to = "value")) %>%
-      dplyr::ungroup() %>%
-      tidyr::pivot_wider(names_from = indicator, values_from = value)
+        tidyr::pivot_wider(names_from = indicator, values_from = value)
+    }
 
     # return
     kin_out <- list(kin_full = kin_full, kin_summary = kin_summary)

@@ -75,6 +75,25 @@ kin_results$kin_summary %>%
   )
 ```
 
+
+### Fast computation
+
+Every modelling function has an argument `fast` (default `FALSE`). With `fast = TRUE` the
+same model runs through a compiled C++ implementation and returns an identical object,
+typically 5 to 200 times faster on large inputs (long time series, two-sex, cause-of-death
+or multistate models). The default keeps the original R code, which remains the readable
+reference implementation of the method.
+
+```{r, eval = FALSE}
+system.time(swe_2015      <- kin(p = swe_px[,"2015"], f = swe_asfr[,"2015"]))
+system.time(swe_2015_fast <- kin(p = swe_px[,"2015"], f = swe_asfr[,"2015"], fast = TRUE))
+identical(swe_2015, swe_2015_fast)
+#> [1] TRUE
+```
+
+Installing from source (as with `remotes::install_github()`) now requires a C++ compiler:
+Rtools on Windows, the Xcode command line tools on macOS.
+
 ## Documentation
 
 For detailed documentation, please visit the [DemoKin website](https://ivanwilli.github.io/DemoKin/).

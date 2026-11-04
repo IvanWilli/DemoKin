@@ -13,7 +13,8 @@ kin_time_variant(
   output_period = NULL,
   output_kin = NULL,
   birth_female = 1/2.04,
-  list_output = FALSE
+  list_output = FALSE,
+  fast = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,15 @@ kin_time_variant(
 \item{birth_female}{numeric. Female portion at birth. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
 \item{list_output}{logical. Results as a list with years elements (as a result of \code{output_cohort} and \code{output_period} combination), with a second list of \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
+
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
 }
 \value{
 A data frame of population kinship structure, with Focal's cohort, focal´s age, period year, type of relatives

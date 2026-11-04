@@ -16,7 +16,8 @@ kin_time_invariant_2sex_cod(
   pif = NULL,
   pim = NULL,
   output_kin = NULL,
-  list_output = FALSE
+  list_output = FALSE,
+  fast = FALSE
 )
 }
 \arguments{
@@ -43,6 +44,15 @@ kin_time_invariant_2sex_cod(
 \item{output_kin}{character. kin to return, considering matrilineal names. For example "m" for parents, "d" for children, etc. See the \code{vignette} for all kin types.}
 
 \item{list_output}{logical. Results as a list with \code{output_kin} elements, with focal´s age in columns and kin ages in rows (2 * ages, last chunk of ages for death experience). Default \code{FALSE}}
+
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
 }
 \value{
 A data frame with focal´s age, related ages and type of kin

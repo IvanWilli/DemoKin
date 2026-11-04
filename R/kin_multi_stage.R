@@ -13,13 +13,29 @@
 
 #' @return A data frame with focal´s age, related ages and type of kin
 #' (for example `d` is daughter, `oa` is older aunts, etc.), living and death kin counts, and specific stage. If `list_output = TRUE` then this is a list with elements as kin types.
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 
 kin_multi_stage <- function(U = NULL, f = NULL, D = NULL, H = NULL,
                             birth_female = 1/2.04,
                             output_kin = NULL,
                             parity = FALSE,
-                            list_output = FALSE){
+                            list_output = FALSE,
+                            fast = FALSE){
+  if(!is.logical(fast) || length(fast) != 1 || is.na(fast)) stop("`fast` must be TRUE or FALSE.")
+  # fast = TRUE: same model and output, C++ projection (R/fast_kin_multi_stage.R)
+  if (isTRUE(fast)) {
+    return(kin_multi_stage_fast(U = U, f = f, D = D, H = H, birth_female = birth_female,
+                                output_kin = output_kin, parity = parity, list_output = list_output))
+  }
+
 
   # global vars
   .<-age_kin<-stage_kin<-alive<-age_focal<-count<-NULL

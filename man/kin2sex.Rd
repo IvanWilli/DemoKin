@@ -23,7 +23,8 @@ kin2sex(
   output_kin = NULL,
   output_age_focal = NULL,
   output_year_last = FALSE,
-  summary_kin = TRUE
+  summary_kin = TRUE,
+  fast = FALSE
 )
 }
 \arguments{
@@ -63,6 +64,15 @@ kin2sex(
 
 \item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.}
 
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
+
 \item{output_year_last.}{Include or not last year of living kin. If rates are from years 0 to n, not including is no output in n+1. Deafult FALSE.}
 }
 \value{
@@ -90,6 +100,15 @@ refers to either mothers or fathers, and column \code{sex_kin} determine the sex
 }
 \details{
 See Caswell (2022) for details on formulas.
+
+\strong{Fast implementation.} Setting \code{fast = TRUE} switches to a C++ implementation of the
+same model: the projection recursions are replayed on the non-zero entries of the
+projection matrices, accumulating in the same order as R's dense matrix product, so the
+results round identically. The R code run with \code{fast = FALSE} is unchanged and remains
+the reference description of the method; the C++ path is checked against it in the test
+suite (\code{tests/testthat/test-fast_equals_default.R}) and on a 46-scenario harness
+(\verb{dev/equivalence/}). Messages, warnings and errors are the same in both modes; the only
+user-visible difference is run time.
 }
 \examples{
 # Kin expected count by relative sex for a French female based on 2012 rates.

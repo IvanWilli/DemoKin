@@ -16,7 +16,8 @@ kin(
   output_age_focal = NULL,
   output_year_last = FALSE,
   birth_female = 1/2.04,
-  summary_kin = TRUE
+  summary_kin = TRUE,
+  fast = FALSE
 )
 }
 \arguments{
@@ -42,6 +43,15 @@ in a more general perspective) with rows as ages (and columns as years in case o
 \item{birth_female}{numeric. Female portion at birth. This multiplies \code{f} argument. If \code{f} is already for female offspring, this needs to be set as 1. This can be a vector of length equal to the number of years in the input data, or a single value that will be repeated for all years.}
 
 \item{summary_kin}{logical. Whether or not include \code{kin_summary} table (see output details). Default \code{TRUE}.}
+
+\item{fast}{logical. If \code{FALSE} (the default) the model runs with the original R
+implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+and data.table). If \code{TRUE}, the same projections run in compiled C++ code and the output
+tables are built directly, which is typically 5 to 200 times faster on large inputs
+(long time series, two-sex, cause-of-death or multistate models). The returned object is
+identical in both cases: same values, same columns, same row order, same classes. Use
+\code{fast = TRUE} for production runs and \code{fast = FALSE} to read or step through the model
+equations in R.}
 
 \item{output_year_last.}{Include or not last year of living kin. If rates are from years 0 to n, not including is no output in n+1. Deafult FALSE.}
 }
@@ -69,6 +79,15 @@ kin count distribution by kin and age.
 }
 \details{
 See Caswell (2019) and Caswell (2021) for details on formulas. One sex only (female by default).
+
+\strong{Fast implementation.} Setting \code{fast = TRUE} switches to a C++ implementation of the
+same model: the projection recursions are replayed on the non-zero entries of the
+projection matrices, accumulating in the same order as R's dense matrix product, so the
+results round identically. The R code run with \code{fast = FALSE} is unchanged and remains
+the reference description of the method; the C++ path is checked against it in the test
+suite (\code{tests/testthat/test-fast_equals_default.R}) and on a 46-scenario harness
+(\verb{dev/equivalence/}). Messages, warnings and errors are the same in both modes; the only
+user-visible difference is run time.
 }
 \examples{
 # Kin expected matrilineal count for a Swedish female based on 2015 rates.

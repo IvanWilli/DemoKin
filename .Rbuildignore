@@ -8,3 +8,6 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^dev$
+^src/.*\.o$
+^src/.*\.(dll|so)$

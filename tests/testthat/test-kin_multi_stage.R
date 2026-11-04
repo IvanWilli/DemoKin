@@ -1,11 +1,14 @@
 # test multi-stage function against caswell 2020
 
-test_that("same output in multi_stage (caswell 2020)", {
+# run once with the R code (fast = FALSE, the default) and once with the C++ path
+for (fast in c(FALSE, TRUE)) {
+test_that(paste0("same output in multi_stage (caswell 2020), fast = ", fast), {
   demokin_svk1990_caswell2020 <- kin_multi_stage(U = svk_Uxs,
                                                  f = svk_fxs,
                                                  D = svk_pxs,
                                                  H = svk_Hxs, birth_female=1,
-                                                 list_output = TRUE, parity = TRUE)
+                                                 list_output = TRUE, parity = TRUE,
+                                                 fast = fast)
   expect_equal(demokin_svk1990_caswell2020$d[1:(110*6),], kin_svk1990_caswell2020$d)
   expect_equal(demokin_svk1990_caswell2020$gd[1:(110*6),], kin_svk1990_caswell2020$gd)
   expect_equal(demokin_svk1990_caswell2020$ggd[1:(110*6),], kin_svk1990_caswell2020$ggd)
@@ -15,7 +18,5 @@ test_that("same output in multi_stage (caswell 2020)", {
   expect_equal(demokin_svk1990_caswell2020$os[1:(110*6),], kin_svk1990_caswell2020$os)
   expect_equal(demokin_svk1990_caswell2020$ys[1:(110*6),], kin_svk1990_caswell2020$ys)
 })
-
-
-
+}
 

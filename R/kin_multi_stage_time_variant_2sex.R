@@ -21,6 +21,14 @@
 #'
 #' @return A data frame with focal age, kin age, kin stage, kin sex, year, cohort, and expected number of kin given these restrictions.
 
+#' @param fast logical. If `FALSE` (the default) the model runs with the original R
+#'   implementation (dense matrix products in R, output tables assembled with dplyr, tidyr
+#'   and data.table). If `TRUE`, the same projections run in compiled C++ code and the output
+#'   tables are built directly, which is typically 5 to 200 times faster on large inputs
+#'   (long time series, two-sex, cause-of-death or multistate models). The returned object is
+#'   identical in both cases: same values, same columns, same row order, same classes. Use
+#'   `fast = TRUE` for production runs and `fast = FALSE` to read or step through the model
+#'   equations in R.
 #' @export
 #'
 kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
@@ -35,7 +43,23 @@ kin_multi_stage_time_variant_2sex <- function(U_list_females = NULL,
                                               summary_kin = TRUE, # Set to FALSE if we want only a full age*stage distribution of kin
                                               sex_Focal = "Female", # Female Focal is default
                                               initial_stage_Focal = NULL,
-                                              output_years){
+                                              output_years,
+                                              fast = FALSE){
+  if(!is.logical(fast) || length(fast) != 1 || is.na(fast)) stop("`fast` must be TRUE or FALSE.")
+  # fast = TRUE: same model and output, C++ projection (R/fast_kin_multi_stage_time_variant_2sex.R)
+  if (isTRUE(fast)) {
+    return(kin_multi_stage_time_variant_2sex_fast(U_list_females = U_list_females,
+                                                  U_list_males = U_list_males,
+                                                  F_list_females = F_list_females,
+                                                  F_list_males = F_list_males,
+                                                  T_list_females = T_list_females,
+                                                  T_list_males = T_list_males, birth_female = birth_female,
+                                                  parity = parity, output_kin = output_kin,
+                                                  summary_kin = summary_kin, sex_Focal = sex_Focal,
+                                                  initial_stage_Focal = initial_stage_Focal,
+                                                  output_years = output_years))
+  }
+
 
   no_years <- length(U_list_females)
   na <- nrow(U_list_females[[1]])

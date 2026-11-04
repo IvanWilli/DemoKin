@@ -70,6 +70,43 @@ package more closely. Important column names now include:
 - `kin` instead of `group`
 - `sex_kin` values `f` and `m` instead of `Female` and `Male`
 
+### Faster computation with `fast = TRUE`
+
+Every modelling function (`kin()`, `kin2sex()`, `kin_multi_stage()`,
+`kin_multi_stage_time_variant_2sex()`, the `kin_time_*()` engines and the
+`timevarying_kin*()` projectors) has a new argument `fast`, `FALSE` by default.
+With `fast = TRUE` the same model runs through a compiled C++ implementation:
+the projection recursions are replayed on the non-zero entries of the
+projection matrices, accumulating in the same order as R's dense matrix
+product and without fused multiply-add, so every number rounds identically;
+the output tables are then built directly instead of through
+`pivot_longer()`/`pivot_wider()`, `melt()`/`dcast()` and `merge()`, reproducing
+the same columns, row order and classes. The object returned is identical to
+the one returned by `fast = FALSE`.
+
+The R code run by default is unchanged and remains the readable reference
+implementation of the method; use `fast = FALSE` to read or step through the
+model equations, and `fast = TRUE` to run them. Both modes print the same
+messages and warnings; `list_output = TRUE` works in both.
+
+```{r, eval = FALSE}
+yrs <- as.character(1990:2018)
+system.time(slow <- kin2sex(swe_px[, yrs], swe_px[, yrs]^1.5, swe_asfr[, yrs], swe_asfr[, yrs] * 1.05,
+                            time_invariant = FALSE, output_period = 2000:2018))
+system.time(fast <- kin2sex(swe_px[, yrs], swe_px[, yrs]^1.5, swe_asfr[, yrs], swe_asfr[, yrs] * 1.05,
+                            time_invariant = FALSE, output_period = 2000:2018, fast = TRUE))
+identical(slow, fast)
+#> [1] TRUE
+```
+
+Typical speed-ups measured on the package's 46-scenario equivalence harness
+(`dev/equivalence/` in the source repository) range from about 5x for small
+time-invariant one-sex models to more than 100x for long two-sex time series,
+cause-of-death models and the two-sex multistate model. Equivalence of the two
+modes is also checked in the package tests. The package now contains compiled
+code, so installing from source needs a C++ compiler (Rtools on Windows, the
+Xcode command line tools on macOS).
+
 ## Commit list
 
 | Date | Ref. | Change made |
