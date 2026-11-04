@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   0_0_Papers: 0_0_Papers.html
@@ -11,7 +11,7 @@ articles:
   2_2_TwoSex_TimeVarying_AgeStage: 2_2_TwoSex_TimeVarying_AgeStage.html
   3_0_Technicals: 3_0_Technicals.html
   4_0_Recent_changes: 4_0_Recent_changes.html
-last_built: 2026-06-27T15:41Z
+last_built: 2026-11-04T12:10Z
 urls:
   reference: https://ivanwilli.github.io/DemoKin/reference
   article: https://ivanwilli.github.io/DemoKin/articles
